@@ -16,7 +16,7 @@ I'll be adding some of my featured projects here soon.
 
 ## Connect with Me
 
-- GitHub: [github.com/anhnam26](https://github.com/anhnam26)
+- Facebook: [anhnamneverdie](https://www.facebook.com/anhnamneverdie)
 
 ---
 
