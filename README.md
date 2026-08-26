@@ -1,16 +1,23 @@
-## Hi there 👋
+# Hi, I'm Phạm Hòa Anh Nam 👋
 
-<!--
-**anhnam26/anhnam26** is a ✨ _special_ ✨ repository because its `README.md` (this file) appears on your GitHub profile.
+Welcome to my GitHub profile!
 
-Here are some ideas to get you started:
+I'm **Phạm Hòa Anh Nam**, also known as **[@anhnam26](https://github.com/anhnam26)** on GitHub. This is where I share my projects, document my learning journey, and showcase the things I build.
 
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+## About Me
+
+- 🌱 Always learning and exploring new ideas.
+- 💻 Passionate about turning ideas into real-world products.
+- 🤝 Open to connecting, exchanging knowledge, and collaborating on exciting projects.
+
+## Projects
+
+I'll be adding some of my featured projects here soon.
+
+## Connect with Me
+
+- GitHub: [github.com/anhnam26](https://github.com/anhnam26)
+
+---
+
+Thanks for stopping by! ✨
