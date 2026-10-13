@@ -547,28 +547,26 @@
       <path d="M126 124H1058V340H126Z" fill="#66bf4d" stroke="#193c50" stroke-width="6"/><rect x="126" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="242.5" y="124" width="116.5" height="216" fill="#76cf58"/><rect x="359" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="475.5" y="124" width="116.5" height="216" fill="#76cf58"/><rect x="592" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="708.5" y="124" width="116.5" height="216" fill="#76cf58"/><rect x="825" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="941.5" y="124" width="116.5" height="216" fill="#76cf58"/>
       <path d="M142 138H1042V326H142ZM592 138V326M142 170H248V298H142M1042 170H936V298H1042M142 207H197V264H142M1042 207H987V264H1042" fill="none" stroke="#fff9de" stroke-width="3"/>
       <ellipse cx="592" cy="232" rx="60" ry="45" fill="none" stroke="#fff9de" stroke-width="3"/><circle cx="592" cy="232" r="4" fill="#fff9de"/>
-      <g data-equipment="football-goal" stroke-linejoin="round">
-    <path d="M24 301L108 285L145 304L61 321Z" fill="#234f3d" opacity=".2"/>
-    <path d="M26 200L104 184V282L26 298Z" fill="#e6fff7" fill-opacity=".24" stroke="#b4d9d2" stroke-width="2"/>
-    <path d="M62 218L140 202L104 184L26 200ZM62 218L26 200V298L62 316Z" fill="#f1fff9" fill-opacity=".16" stroke="#d8f3e8" stroke-width="1.5"/>
-    <g fill="none" stroke="#edfff9" stroke-width="1.3" opacity=".8"><path d="M35.75 198V296"/><path d="M45.5 196V294"/><path d="M55.25 194V292"/><path d="M65 192V290"/><path d="M74.75 190V288"/><path d="M84.5 188V286"/><path d="M94.25 186V284"/><path d="M26 214L104 198"/><path d="M26 228L104 212"/><path d="M26 242L104 226"/><path d="M26 256L104 240"/><path d="M26 270L104 254"/><path d="M26 284L104 268"/>
-      <path d="M35.75 198L71.75 216M45.5 196L81.5 214M55.25 194L91.25 212M65 192L101 210M74.75 190L110.75 208M84.5 188L120.5 206M94.25 186L130.25 204M26 224L62 242M26 248L62 266M26 273L62 291"/>
-    </g>
-    <path d="M26 298V200L104 184V282M104 184L140 202M26 298L62 316" fill="none" stroke="#afcfc8" stroke-width="3"/>
-    <path d="M62 316V218L140 202V300" fill="none" stroke="#193c50" stroke-width="8"/>
-    <path d="M62 316V218L140 202V300" fill="none" stroke="#fffdf3" stroke-width="5"/>
-    <path d="M64 314V220L138 205" fill="none" stroke="#ffffff" stroke-width="1.5"/>
-  </g><g transform="translate(1184 0) scale(-1 1)"><g data-equipment="football-goal" stroke-linejoin="round">
-    <path d="M24 301L108 285L145 304L61 321Z" fill="#234f3d" opacity=".2"/>
-    <path d="M26 200L104 184V282L26 298Z" fill="#e6fff7" fill-opacity=".24" stroke="#b4d9d2" stroke-width="2"/>
-    <path d="M62 218L140 202L104 184L26 200ZM62 218L26 200V298L62 316Z" fill="#f1fff9" fill-opacity=".16" stroke="#d8f3e8" stroke-width="1.5"/>
-    <g fill="none" stroke="#edfff9" stroke-width="1.3" opacity=".8"><path d="M35.75 198V296"/><path d="M45.5 196V294"/><path d="M55.25 194V292"/><path d="M65 192V290"/><path d="M74.75 190V288"/><path d="M84.5 188V286"/><path d="M94.25 186V284"/><path d="M26 214L104 198"/><path d="M26 228L104 212"/><path d="M26 242L104 226"/><path d="M26 256L104 240"/><path d="M26 270L104 254"/><path d="M26 284L104 268"/>
-      <path d="M35.75 198L71.75 216M45.5 196L81.5 214M55.25 194L91.25 212M65 192L101 210M74.75 190L110.75 208M84.5 188L120.5 206M94.25 186L130.25 204M26 224L62 242M26 248L62 266M26 273L62 291"/>
-    </g>
-    <path d="M26 298V200L104 184V282M104 184L140 202M26 298L62 316" fill="none" stroke="#afcfc8" stroke-width="3"/>
-    <path d="M62 316V218L140 202V300" fill="none" stroke="#193c50" stroke-width="8"/>
-    <path d="M62 316V218L140 202V300" fill="none" stroke="#fffdf3" stroke-width="5"/>
-    <path d="M64 314V220L138 205" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+      <g data-equipment="football-goal" data-view="side" stroke-linejoin="round">
+    <defs><clipPath id="sports-goal-net-left"><path d="M142 192L94 209L54 308H142Z"/></clipPath></defs>
+    <ellipse cx="100" cy="312" rx="49" ry="5" fill="#234f3d" opacity=".18"/>
+    <path d="M142 192L94 209L54 308H142Z" fill="#d8f9ee" fill-opacity=".18"/>
+    <path d="M54 190V310M65 190V310M76 190V310M87 190V310M98 190V310M109 190V310M120 190V310M131 190V310M142 190V310M52 198H144M52 209H144M52 220H144M52 231H144M52 242H144M52 253H144M52 264H144M52 275H144M52 286H144M52 297H144M52 308H144" clip-path="url(#sports-goal-net-left)" fill="none" stroke="#eafff6" stroke-width="1.4" opacity=".8"/>
+    <path d="M142 192L94 209L54 308H142" fill="none" stroke="#b2d1c9" stroke-width="3"/>
+    <path d="M142 308V192" fill="none" stroke="#193c50" stroke-width="9"/>
+    <path d="M142 308V192" fill="none" stroke="#fffdf3" stroke-width="6"/>
+    <path d="M140 304V195" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="142" cy="192" r="4" fill="#fffdf3" stroke="#193c50" stroke-width="1.5"/>
+  </g><g transform="translate(1184 0) scale(-1 1)"><g data-equipment="football-goal" data-view="side" stroke-linejoin="round">
+    <defs><clipPath id="sports-goal-net-right"><path d="M142 192L94 209L54 308H142Z"/></clipPath></defs>
+    <ellipse cx="100" cy="312" rx="49" ry="5" fill="#234f3d" opacity=".18"/>
+    <path d="M142 192L94 209L54 308H142Z" fill="#d8f9ee" fill-opacity=".18"/>
+    <path d="M54 190V310M65 190V310M76 190V310M87 190V310M98 190V310M109 190V310M120 190V310M131 190V310M142 190V310M52 198H144M52 209H144M52 220H144M52 231H144M52 242H144M52 253H144M52 264H144M52 275H144M52 286H144M52 297H144M52 308H144" clip-path="url(#sports-goal-net-right)" fill="none" stroke="#eafff6" stroke-width="1.4" opacity=".8"/>
+    <path d="M142 192L94 209L54 308H142" fill="none" stroke="#b2d1c9" stroke-width="3"/>
+    <path d="M142 308V192" fill="none" stroke="#193c50" stroke-width="9"/>
+    <path d="M142 308V192" fill="none" stroke="#fffdf3" stroke-width="6"/>
+    <path d="M140 304V195" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="142" cy="192" r="4" fill="#fffdf3" stroke="#193c50" stroke-width="1.5"/>
   </g></g>
     </g>
     <g class="sports-animated sports-basketball-scene" opacity="0">

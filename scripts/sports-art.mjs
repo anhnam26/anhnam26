@@ -54,25 +54,20 @@ export function drawAthlete(id,player,group) {
     `)}`);
 }
 
-function goal() {
-  const backGrid = Array.from({length:7},(_,i)=>{
-    const u=(i+1)/8,x=26+78*u;
-    return `<path d="M${x} ${200-16*u}V${298-16*u}"/>`;
-  }).join('') + Array.from({length:6},(_,i)=>{
-    const v=(i+1)/7;
-    return `<path d="M26 ${200+98*v}L104 ${184+98*v}"/>`;
-  }).join('');
-  return `<g data-equipment="football-goal" stroke-linejoin="round">
-    <path d="M24 301L108 285L145 304L61 321Z" fill="#234f3d" opacity=".2"/>
-    <path d="M26 200L104 184V282L26 298Z" fill="#e6fff7" fill-opacity=".24" stroke="#b4d9d2" stroke-width="2"/>
-    <path d="M62 218L140 202L104 184L26 200ZM62 218L26 200V298L62 316Z" fill="#f1fff9" fill-opacity=".16" stroke="#d8f3e8" stroke-width="1.5"/>
-    <g fill="none" stroke="#edfff9" stroke-width="1.3" opacity=".8">${backGrid}
-      <path d="M35.75 198L71.75 216M45.5 196L81.5 214M55.25 194L91.25 212M65 192L101 210M74.75 190L110.75 208M84.5 188L120.5 206M94.25 186L130.25 204M26 224L62 242M26 248L62 266M26 273L62 291"/>
-    </g>
-    <path d="M26 298V200L104 184V282M104 184L140 202M26 298L62 316" fill="none" stroke="#afcfc8" stroke-width="3"/>
-    <path d="M62 316V218L140 202V300" fill="none" stroke="${ink}" stroke-width="8"/>
-    <path d="M62 316V218L140 202V300" fill="none" stroke="#fffdf3" stroke-width="5"/>
-    <path d="M64 314V220L138 205" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+function goal(side) {
+  const net='M142 192L94 209L54 308H142Z';
+  const mesh=Array.from({length:9},(_,i)=>`M${54+i*11} 190V310`).join('')
+    +Array.from({length:11},(_,i)=>`M52 ${198+i*11}H144`).join('');
+  return `<g data-equipment="football-goal" data-view="side" stroke-linejoin="round">
+    <defs><clipPath id="sports-goal-net-${side}"><path d="${net}"/></clipPath></defs>
+    <ellipse cx="100" cy="312" rx="49" ry="5" fill="#234f3d" opacity=".18"/>
+    <path d="${net}" fill="#d8f9ee" fill-opacity=".18"/>
+    <path d="${mesh}" clip-path="url(#sports-goal-net-${side})" fill="none" stroke="#eafff6" stroke-width="1.4" opacity=".8"/>
+    <path d="M142 192L94 209L54 308H142" fill="none" stroke="#b2d1c9" stroke-width="3"/>
+    <path d="M142 308V192" fill="none" stroke="${ink}" stroke-width="9"/>
+    <path d="M142 308V192" fill="none" stroke="#fffdf3" stroke-width="6"/>
+    <path d="M140 304V195" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+    <circle cx="142" cy="192" r="4" fill="#fffdf3" stroke="${ink}" stroke-width="1.5"/>
   </g>`;
 }
 
@@ -107,7 +102,7 @@ export function drawCourts() {
       <path d="${pitch}" fill="#66bf4d" stroke="${ink}" stroke-width="6"/>${stripes}
       <path d="M142 138H1042V326H142ZM592 138V326M142 170H248V298H142M1042 170H936V298H1042M142 207H197V264H142M1042 207H987V264H1042" ${line}/>
       <ellipse cx="592" cy="232" rx="60" ry="45" ${line}/><circle cx="592" cy="232" r="4" fill="#fff9de"/>
-      ${goal()}<g transform="translate(1184 0) scale(-1 1)">${goal()}</g>
+      ${goal('left')}<g transform="translate(1184 0) scale(-1 1)">${goal('right')}</g>
     </g>
     <g class="sports-animated sports-basketball-scene" opacity="0">
       <path d="${pitch}" fill="#ffbf78" stroke="${ink}" stroke-width="6"/>${planks}
