@@ -139,7 +139,6 @@ export function renderActivity(snapshot, theme) {
       </g>
     </g>
   </g>
-  <text x="48" y="471" font-family="Consolas,monospace" font-size="12" fill="${p.muted}">SNAPSHOT / ${escapeXml(updated.toUpperCase())} / UTC+7</text>
   <g font-family="Consolas,monospace" font-size="12" fill="${p.muted}">
     <text x="1020" y="471">Less</text>
     ${p.levels.map((color, i) => `<rect x="1060" y="460" width="12" height="12" rx="2" fill="${color}" transform="translate(${i * 19} 0)"/>`).join('')}

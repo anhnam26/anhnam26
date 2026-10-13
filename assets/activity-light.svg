@@ -427,7 +427,6 @@
       </g>
     </g>
   </g>
-  <text x="48" y="471" font-family="Consolas,monospace" font-size="12" fill="#4f645b">SNAPSHOT / 13 OCT 2026 / UTC+7</text>
   <g font-family="Consolas,monospace" font-size="12" fill="#4f645b">
     <text x="1020" y="471">Less</text>
     <rect x="1060" y="460" width="12" height="12" rx="2" fill="#e0e8de" transform="translate(0 0)"/><rect x="1060" y="460" width="12" height="12" rx="2" fill="#c0dbbf" transform="translate(19 0)"/><rect x="1060" y="460" width="12" height="12" rx="2" fill="#89b88d" transform="translate(38 0)"/><rect x="1060" y="460" width="12" height="12" rx="2" fill="#4b9265" transform="translate(57 0)"/><rect x="1060" y="460" width="12" height="12" rx="2" fill="#236b51" transform="translate(76 0)"/>

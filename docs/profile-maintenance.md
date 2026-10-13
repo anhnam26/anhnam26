@@ -48,8 +48,9 @@ writing `assets/activity-dark.svg`, `assets/activity-light.svg` and
 The calendar counts contributions displayed on the public profile, including
 anonymous private contribution counts if the account elects to show them.
 Repository stars count owned, non-fork public repositories. These are activity
-measurements, not a rating of engineering skill. The date on each image makes
-clear that this is a snapshot; it does not update automatically.
+measurements, not a rating of engineering skill. Fetch dates remain in
+`assets/activity.json` and the SVG's accessible description; no timestamp line
+is displayed on the panel. This is saved data and does not update automatically.
 
 If GitHub changes its calendar markup, a response is incomplete, or the public
 API rate limit is reached, the updater exits with an error before replacing the

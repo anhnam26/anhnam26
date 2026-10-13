@@ -40,7 +40,8 @@ test('render keeps year boundaries in bounds and uses Vietnam snapshot date', ()
   const snapshot = { fetchedAt: '2026-10-12T18:00:00Z', repositories: 6, stars: 9, calendar: parseContributionCalendar(calendarHtml()) };
   for (const theme of ['light', 'dark']) {
     const svg = renderActivity(snapshot, theme);
-    assert.match(svg, /13 OCT 2026/);
+    assert.match(svg, /Updated 13 Oct 2026/);
+    assert.doesNotMatch(svg, /<text[^>]*>SNAPSHOT/);
     assert.match(svg, /2025-01-01: 1234 contributions/);
     assert.match(svg, /2025-12-31: 0 contributions/);
     const cells = [...svg.matchAll(/<rect x="(\d+)" y="(\d+)" width="15" height="15"/g)];
