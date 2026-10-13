@@ -9,7 +9,7 @@ const script = [
   [1.7,'street','idle','close',['skull','jacket']],
   [2.56667,'street','walk','rear',['jacket','skull']],
   [3.46667,'street','interact','wide',['jacket','skull']],
-  [4.26667,'yard','aim','wide',['skull']],
+  [4.26667,'yard','advance','wide',['skull']],
   [8.8,'yard','sit','medium',['skull']],
   [9.8,'yard','aim','face',['skull']],
   [10.4667,'blue-room','chat','medium',['gamer']],

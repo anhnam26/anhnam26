@@ -8,7 +8,7 @@ export function poseActor(actor,state,slot) {
   head.rotation.set(0,0,0);head.scale.setScalar(1);weapon.rotation.set(0,-.16,0);
   weapon.visible=!['jacket','bald','gamer','commander'].includes(actor.id)
     &&!['chat','duel','bow','handshake','reach','photo','iris'].includes(action);
-  const walking=['walk','run'].includes(action),phase=local*(action==='run'?7:4);
+  const walking=['walk','run','advance'].includes(action),phase=local*(action==='run'?7:4);
   for(const [i,leg] of legs.entries()) {
     const wave=Math.sin(phase+i*Math.PI);
     leg.upper.rotation.set(walking?wave*.55:.02,0,(i?1:-1)*.035);
@@ -24,13 +24,16 @@ export function poseActor(actor,state,slot) {
     root.rotation.x=.08;
     for(const arm of arms)reach(arm,[arm.side*.56,1.04,Math.sin(phase+arm.side*Math.PI/2)*.3]);
   }
-  if(['aim','weapon','fire','scope','threat','inspect','fuel','roster'].includes(action)) {
+  if(['aim','advance','weapon','fire','scope','threat','inspect','fuel','roster'].includes(action)) {
     group.rotation.y=shot.camera==='weapon'?-.9:slot%2?.46:-.3;
     const recoil=action==='fire'?Math.max(0,Math.sin(local*17))**12*.065:0;
     weapon.position.set(.29,1.18,.38-recoil);
     reach(arms[1],[.3,1.18,.37-recoil]);reach(arms[0],[.14,1.23,.64-recoil]);
     root.rotation.x=-recoil*.5;
   } else weapon.position.set(.29,1.18,.38);
+  if(action==='advance') {
+    group.rotation.y=-Math.PI/2;group.position.z=0;group.position.x=(progress-.5)*1.2;
+  }
   if(action==='phone') {
     reach(arms[1],[.2,1.39,.5]);reach(arms[0],[-.07,1.35,.46]);head.rotation.x=.3;
     group.rotation.y=Math.PI*.78;
