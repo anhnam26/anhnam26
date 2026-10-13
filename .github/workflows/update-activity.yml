@@ -2,13 +2,19 @@ name: Update GitHub activity
 
 on:
   schedule:
-    - cron: '23 * * * *'
+    - cron: '2-59/5 * * * *'
   workflow_dispatch:
   push:
     branches: [main]
-    paths:
-      - '.github/workflows/update-activity.yml'
-      - 'scripts/**'
+  issues:
+    types: [opened]
+  pull_request_target:
+    branches: [main]
+    types: [opened, closed, reopened]
+  discussion:
+    types: [created]
+  repository_dispatch:
+    types: [contributions-updated]
 
 permissions:
   contents: read
@@ -29,6 +35,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           ref: main
+        # Event refreshes always run trusted code from main, including PR events.
 
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -50,8 +57,8 @@ jobs:
       - name: Publish changed activity assets
         run: |
           git status --short
-          git diff --stat -- assets/activity.json assets/activity-dark.svg assets/activity-light.svg
-          git add -- assets/activity.json assets/activity-dark.svg assets/activity-light.svg
+          git diff --stat -- assets/activity.json assets/activity-dark.svg assets/activity-light.svg README.md
+          git add -- assets/activity.json assets/activity-dark.svg assets/activity-light.svg README.md
           git diff --cached --check
           if git diff --cached --quiet; then
             echo "Public activity is unchanged; no commit needed."

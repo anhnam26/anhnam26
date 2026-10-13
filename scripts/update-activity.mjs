@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
+import { createHash } from 'node:crypto';
 import { renderSportsAnimation } from './sports-animation.mjs';
 
 const USERNAME = 'anhnam26';
@@ -131,6 +132,7 @@ async function request(url, json, { fetchImpl, token }) {
   const response = await fetchImpl(url, {
     headers: {
       'User-Agent': `${USERNAME}-profile`,
+      'Cache-Control': 'no-cache',
       ...(json ? { Accept: 'application/vnd.github+json' } : {}),
       ...(api && token ? { Authorization: `Bearer ${token}` } : {}),
     },
@@ -153,6 +155,7 @@ async function fetchRepositories(options) {
 
 export async function updateActivity({
   assets = ASSETS, fetchImpl = fetch, token = process.env.GITHUB_TOKEN, now = () => new Date(),
+  readme = assets === ASSETS ? new URL('../README.md', import.meta.url) : undefined,
 } = {}) {
   const options = { fetchImpl, token };
   const [html, repositories] = await Promise.all([
@@ -183,10 +186,20 @@ export async function updateActivity({
   const dark = renderActivity(snapshot, 'dark');
   const light = renderActivity(snapshot, 'light');
   const data = JSON.stringify(snapshot, null, 2) + '\n';
+  // A fresh URL makes GitHub's image proxy request the newly published panel.
+  // Content hashes stay stable on unchanged polls and cover design changes too.
+  let updatedReadme;
+  if(readme) {
+    const version=createHash('sha256').update(dark).update(light).digest('hex').slice(0,16);
+    updatedReadme=(await readFile(readme,'utf8')).replace(
+      /((?:src|srcset)="assets\/activity-(?:dark|light)\.svg)(?:\?v=[a-f0-9]+)?(?=")/g,
+      `$1?v=${version}`);
+  }
   await mkdir(assets, { recursive: true });
   await writeFile(new URL('activity-dark.svg', assets), dark, 'utf8');
   await writeFile(new URL('activity-light.svg', assets), light, 'utf8');
   await writeFile(new URL('activity.json', assets), data, 'utf8');
+  if(readme) await writeFile(readme,updatedReadme,'utf8');
   console.log(`${unchanged ? 'Verified unchanged' : 'Updated'} activity: ${snapshot.calendar.total} contributions, ${snapshot.repositories} public repos, ${snapshot.stars} stars.`);
   console.log(`Assets: ${fileURLToPath(assets)}`);
 }
