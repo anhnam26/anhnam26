@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { MATCHES, MATCH_DURATION, SPORTS_DURATION, TEAMS, CELEBRATION_DURATION, matchStateAt } from './sports-matches.mjs';
-import { choreographyDuration, playDuration, returnPlan, courtAt, ENTRANCE_COURT } from './sports-paths.mjs';
+import { choreographyDuration, playDuration, returnPlan, courtAt, entranceCourt } from './sports-paths.mjs';
 
 test('each sport lasts 80 seconds including entrances, restarts, celebration and transition', () => {
   assert.equal(MATCH_DURATION,80);
@@ -22,14 +22,15 @@ test('each sport lasts 80 seconds including entrances, restarts, celebration and
         assert.ok(Math.abs(actual[key]-baseline[key]*match.timeScale)<1e-6);
       }
     };
-    checkPlan(match.introPlan,returnPlan(ENTRANCE_COURT,courtAt(match.sport,match.rounds[0],0)));
+    if(match.sport==='football') assert.equal(match.introPlan.duration,0,'Football starts in its kickoff formation');
+    else checkPlan(match.introPlan,returnPlan(entranceCourt(match.sport),courtAt(match.sport,match.rounds[0],0)));
     for(const round of match.rounds) {
       assert.equal(round.timeScale,match.timeScale,'Use one speed factor throughout each match');
       assert.equal(round.duration,playDuration(match.sport,round)*match.timeScale);
       const end=courtAt(match.sport,round,choreographyDuration(match.sport,round));
       const next=match.rounds[round.index+1];
       if(next) checkPlan(round.returnPlan,returnPlan(end,courtAt(match.sport,next,0)));
-      else checkPlan(match.transitionPlan,returnPlan(end,ENTRANCE_COURT));
+      else checkPlan(match.transitionPlan,returnPlan(end,entranceCourt(MATCHES[(index+1)%3].sport)));
     }
     assert.ok(Math.abs(match.transitionStart+match.transitionPlan.duration-match.duration)<2e-6);
   }
@@ -63,7 +64,7 @@ test('football and basketball restart with the conceding team', () => {
       assert.equal(match.rounds[round+1].possession,conceding);
       assert.equal(matchStateAt(match.startAt+match.rounds[round+1].start).possession,conceding);
     }
-    assert.equal(match.rounds[0].duration,match.rounds[4].duration,'The winning attack must keep the opening attack pace');
+    assert.equal(match.rounds[0].timeScale,match.rounds[4].timeScale,'Opening and winning plays use the same speed factor');
   }
 });
 

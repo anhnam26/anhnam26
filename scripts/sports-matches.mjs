@@ -1,4 +1,4 @@
-import { choreographyDuration, courtAt, playDuration, returnPlan, ENTRANCE_COURT } from './sports-paths.mjs';
+import { choreographyDuration, courtAt, playDuration, returnPlan, entranceCourt } from './sports-paths.mjs';
 
 // One repeatable first-to-three script, retimed evenly within each sport.
 export const MATCH_DURATION = 80;
@@ -15,7 +15,8 @@ function makeMatch(sport,initialPossession,scorers) {
     index,scorer,possession:index===0?initialPossession
       :sport==='volleyball'?scorers[index-1]:opponent(scorers[index-1]),
   }));
-  const introPlan=returnPlan(ENTRANCE_COURT,courtAt(sport,rounds[0],0));
+  const introPlan=sport==='football'?{enter:0,cross:0,settle:0,duration:0}
+    :returnPlan(entranceCourt(sport),courtAt(sport,rounds[0],0));
   const introDuration=rounded(introPlan.duration+3);
   let cursor=introDuration;
   for(const round of rounds) {
@@ -29,7 +30,8 @@ function makeMatch(sport,initialPossession,scorers) {
     }
   }
   const last=rounds.at(-1),winAt=last.scoreAt;
-  const transitionPlan=returnPlan(courtAt(sport,last,choreographyDuration(sport,last)),ENTRANCE_COURT);
+  const nextSport={football:'basketball',basketball:'volleyball',volleyball:'football'}[sport];
+  const transitionPlan=returnPlan(courtAt(sport,last,choreographyDuration(sport,last)),entranceCourt(nextSport));
   // Keep the celebration readable; speed up every movement by the same factor.
   // The opening and winning attacks share a clock, with no final-play rush.
   const timeScale=(MATCH_DURATION-CELEBRATION_DURATION)/(winAt+transitionPlan.duration);

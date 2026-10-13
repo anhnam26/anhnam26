@@ -37,7 +37,10 @@ an orange ponytail, and Blue 09 has cropped hair and a mint headband. Exactly
 two players per team are visible on the court. The bright arcade stadium stays
 in place while the playing surface and equipment transform.
 
-Each match opens with an entrance and readiness sequence. Points arrive at the
+Football opens in a ready formation: the ball sits at (592, 232), the painted
+centre spot, and both rear players stand on the goals' centreline at y=232.
+Every football restart uses that same centred kickoff. Basketball and volleyball
+retain their entrance and readiness sequences. Points arrive at the
 end of their actual plays. The scoreboard displays the final score and FULL
 TIME winner as soon as a team reaches three. A 5.5-second celebration precedes
 the court transition, with six fireworks and confetti fired from both corners.
@@ -66,10 +69,20 @@ limb movement and scoring follow the same scaled clock. Return trips change
 court depth, cross in separate lanes, then settle into formation. The final
 attack uses the opening attack's speed factor, with no deadline catch-up.
 
-Football shows contested dribbling, a tackle, recovery, a give-and-go and a shot
-past a saving defender. Basketball includes dribbling, a steal, passing and a
-contested jump shot. Volleyball includes a serve, receive, set, spike, low dig
-attempts and a jumping block. Winning spikes land inside the opponent's court.
+Each football goal has its own authored play: tackle recovery and a wall pass,
+a wing run and cutback, a feint and long-range shot, an overlap finished by the
+winger, and an interception followed by a solo counterattack. Basketball uses
+a crossover pull-up, a give-and-go jumper, a steal and fast-break layup, a
+backdoor cut with an extra pass, and a post entry and spin jumper. Successful
+steals change possession; failed challenges leave the attacker in control.
+Passes, catches, shot releases and running paths differ between plays.
+
+Volleyball includes a serve, receive, set, spike, low dig attempts and a
+jumping block. The net spans the court's depth with posts at the two sidelines,
+a continuous top tape and a perspective mesh. Flights clear the tape; spikes
+travel downwards from contact. Each winning spike lands fully inside the
+opponent's court, at a fixed empty location more than 75 pixels from either
+defending player's court position.
 The server stays behind the end line until after contact; both shoes remain
 outside x=162 or x=1022. Players keep looking at the
 ball and run past each other on separate paths, with at least 30 logical pixels
@@ -171,6 +184,8 @@ from the latest `main` branch. Disable the workflow in Actions to stop refreshes
 - `.github/workflows/update-activity.yml`: hourly refresh and bot publication.
 - `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
 - `scripts/sports-paths.mjs`: court paths, baseline play clocks and returns.
+- `scripts/sports-plays.mjs`: five distinct plays per attacking sport and fixed
+  volleyball landing locations.
 - `scripts/sports-celebration.mjs`: winner-only fireworks and confetti.
 - `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
 - `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.

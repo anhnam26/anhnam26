@@ -118,7 +118,7 @@ function animationCSS() {
       const actions=match.sport==='football'?[.75,1.35,1.55,1.6,1.85,1.95,2.05,2.1,2.2,2.4,3.15,3.7,3.85,4.15,5.1,6,6.35,6.65,6.85,7.2,8.8]
         :match.sport==='basketball'?[.8,1.4,1.55,1.6,1.8,1.85,2.1,2.2,2.4,2.5,3.2,3.85,4.25,4.9,5.1,5.15,5.95,6.2,6.55,6.8,7.2,7.24,7.4,7.75,8.8]:[1.1];
       for(const q of actions) times.add(actionTimeAt(index,round.index,q));
-      for(const points of Object.values(courtTracks(match.sport,round.possession===round.scorer))) {
+      for(const points of Object.values(courtTracks(match.sport,round))) {
         for(const [q] of points) if(q<= (match.sport==='volleyball'&&round.scorer!==round.possession?6.4:8.8)) times.add(actionTimeAt(index,round.index,q));
       }
     }

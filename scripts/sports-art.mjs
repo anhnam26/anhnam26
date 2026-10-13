@@ -117,9 +117,15 @@ export function drawCourts() {
       <path d="M162 138H1022V326H162Z" fill="#ffe09a"/>
       <path d="M162 138H1022V326H162ZM382 138V326M802 138V326M592 138V326M162 132V335M1022 132V335" ${line}/>
       <g fill="#fff7d3" font-family="Consolas,monospace" font-size="10" text-anchor="middle"><text x="87" y="354">SERVE ZONE</text><text x="1097" y="354">SERVE ZONE</text></g>
-      <path d="M578 160V310M606 160V310" stroke="${ink}" stroke-width="7"/>
-      <path d="M578 176H606V274H578Z" fill="#ffffff" fill-opacity=".15" stroke="#fffdf1" stroke-width="4"/>
-      <path d="M585 176V274M592 176V274M599 176V274M578 192H606M578 208H606M578 224H606M578 240H606M578 256H606" fill="none" stroke="#fffdf1" stroke-width="1.5"/>
+      <g data-equipment="volleyball-net" fill="none" stroke="${ink}" stroke-width="1.2" stroke-linejoin="round">
+        <path d="M568 44V138M616 208V326" stroke="${ink}" stroke-width="8"/>
+        <path d="M568 44V138M616 208V326" stroke="#fffdf1" stroke-width="4"/>
+        <path d="M568 56L616 220V292L568 128Z" fill="#fffdf1" fill-opacity=".2" stroke="${ink}" stroke-width="1.5"/>
+        ${Array.from({length:4},(_,i)=>{const w=(i+1)/5;return `<path d="M${568+48*w} ${56+164*w}V${128+164*w}"/>`;}).join('')}
+        ${Array.from({length:3},(_,i)=>`<path d="M568 ${74+i*18}L616 ${238+i*18}"/>`).join('')}
+        <path d="M568 56L616 220" stroke="#fffdf1" stroke-width="6"/>
+        <path d="M568 128L616 292" stroke="#fffdf1" stroke-width="2"/>
+      </g>
     </g>`;
 }
 
