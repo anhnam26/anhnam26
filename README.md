@@ -43,6 +43,10 @@ Based in **Ho Chi Minh City, Vietnam**. Studying Information Technology at **HCM
 
 <sub>[See current activity ↗](https://github.com/anhnam26?tab=overview)</sub>
 
+## Video
+
+https://github.com/user-attachments/assets/26e2b56f-875a-4974-8a56-e82bf3f9807e
+
 ## Selected repositories
 
 - **[NLPNew](https://github.com/anhnam26/NLPNew)** — Vietnamese History MiniGPT + RAG: a custom PyTorch Transformer with hybrid retrieval.

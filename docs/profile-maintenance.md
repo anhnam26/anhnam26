@@ -110,6 +110,18 @@ during each running stride; jumps include a crouch and landing. Reduced motion
 shows a static football poster with all four players ready on the field.
 Sports scores belong to the illustration and do not change contribution counts.
 
+## Profile video
+
+The standalone attachment URL under **Video** embeds GitHub's native video
+player directly below the activity and sports panel. It is the original
+`K1.mp4`, including its audio: 1920 x 1080, 30 fps, 244.6 seconds, H.264/AAC.
+The source was uploaded unchanged, rather than recreated or converted to GIF.
+`assets/profile-video.json` records the public attachment URL, source hash,
+file size and media properties. The upload uses GitHub's user-attachment
+endpoint; no issue, comment, release or Pages site is needed. Keep the URL on
+its own paragraph so GitHub renders a player. Playback starts with the visitor's
+Play button; GitHub controls the player's behaviour.
+
 ## Automatic activity updates
 
 The workflow in `.github/workflows/update-activity.yml` refreshes activity every
