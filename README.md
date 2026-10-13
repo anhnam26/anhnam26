@@ -66,6 +66,18 @@ A 3D office experience built around wheelchair navigation, object interactions a
 | **Data & retrieval** | SQLite · FTS5 · Dense embeddings · Hybrid search · PostgreSQL |
 | **Vision & mobile** | Java · Android · MediaPipe · Firebase |
 
+## The build log
+
+<a href="https://github.com/anhnam26?tab=overview">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg">
+    <img src="assets/activity-dark.svg" alt="GitHub activity snapshot for anhnam26: yearly contribution calendar, public repositories and stars. The image includes its update date. Open my GitHub activity for current data." width="100%">
+  </picture>
+</a>
+
+<sub>A dated snapshot of my GitHub activity. [See current activity ↗](https://github.com/anhnam26?tab=overview)</sub>
+
 ## Let's build something useful.
 
 I'm happy to exchange ideas about **RAG, AI agents, language models and computer vision**, or collaborate on a project with a practical problem to solve.
