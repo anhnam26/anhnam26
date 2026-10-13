@@ -1,6 +1,8 @@
-import { MATCHES, SPORTS_DURATION, INTRO_DURATION, TRANSITION_START, matchStateAt } from './sports-matches.mjs';
+import { MATCHES, SPORTS_DURATION, CELEBRATION_DURATION, matchStateAt } from './sports-matches.mjs';
 import { FLOOR, POSES, makePlayer, worldHand, legAngles, strideFeet, blendPose, smooth, mix, clamp, windowWeight } from './sports-rig.mjs';
-export { SPORTS_DURATION };
+import { track, trackVelocity, courtTracks, roleFloor, choreographyDuration, elapsedAtQ, qAtElapsed, paceAtQ, playDuration, returnPosition, ENTRANCE_COURT } from './sports-paths.mjs';
+export { SPORTS_DURATION, choreographyDuration };
+export const BALL_SPIN_SPEED=360*Math.ceil(SPORTS_DURATION/2)/SPORTS_DURATION;
 
 export const PLAYER_IDS = ['red-1', 'red-2', 'blue-1', 'blue-2'];
 export const VOLLEYBALL_BASELINES = { left:162, right:1022 };
@@ -8,14 +10,6 @@ const other = team => team==='red'?'blue':'red';
 const direction = team => team==='red'?1:-1;
 const sideX = (team,x) => team==='red'?x:1184-x;
 const pair = (a,b,w) => a.map((value,i)=>mix(value,b[i],w));
-
-function track(points,time) {
-  for (let i=1;i<points.length;i++) if (time<=points[i][0]) {
-    const a=points[i-1],b=points[i];
-    return mix(a[1],b[1],smooth((time-a[0])/(b[0]-a[0])));
-  }
-  return points.at(-1)[1];
-}
 
 function curve(points,progress) {
   let values=points;
@@ -28,15 +22,10 @@ function flight(time,segments) {
   return curve(points,clamp((time-from)/(to-from)));
 }
 
-export function actionDuration(sport,round) {
-  return Math.min(round.scoreAt-round.start, choreographyDuration(sport,round));
-}
-
-export const choreographyDuration = (sport,round) => sport==='volleyball'?(round.possession===round.scorer?8.8:6.4):8.8;
+export const actionDuration = (sport,round) => playDuration(sport,round);
 export const actionTimeAt = (matchIndex,roundIndex,q) => {
   const match=MATCHES[matchIndex],round=match.rounds[roundIndex];
-  return matchIndex*60+round.scoreAt-actionDuration(match.sport,round)
-    +q*actionDuration(match.sport,round)/choreographyDuration(match.sport,round);
+  return match.startAt+round.start+elapsedAtQ(match.sport,round,q);
 };
 
 function basePlayers(sport) {
@@ -47,10 +36,10 @@ function basePlayers(sport) {
   }));
 }
 
-function move(player,team,points,q) {
+function move(player,team,points,q,pace=1) {
   const position=track(points,q);
   player.x=sideX(team,position);
-  const speed=(track(points,q+.015)-track(points,Math.max(0,q-.015)))/.03;
+  const speed=trackVelocity(points,q)*pace;
   let travelled=0;
   for (let i=1;i<points.length;i++) {
     if(q>=points[i][0]) travelled+=Math.abs(points[i][1]-points[i-1][1]);
@@ -137,21 +126,15 @@ function playersDuring(sport,round,q) {
   const players=basePlayers(sport),team=sport==='volleyball'?round.possession:round.scorer,opponent=other(team);
   const lead=players[`${team}-1`],mate=players[`${team}-2`];
   const guard=players[`${opponent}-1`],keeper=players[`${opponent}-2`];
-  const place=(player,points)=>move(player,team,points,q);
+  const tracks=courtTracks(sport,round.possession===round.scorer),pace=paceAtQ(sport,round,q);
+  const place=(player,points)=>move(player,team,points,q,pace);
   const lane=(player,depth)=>{player.floor=FLOOR-depth;player.y=player.floor;player.scale=1-depth*.002;};
-  if(sport!=='volleyball') {
-    lane(mate,86);lane(keeper,0);
-    // The attacker sidesteps into the back of the court before either crossing.
-    // The thief keeps the front lane while the opponent turns back to recover.
-    lane(lead,56*Math.max(windowWeight(q,1.55,1.85,2.1,2.4),
-      sport==='football'?windowWeight(q,6.0,6.35,6.85,7.2):windowWeight(q,4.9,5.1,5.95,6.2)));
-    lane(guard,0);
-  }
+  for(const [role,player] of Object.entries({lead,mate,guard,keeper})) lane(player,FLOOR-roleFloor(sport,role,q));
   if(sport==='football') {
-    place(lead,[[0,500],[.75,558],[1.35,588],[1.6,604],[1.95,603],[2.2,542],[2.4,523],[3.15,635],[3.7,624],[4.15,656],[5.1,735],[6.35,864],[7.2,910],[8.8,910]]);
-    place(guard,[[0,660],[.75,632],[1.35,640],[1.6,650],[2.05,576],[2.2,564],[2.4,565],[3.15,690],[3.7,673],[4.15,710],[5.1,781],[6.35,902],[6.65,872],[7.2,868],[8.8,868]]);
-    place(mate,[[0,220],[.75,328],[1.5,458],[2.5,527],[3.15,559],[3.7,560],[3.85,560],[4.15,594],[5.1,658],[6.35,810],[8.8,840]]);
-    place(keeper,[[0,1008],[6.35,1008],[7.65,1028],[8.8,1038]]);
+    place(lead,tracks.lead);
+    place(guard,tracks.guard);
+    place(mate,tracks.mate);
+    place(keeper,tracks.keeper);
     if(round.possession===round.scorer) challenge(guard,q,1.35,sport);
     challenge(lead,q,2.4,sport,28);
     challenge(guard,q,3.15,sport);challenge(guard,q,6.65,sport);
@@ -160,10 +143,10 @@ function playersDuring(sport,round,q) {
     const save=windowWeight(q,7.25,7.9,8.55,8.8);
     arms(keeper,'save',save);crouch(keeper,save,10);
   } else if(sport==='basketball') {
-    place(lead,[[0,470],[.8,530],[1.6,578],[1.8,578],[2.1,553],[2.2,496],[2.5,493],[3.3,672],[3.8,698],[4.5,764],[5.4,855],[6.2,888],[6.55,868],[7.2,910],[8.8,910]]);
-    place(guard,[[0,615],[.8,580],[1.6,625],[1.8,618],[2.1,540],[2.2,527],[2.5,552],[3.3,718],[3.8,760],[4.5,825],[5.4,870],[6.2,825],[6.55,832],[7.2,860],[8.8,878]]);
-    place(mate,[[0,310],[1.6,515],[2.5,680],[3.3,765],[3.8,790],[4.5,790],[5.4,804],[7.2,850],[8.8,850]]);
-    place(keeper,[[0,952],[3.3,990],[6.2,962],[7.2,962],[8.8,994]]);
+    place(lead,tracks.lead);
+    place(guard,tracks.guard);
+    place(mate,tracks.mate);
+    place(keeper,tracks.keeper);
     const balanceArm=lead.arms.back;
     arms(lead,'dribble');lead.arms.back=balanceArm;
     const dribbling=q<1.4 || q>=5.15 && q<6.55;
@@ -189,10 +172,9 @@ function playersDuring(sport,round,q) {
     arms(keeper,'guard',windowWeight(q,6.75,7.2,7.5,7.9));
     jump(lead,q,7.2,44);jump(guard,q,7.24,38);jump(keeper,q,7.4,22);
   } else {
-    lane(mate,86);lane(keeper,86);
     const returns=team===round.scorer,firstHit=returns?4.5:5.1;
-    place(lead,[[0,96],[1.1,96],[3.8,222],[5.2,286],[6.5,286],[7.5,520],[8.8,520]]);
-    move(guard,opponent,[[0,286],[3.1,286],[firstHit-.5,520],[firstHit+.5,520],[7.5,550],[8.8,550]],q);
+    place(lead,tracks.lead);
+    move(guard,opponent,tracks.guard,q,pace);
     arms(lead,'carry',windowWeight(q,0,0,.2,.5));
     arms(lead,'strike',windowWeight(q,.25,.8,.9,1.2));
     arms(lead,'follow',windowWeight(q,.9,1.15,1.4,1.75));
@@ -299,48 +281,35 @@ function initialState(sport,round) {
 }
 
 function entranceState(sport,round) {
-  const initial=initialState(sport,round);
-  const floors={'red-1':308,'red-2':218,'blue-1':278,'blue-2':248};
-  const xs={'red-1':80,'red-2':160,'blue-1':1104,'blue-2':1024};
-  return {players:Object.fromEntries(PLAYER_IDS.map(id=>[id,makePlayer(id,initial.players[id].team,xs[id],floors[id])])),ball:[592,296]};
+  return {players:Object.fromEntries(PLAYER_IDS.map(id=>[id,makePlayer(id,id.split('-')[0],ENTRANCE_COURT[id].x,ENTRANCE_COURT[id].floor)])),ball:[592,296]};
 }
 
-function interpolatePlayers(a,b,weight,progress,duration) {
+function interpolatePlayers(a,b,elapsed,plan) {
+  const weight=smooth(elapsed/plan.duration);
   return Object.fromEntries(PLAYER_IDS.map(id=>{
-    const player={...a[id],x:mix(a[id].x,b[id].x,weight),y:mix(a[id].y,b[id].y,weight),floor:mix(a[id].floor,b[id].floor,weight),lean:mix(a[id].lean,b[id].lean,weight)};
-    // Four distinct return paths let teammates and opponents pass without
-    // pushing their bodies through one another during a restart or court change.
-    const corridor={ 'red-1':308,'red-2':218,'blue-1':278,'blue-2':248 }[id];
-    const floor=mix(player.floor,corridor,windowWeight(progress,0,.06,.94,1));
-    player.y+=floor-player.floor;player.floor=floor;
-    player.scale=1-(FLOOR-player.floor)*.002;
-    player.arms=blendPose(a[id].arms,b[id].arms,weight);
-    player.legs={front:pair(a[id].legs.front,b[id].legs.front,weight),back:pair(a[id].legs.back,b[id].legs.back,weight)};
-    const distance=b[id].x-a[id].x;
-    const amount=clamp(Math.abs(distance)*6*progress*(1-progress)/duration/55);
-    const travelled=Math.abs(player.x-a[id].x);
-    player.motion={travelled,direction:distance>=0?1:-1,amount};
-    player.airborne=0;player.kickWeight=0;
-    const wave=Math.sin(travelled/(48*player.scale)*Math.PI*2);
+    const route=returnPosition(id,a[id],b[id],elapsed,plan);
+    const player={...a[id],x:route.x,floor:route.floor,scale:1-(FLOOR-route.floor)*.002,
+      y:route.floor+mix(a[id].y-a[id].floor,b[id].y-b[id].floor,weight),lean:mix(a[id].lean,b[id].lean,weight),
+      arms:blendPose(a[id].arms,b[id].arms,weight),airborne:0,kickWeight:0};
+    const amount=clamp(route.speed/55),wave=Math.sin(route.travelled/(48*player.scale)*Math.PI*2);
+    player.motion={travelled:route.travelled,direction:route.direction,amount,speed:route.speed};
     player.arms=blendPose(player.arms,{front:[-10-wave*28,-46-wave*28],back:[-10+wave*28,-46+wave*28]},amount*.9);
-    player.y+=player.scale*amount*(6.5+1.5*Math.cos(travelled/(48*player.scale)*Math.PI*4));
+    player.y+=player.scale*amount*(6.5+1.5*Math.cos(route.travelled/(48*player.scale)*Math.PI*4));
     return [id,player];
   }));
 }
 
 export function sportsStateAt(seconds) {
-  const match=matchStateAt(seconds),duration=actionDuration(match.sport,match.round);
-  const q=clamp(match.roundTime-(match.roundDuration-duration),0,duration)
-    *choreographyDuration(match.sport,match.round)/duration;
+  const match=matchStateAt(seconds),script=MATCHES[match.matchIndex];
+  const q=qAtElapsed(match.sport,match.round,match.roundTime);
   let players=playersDuring(match.sport,match.round,q),ball=ballDuring(match.sport,match.round,q);
   let possession=match.possession;
   const scenes={football:0,basketball:0,volleyball:0};scenes[match.sport]=1;
   let morph=0;
   if(match.phase==='intro') {
     const entrance=entranceState(match.sport,match.round),initial=initialState(match.sport,match.round);
-    const progress=clamp(match.matchTime/5);
-    players=interpolatePlayers(entrance.players,initial.players,smooth(progress),progress,5);
-    ball=pair(entrance.ball,initial.ball,smooth((match.matchTime-5)/(INTRO_DURATION-5)));
+    players=interpolatePlayers(entrance.players,initial.players,match.matchTime,script.introPlan);
+    ball=pair(entrance.ball,initial.ball,smooth((match.matchTime-script.introPlan.duration)/3));
   }
   if(match.phase==='play' && match.sport!=='volleyball') {
     const stolen=match.sport==='football'?q>=1.6&&q<2.4:q>=1.8&&q<2.5;
@@ -350,21 +319,23 @@ export function sportsStateAt(seconds) {
   if(match.phase==='restart') {
     const nextRound=MATCHES[match.matchIndex].rounds[match.round.index+1];
     const next=initialState(match.sport,nextRound),elapsed=match.matchTime-match.round.scoreAt;
-    const weight=smooth(elapsed/2);
-    players=interpolatePlayers(players,next.players,weight,clamp(elapsed/2),2);
+    const plan=match.round.returnPlan;
+    players=interpolatePlayers(players,next.players,elapsed,plan);
     const controls=match.sport==='football'?[ball,[ball[0],296],next.ball]
       :match.sport==='basketball'?[ball,[ball[0],232],[next.ball[0],296],next.ball]
       :[ball,[ball[0],112],[next.ball[0],112],next.ball];
-    ball=curve(controls,clamp(elapsed/2));
+    ball=curve(controls,clamp(elapsed/plan.duration));
   } else if(match.winner) {
     for(const player of Object.values(players)) if(player.team===match.winner) {
-      arms(player,'celebrate',windowWeight(match.matchTime,56,56.3,58,59.8));
-      jump(player,match.matchTime,57+(player.id.endsWith('2')?.15:0),32);
+      const victoryTime=match.matchTime-script.winAt;
+      arms(player,'celebrate',windowWeight(victoryTime,0,.3,CELEBRATION_DURATION,CELEBRATION_DURATION+.3));
+      jump(player,victoryTime,1+(player.id.endsWith('2')?.25:0),32);
     }
     if(match.phase==='transition') {
       const nextIndex=(match.matchIndex+1)%3,nextMatch=MATCHES[nextIndex];
-      const next=entranceState(nextMatch.sport,nextMatch.rounds[0]),progress=(match.matchTime-TRANSITION_START)/(60-TRANSITION_START),weight=smooth(progress);
-      players=interpolatePlayers(players,next.players,weight,progress,2);
+      const next=entranceState(nextMatch.sport,nextMatch.rounds[0]),elapsed=match.matchTime-script.transitionStart;
+      const progress=clamp(elapsed/script.transitionPlan.duration),weight=smooth(progress);
+      players=interpolatePlayers(players,next.players,elapsed,script.transitionPlan);
       ball=curve([ball,[ball[0],25],[next.ball[0],25],next.ball],smooth(progress));
       morph=Math.sin(Math.PI*progress);
       scenes[match.sport]=1-weight;scenes[match.nextSport]=weight;
@@ -379,8 +350,8 @@ export function sportsStateAt(seconds) {
     player.headAngle=clamp(Math.atan2(ball[1]-headY,Math.abs(ball[0]-headX))*180/Math.PI-player.lean,-55,55);
     player.layer=player.floor<233?0:player.floor<263?1:player.floor<293?2:3;
   }
-  const extraTurns=match.matchIndex*720+(match.phase==='transition'?720*smooth((match.matchTime-TRANSITION_START)/(60-TRANSITION_START)):0);
-  return {...match,possession,players,scenes,morph,ball:{x:ball[0],y:ball[1],rotation:match.time*180+extraTurns},actionTime:q};
+  const extraTurns=match.matchIndex*720+(match.phase==='transition'?720*smooth((match.matchTime-script.transitionStart)/script.transitionPlan.duration):0);
+  return {...match,possession,players,scenes,morph,ball:{x:ball[0],y:ball[1],rotation:match.time*BALL_SPIN_SPEED+extraTurns},actionTime:q};
 }
 
 export function contactEvents(matchIndex,roundIndex) {

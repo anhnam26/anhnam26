@@ -4,15 +4,16 @@ import { sportsStateAt, SPORTS_DURATION } from './sports-animation.mjs';
 import { contactEvents, actionTimeAt } from './sports-timeline.mjs';
 import { PLAYER_LOOKS } from './sports-art.mjs';
 import { playerBones, worldHand, worldFoot, ARM_LENGTHS, LEG_LENGTHS } from './sports-rig.mjs';
-import { MATCHES, POINT_TIMES } from './sports-matches.mjs';
+import { MATCHES } from './sports-matches.mjs';
+
+import { RUN_SPEED } from './sports-paths.mjs';
 
 const close=(a,b,tolerance=.001)=>assert.ok(Math.abs(a-b)<tolerance,`${a} != ${b}`);
 const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 
-test('the three-minute animation closes without a ball or player jump', () => {
-  assert.equal(SPORTS_DURATION,180);
-  assert.deepEqual(sportsStateAt(0),sportsStateAt(180));
-  const before=sportsStateAt(180-1e-7),after=sportsStateAt(0);
+test('the normal-paced animation closes without a ball or player jump', () => {
+  assert.deepEqual(sportsStateAt(0),sportsStateAt(SPORTS_DURATION));
+  const before=sportsStateAt(SPORTS_DURATION-1e-7),after=sportsStateAt(0);
   close(before.ball.x,after.ball.x);close(before.ball.y,after.ball.y);
   for (const id of Object.keys(after.players)) {
     close(before.players[id].x,after.players[id].x);
@@ -25,7 +26,7 @@ test('the four pixel identities retain distinct numbers, hair and skin across sp
   assert.equal(new Set(Object.values(PLAYER_LOOKS).map(look=>look.number)).size,4);
   assert.equal(new Set(Object.values(PLAYER_LOOKS).map(look=>look.style)).size,4);
   assert.equal(new Set(Object.values(PLAYER_LOOKS).map(look=>look.skin)).size,4);
-  for(const time of [8,68,128]) {
+  for(const time of MATCHES.map(match=>match.startAt+match.introDuration)) {
     const players=Object.values(sportsStateAt(time).players);
     assert.deepEqual(players.map(player=>player.id),Object.keys(PLAYER_LOOKS));
     assert.equal(players.filter(player=>player.team==='red').length,2);
@@ -35,15 +36,15 @@ test('the four pixel identities retain distinct numbers, hair and skin across sp
 
 test('each ending holds the final score while a glowing ball lifts and both courts blend', () => {
   for(let index=0;index<3;index++) {
-    const ending=sportsStateAt(index*60+56);
-    const middle=sportsStateAt(index*60+59);
+    const match=MATCHES[index],ending=sportsStateAt(match.startAt+match.winAt);
+    const middle=sportsStateAt(match.startAt+match.transitionStart+match.transitionPlan.duration/2);
     assert.deepEqual(middle.score,ending.score);
     assert.equal(middle.phase,'transition');
     close(middle.morph,1);
     close(middle.scenes[ending.sport],.5);
     close(middle.scenes[ending.nextSport],.5);
     assert.ok(middle.ball.y<ending.ball.y-60);
-    const before=sportsStateAt((index+1)*60-1e-7),after=sportsStateAt((index+1)*60);
+    const before=sportsStateAt(match.startAt+match.duration-1e-7),after=sportsStateAt(match.startAt+match.duration);
     close(before.ball.x,after.ball.x);close(before.ball.y,after.ball.y);
     close(Math.cos(before.ball.rotation*Math.PI/180),Math.cos(after.ball.rotation*Math.PI/180));
     if(index<2) close(before.ball.rotation,after.ball.rotation);
@@ -58,14 +59,14 @@ test('each ending holds the final score while a glowing ball lifts and both cour
 test('the third basketball play starts blue and contains the decisive red steal', () => {
   const steal=contactEvents(1,2).find(event=>event.action==='steal');
   assert.equal(steal.player,'red-1');
-  assert.equal(sportsStateAt(90).possession,'blue');
+  assert.equal(sportsStateAt(MATCHES[1].startAt+MATCHES[1].rounds[2].start).possession,'blue');
   assert.equal(sportsStateAt(steal.time+.05).possession,'red');
-  assert.deepEqual(sportsStateAt(98).score,{red:2,blue:1});
+  assert.deepEqual(sportsStateAt(MATCHES[1].startAt+MATCHES[1].rounds[2].scoreAt).score,{red:2,blue:1});
 });
 
 test('one ball stays visible and continuous over rallies, resets and court changes', () => {
   let previous=sportsStateAt(0);
-  for (let time=.005;time<180;time+=.005) {
+  for (let time=.005;time<SPORTS_DURATION;time+=.005) {
     const state=sportsStateAt(time);
     close(Object.values(state.scenes).reduce((sum,n)=>sum+n,0),1);
     assert.ok(state.ball.x-13>24 && state.ball.x+13<1160);
@@ -73,11 +74,11 @@ test('one ball stays visible and continuous over rallies, resets and court chang
     assert.ok(distance([state.ball.x,state.ball.y],[previous.ball.x,previous.ball.y])<12,`Ball jumps at ${time}`);
     previous=state;
   }
-  for (const time of [59.5,119.5,179.5]) assert.equal(Object.values(sportsStateAt(time).scenes).filter(n=>n>0).length,2);
+  for (const time of MATCHES.map(match=>match.startAt+match.transitionStart+match.transitionPlan.duration/2)) assert.equal(Object.values(sportsStateAt(time).scenes).filter(n=>n>0).length,2);
 });
 
 test('four players face the ball, remain in the arena and respect volleyball halves', () => {
-  for (let time=0;time<180;time+=.125) {
+  for (let time=0;time<SPORTS_DURATION;time+=.125) {
     const state=sportsStateAt(time);
     assert.equal(Object.keys(state.players).length,4);
     for (const player of Object.values(state.players)) {
@@ -90,7 +91,7 @@ test('four players face the ball, remain in the arena and respect volleyball hal
 });
 
 test('arm joints remain anatomically bounded and all bone lengths stay fixed', () => {
-  for (let time=0;time<180;time+=.2) {
+  for (let time=0;time<SPORTS_DURATION;time+=.2) {
     for (const player of Object.values(sportsStateAt(time).players)) {
       for (const arm of Object.values(player.arms)) {
         assert.ok(Math.abs(arm[1]-arm[0])<=120,`Hyperextended elbow: ${player.id}`);
@@ -136,9 +137,15 @@ test('a thief runs past the attacker and the attacker later beats the defender',
   }
 });
 
-test('player paths never collide in the court plane, including restarts and transitions', () => {
-  for(let time=0;time<180;time+=.01) {
-    const players=Object.values(sportsStateAt(time).players);
+test('all player paths stay clear and below normal running speed, including returns', () => {
+  let previous=sportsStateAt(0);
+  for(let time=0;time<SPORTS_DURATION;time+=.01) {
+    const state=sportsStateAt(time),players=Object.values(state.players);
+    if(time>0) for(const player of players) {
+      const prior=previous.players[player.id];
+      assert.ok(Math.hypot(player.x-prior.x,player.floor-prior.floor)/.01<=RUN_SPEED+.05,player.id+' accelerates at '+time);
+    }
+    previous=state;
     for(let i=0;i<players.length;i++) for(let j=i+1;j<players.length;j++) {
       const a=players[i],b=players[j];
       assert.ok(Math.hypot(a.x-b.x,a.floor-b.floor)>=30,`${a.id} runs into ${b.id} at ${time.toFixed(2)}`);
@@ -172,7 +179,7 @@ test('football tackles, recoveries and shots put the shoe against the ball', () 
 });
 
 test('grounded players always have a support foot on the court while they run or crouch', () => {
-  for(let time=0;time<180;time+=.08) for(const player of Object.values(sportsStateAt(time).players)) {
+  for(let time=0;time<SPORTS_DURATION;time+=.08) for(const player of Object.values(sportsStateAt(time).players)) {
     if(player.airborne>0 || player.kickWeight>0) continue;
     const feet=['front','back'].map(leg=>worldFoot(player,leg));
     assert.ok(feet.every(foot=>foot[1]<=player.floor+.001),`${player.id} sinks into the court at ${time}`);
@@ -193,8 +200,8 @@ test('basketball releases, volleyball serves, sets, digs and spikes meet the act
 });
 
 test('every scored point has the ball at the correct opposing goal, rim or court', () => {
-  for (let match=0;match<3;match++) for (const point of POINT_TIMES) {
-    const state=sportsStateAt(match*60+point);
+  for (let match=0;match<3;match++) for (const round of MATCHES[match].rounds) {
+    const state=sportsStateAt(MATCHES[match].startAt+round.scoreAt);
     const scorer=state.round.scorer;
     const expectedX=scorer==='red'?(match===2?990:1110):(match===2?194:74);
     close(state.ball.x,expectedX);

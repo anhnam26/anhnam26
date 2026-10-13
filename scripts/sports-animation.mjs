@@ -1,6 +1,7 @@
-import { sportsStateAt, PLAYER_IDS, SPORTS_DURATION, actionTimeAt, contactEvents } from './sports-timeline.mjs';
+import { sportsStateAt, PLAYER_IDS, SPORTS_DURATION, BALL_SPIN_SPEED, actionTimeAt, contactEvents } from './sports-timeline.mjs';
 import { playerBones } from './sports-rig.mjs';
-import { MATCHES, MATCH_DURATION, TEAMS } from './sports-matches.mjs';
+import { MATCHES, TEAMS } from './sports-matches.mjs';
+import { courtTracks } from './sports-paths.mjs';
 import { drawAthlete, drawStadium, drawCourts, drawBall, drawRoster } from './sports-art.mjs';
 export { sportsStateAt, SPORTS_DURATION };
 
@@ -16,8 +17,9 @@ function valuesAt(state) {
   add('ball-glow','opacity',[state.morph*.9]);
   add('ball-halo','size',[1+state.morph*.65]);
   add('court-shimmer','opacity',[state.morph*.24]);
-  add('intro-label','opacity',[state.phase==='intro'?windowIntro(state.matchTime):0]);
-  add('start-label','opacity',[state.phase==='intro'&&state.matchTime>=6.5?Math.min(1,(state.matchTime-6.5)*4,(8-state.matchTime)*4):0]);
+  const whistle=state.introDuration-1.5;
+  add('intro-label','opacity',[state.phase==='intro'?windowIntro(state.matchTime,state.introDuration):0]);
+  add('start-label','opacity',[state.phase==='intro'&&state.matchTime>=whistle?Math.min(1,(state.matchTime-whistle)*4,(state.introDuration-state.matchTime)*4):0]);
   add('point-label','opacity',[state.phase==='restart'?Math.max(0,1-(state.matchTime-state.round.scoreAt)/1.4):0]);
   for (const sport of ['football','basketball','volleyball']) {
     add(`${sport}-scene`,'opacity',[state.scenes[sport]]);
@@ -48,12 +50,12 @@ function valuesAt(state) {
     add(`possession-${team}`,'opacity',[Number(state.possession===team && state.sport!=='volleyball')],true);
     add(`serve-${team}`,'opacity',[Number(state.possession===team && state.sport==='volleyball')],true);
   }
-  add('match-progress','scale',[state.matchTime/60]);
+  add('match-progress','scale',[Math.max(state.score.red,state.score.blue)/3]);
   return values;
 }
 
 // Remove redundant samples while bounding screen-space and joint-angle errors.
-// This keeps the three-minute SVG much smaller than a frame-by-frame export.
+// This keeps the complete SVG much smaller than a frame-by-frame export.
 function simplify(samples, kind) {
   const tolerances=kind==='opacity'?[.004]:kind==='rotate'?[1.2]:kind==='translate'?[.4,.4]:[.004];
   const retained=new Set([0,samples.length-1]);
@@ -70,19 +72,22 @@ function simplify(samples, kind) {
   return [...retained].sort((a,b)=>a-b).map(index=>samples[index]);
 }
 
-const windowIntro = time => time<6?1:Math.max(0,(6.5-time)*2);
+const windowIntro = (time,duration) => time<duration-2?1:Math.max(0,(duration-1.5-time)*2);
 let cachedCSS;
 function animationCSS() {
   if(cachedCSS) return cachedCSS;
-  const times=new Set(Array.from({length:SPORTS_DURATION*12+1},(_,index)=>index/12));
+  const times=new Set(Array.from({length:Math.ceil(SPORTS_DURATION*12)+1},(_,index)=>Math.min(SPORTS_DURATION,index/12)));
   for (const [index,match] of MATCHES.entries()) {
-    const offset=index*MATCH_DURATION;
-    // Returns to position are faster than normal play. Sample their running
-    // cycles more densely to preserve planted feet between rendered keyframes.
+    const offset=match.startAt;
+    const addReturn=(start,plan)=>{
+      for(const time of [0,plan.enter,plan.enter+plan.cross,plan.duration]) times.add(offset+start+time);
+    };
+    addReturn(0,match.introPlan);
+    times.add(offset+match.introDuration);
     for (const round of match.rounds.slice(0,-1)) {
-      for(let frame=0;frame<=48;frame++) times.add(offset+round.scoreAt+frame/24);
+      addReturn(round.scoreAt,round.returnPlan);
     }
-    for(let frame=0;frame<=96;frame++) times.add(offset+58+frame/48);
+    addReturn(match.transitionStart,match.transitionPlan);
     for (const round of match.rounds) {
       for (const time of [round.start,round.scoreAt]) times.add(offset+time);
       times.add(actionTimeAt(index,round.index,0));
@@ -90,11 +95,15 @@ function animationCSS() {
       const actions=match.sport==='football'?[.75,1.35,1.55,1.6,1.85,1.95,2.05,2.1,2.2,2.4,3.15,3.7,3.85,4.15,5.1,6,6.35,6.65,6.85,7.2,8.8]
         :match.sport==='basketball'?[.8,1.4,1.55,1.6,1.8,1.85,2.1,2.2,2.4,2.5,3.2,3.85,4.25,4.9,5.1,5.15,5.95,6.2,6.55,6.8,7.2,7.24,7.4,7.75,8.8]:[1.1];
       for(const q of actions) times.add(actionTimeAt(index,round.index,q));
+      for(const points of Object.values(courtTracks(match.sport,round.possession===round.scorer))) {
+        for(const [q] of points) if(q<= (match.sport==='volleyball'&&round.scorer!==round.possession?6.4:8.8)) times.add(actionTimeAt(index,round.index,q));
+      }
     }
   }
   // Facing changes are discrete. Locate the actual crossing instead of waiting
   // for the next regular sample, which would leave a player looking away briefly.
-  const sampled=[...times].sort((a,b)=>a-b).map(time=>({time,state:sportsStateAt(time)}));
+  const sortedTimes=()=>[...new Set([...times].map(time=>Math.min(SPORTS_DURATION,Math.max(0,time))))].sort((a,b)=>a-b);
+  const sampled=sortedTimes().map(time=>({time,state:sportsStateAt(time)}));
   for (let i=1;i<sampled.length;i++) {
     const from=sampled[i-1],to=sampled[i];
     for (const id of PLAYER_IDS) {
@@ -120,9 +129,9 @@ function animationCSS() {
       times.add(Math.min(SPORTS_DURATION,high+.000001));
     }
   }
-  const frames=[...times].sort((a,b)=>a-b).map(time=>{
+  const frames=sortedTimes().map(time=>{
     const state=sportsStateAt(time);
-    if (time===SPORTS_DURATION) state.ball.rotation=SPORTS_DURATION*180+MATCHES.length*720;
+    if (time===SPORTS_DURATION) state.ball.rotation=SPORTS_DURATION*BALL_SPIN_SPEED+MATCHES.length*720;
     return {time,values:valuesAt(state)};
   });
   cachedCSS=Object.keys(frames[0].values).map(name=>{
@@ -138,7 +147,7 @@ function animationCSS() {
 }
 
 function playerSVG(id,layer) {
-  const state=sportsStateAt(8),player=state.players[id],initial=valuesAt(state);
+  const state=sportsStateAt(MATCHES[0].introDuration),player=state.players[id],initial=valuesAt(state);
   const group=(part,content) => {
     const value=initial[`${id}-${part}`];
     return `<g class="sports-animated sports-${id}-${part}" style="transform:${transform(value.kind,value.values)}${part==='lean'?';transform-origin:0px -41px':''}">${content}</g>`;
@@ -157,7 +166,7 @@ export function renderSportsAnimation() {
     <text class="sports-animated sports-winner-${team}" opacity="0" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="24" font-weight="bold">FULL TIME / ${TEAMS[team].name} WINS</text>`).join('');
   return `<svg id="sports-arena" x="48" y="410" width="1184" height="666" viewBox="0 0 1184 666" role="img" aria-labelledby="sports-title sports-description">
     <title id="sports-title">Pixel Sports Club - red versus blue</title>
-    <desc id="sports-description">Four distinct pixel cartoon athletes in a seamless 180-second loop: football, basketball and volleyball, 60 seconds each. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. Scores change at 18, 28, 38, 48 and 56 seconds. Red steals and scores in the third basketball play. The ball rises, spins, glows and morphs as each court transforms. Football and basketball restart with the conceding team; the volleyball point winner serves behind the end line.</desc>
+    <desc id="sports-description">Four distinct pixel cartoon athletes play a repeatable football, basketball and volleyball loop at normal running speed. Each match ends when a team reaches three points. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. Red steals and scores in the third basketball play. The ball rises, spins, glows and morphs as each court transforms. Football and basketball restart with the conceding team; the volleyball point winner serves behind the end line.</desc>
     <defs><clipPath id="sports-stage-clip"><path d="M12 0H1172V12H1184V654H1172V666H12V654H0V12H12Z"/></clipPath><clipPath id="sports-ball-clip"><circle r="13"/></clipPath>
       <style>${animationCSS()}
       @media(prefers-reduced-motion:reduce){.sports-animated{animation:none!important}.sports-intro-label{opacity:0}}

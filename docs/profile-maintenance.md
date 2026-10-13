@@ -27,18 +27,19 @@ address synchronized when changing contact details.
 
 The README displays the activity panel after current work and before the small
 repository section. A separate 16:9 arena below the calendar runs Pixel Sports
-Club: football,
-basketball and volleyball, 60 seconds each, in a seamless 180-second loop.
+Club: football, basketball and volleyball, in a seamless loop. Matches follow
+the pace of their plays and end when a team reaches three points. They have no
+one-minute deadline. The current loop takes approximately seven minutes.
 Four hand-authored pixel cartoon athletes keep their identities across sports:
 Red 07 has spiky dark hair, Red 11 has curls and a yellow headband, Blue 04 has
 an orange ponytail, and Blue 09 has cropped hair and a mint headband. Exactly
 two players per team are visible on the court. The bright arcade stadium stays
 in place while the playing surface and equipment transform.
 
-Each match opens with an eight-second entrance and readiness sequence. The five
-points arrive at seconds 18, 28, 38, 48 and 56. The scoreboard displays the final
-score and FULL TIME winner from 56 until 60; the court transition runs from
-58 until 60. Every scoring play, including a basket, adds exactly one point.
+Each match opens with an entrance and readiness sequence. Points arrive at the
+end of their actual plays. The scoreboard displays the final score and FULL
+TIME winner as soon as a team reaches three. A 5.5-second celebration precedes
+the court transition. Every scoring play, including a basket, adds one point.
 
 | Sport | Point winners, in order | Final score (red : blue) | Next possession |
 | --- | --- | --- | --- |
@@ -48,18 +49,22 @@ score and FULL TIME winner from 56 until 60; the court transition runs from
 
 Football starts with red possession, basketball with blue possession, and
 volleyball with a red serve. After each of the first four points, the players
-return to position over two seconds. Blue steals from red before the final
+return to position at the same normal pace. Blue steals from red before the final
 football goal. Red steals from blue during the third basketball play. These
 turnovers reconcile the fixed scoring order with the normal restart rules.
-The final eight-second scoring window includes the reset and a faster attack.
-No random events change the script.
+The final attack uses the same pace as the opening play. No random events change
+the script. A shared monotone play clock slows fast movement before direction
+changes and keeps all running below 105 logical pixels per second. It never
+speeds up authored play to fit a duration. Contact times and scoring use that
+same clock. Return trips change court depth, cross in separate lanes, then
+settle into formation; each leg receives enough time for the same speed limit.
 
 Football shows contested dribbling, a tackle, recovery, a give-and-go and a shot
 past a saving defender. Basketball includes dribbling, a steal, passing and a
 contested jump shot. Volleyball includes a serve, receive, set, spike, low dig
 attempts and a jumping block. Winning spikes land inside the opponent's court.
-The server stays behind the end line until after
-contact; both shoes remain outside x=162 or x=1022. Players keep looking at the
+The server stays behind the end line until after contact; both shoes remain
+outside x=162 or x=1022. Players keep looking at the
 ball and run past each other on separate paths, with at least 30 logical pixels
 of clearance between their court positions. Supporting players use a back lane.
 Four depth bands choose the paint order, with one visible drawing per athlete.
@@ -72,12 +77,12 @@ crossfade continuously. The ending returns to the next entrance state, including
 the volleyball-to-football seam.
 
 The SVG uses local artwork and generated CSS, with no runtime script, remote
-images or font dependencies. Normal motion is sampled at 12 Hz, returns at
-24 Hz, and court transitions at 48 Hz, together with exact contact, scoring,
+images or font dependencies. Motion is sampled at 12 Hz, together with exact
+path waypoints, return phases, contact, scoring,
 facing and depth changes. Redundant samples are discarded within 0.4 logical
 pixels for position and 1.2 degrees for joints; browser interpolation fills the
-gaps. The full three-minute asset is about 3.2 MB per theme. Tests enforce a
-3.5 MB size ceiling. The generated CSS is cached within the render process so
+gaps. The longer normal-paced asset is about 4.5 MB per theme. Tests enforce a
+5 MB size ceiling for this expanded loop. The generated CSS is cached within the render process so
 both themes use the identical choreography.
 
 Shoulders, elbows, hips and knees stay connected through nested fixed-length
@@ -159,6 +164,7 @@ from the latest `main` branch. Disable the workflow in Actions to stop refreshes
 - `scripts/update-activity.mjs`: activity layout, colors and data collection.
 - `.github/workflows/update-activity.yml`: hourly refresh and bot publication.
 - `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
+- `scripts/sports-paths.mjs`: court paths, normal-paced play clocks and returns.
 - `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
 - `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.
 - `scripts/sports-art.mjs`: hand-authored pixel athletes, stadium, courts and ball.
