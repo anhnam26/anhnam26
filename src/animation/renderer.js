@@ -3,7 +3,7 @@ import { makeActor } from '../characters/models.js';
 import { poseActor } from '../characters/motion.js';
 import { PALETTES,makeEnvironments } from '../scenes/environments.js';
 import { material,geometry,box } from '../scenes/primitives.js';
-import { drawInterface } from '../scenes/interface.js';
+import { drawInterface,loadInterfaceAssets } from '../scenes/interface.js';
 import { loadPortraits } from '../assets/textures.js';
 import { stateAt } from './timeline.js';
 import { LoopBlend } from '../transitions/loop.js';
@@ -18,7 +18,7 @@ export async function makeRenderer(canvas,overlay) {
   sun.shadow.mapSize.set(1024,1024);Object.assign(sun.shadow.camera,{left:-9,right:9,top:9,bottom:-9,near:.1,far:40});sun.shadow.bias=-.001;
   scene.add(sun);scene.add(sun.target);
   const rim=new T.DirectionalLight('#7eafbb',1.6);rim.position.set(4,5,-4);scene.add(rim);
-  const portraits=await loadPortraits();
+  const [portraits]=await Promise.all([loadPortraits(),loadInterfaceAssets()]);
   const sets=makeEnvironments(portraits['group-photo.jpg']);Object.values(sets).forEach(g=>scene.add(g));
   const ids=['jacket','skull','goggles','dog','operator','rookie','gamer','commander','bald'];
   const actors=Object.fromEntries(ids.map(id=>[id,makeActor(id,portraits[`${id==='rookie'?'operator':id}-face.png`])]));

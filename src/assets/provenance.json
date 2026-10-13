@@ -81,5 +81,17 @@
     "file": "public/k1-poster.png",
     "source": "Code-rendered browser recreation, first GIF frame",
     "purpose": "Loading and reduced-motion fallback"
+  },
+  {
+    "file": "public/ui/technical-diagram.png",
+    "source": "K1.mp4",
+    "seconds": 218,
+    "crop": [
+      0,
+      69,
+      1280,
+      651
+    ],
+    "purpose": "Static reference UI graphic in the technical-diagram insert; animation remains code-rendered"
   }
 ]

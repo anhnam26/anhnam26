@@ -1,6 +1,12 @@
 import { stateAt } from '../animation/timeline.js';
 
 let outgoing,incoming;
+let technicalDiagram;
+export async function loadInterfaceAssets() {
+  technicalDiagram=new Image();
+  technicalDiagram.src=new URL('../../public/ui/technical-diagram.png',import.meta.url).href;
+  await technicalDiagram.decode();
+}
 // Only graphics present in the reference appear over the rendered scene.
 export function drawInterface(canvas,state) {
   if(state.loopBlend>0) {
@@ -55,11 +61,10 @@ export function drawInterface(canvas,state) {
     for(let i=0;i<shot.cast.length;i++)label(i%2?'PASS':'PERFECT',245+i*255,140+(i%2)*50,'#9ad6ee',25);
   }
   if(shot.action==='diagram') {
-    panel(250,95,780,530,'#153d64');c.strokeStyle='#6aa0c766';c.lineWidth=1;
-    for(let x=270;x<1020;x+=25){c.beginPath();c.moveTo(x,110);c.lineTo(x,605);c.stroke();}
-    for(let y=110;y<620;y+=25){c.beginPath();c.moveTo(270,y);c.lineTo(1010,y);c.stroke();}
-    c.strokeStyle='#c7e2f0';c.lineWidth=14;c.beginPath();c.arc(640,225,48,0,Math.PI*2);c.moveTo(640,275);c.lineTo(640,407);c.lineTo(575,570);c.moveTo(640,407);c.lineTo(705,570);c.moveTo(640,310);c.lineTo(531,375);c.moveTo(640,310);c.lineTo(747,287);c.stroke();
-    label('180       210       240       270       300',640,607,'#91afc8',18);
+    c.fillStyle='#000';c.fillRect(0,0,1280,720);
+    const zoom=1+(state.time-218)*.006,width=1280*zoom,height=582*zoom;
+    c.drawImage(technicalDiagram,(1280-width)/2,69+(582-height)/2,width,height);
+    c.restore();return;
   }
   if(shot.action==='iris') {
     const g=c.createRadialGradient(640,360,28,640,360,500);g.addColorStop(0,'#130f08');g.addColorStop(.18,'#20160a');g.addColorStop(.2,'#b78642');g.addColorStop(.7,'#d2ad69');g.addColorStop(1,'#ddd0a7');
