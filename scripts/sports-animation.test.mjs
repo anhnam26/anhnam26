@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { sportsStateAt, SPORTS_DURATION } from './sports-animation.mjs';
+import { sportsStateAt, SPORTS_DURATION, renderSportsAnimation } from './sports-animation.mjs';
 import { contactEvents, actionTimeAt } from './sports-timeline.mjs';
 import { PLAYER_LOOKS } from './sports-art.mjs';
 import { playerBones, worldHand, worldFoot, ARM_LENGTHS, LEG_LENGTHS } from './sports-rig.mjs';
@@ -12,6 +12,27 @@ import { playFor } from './sports-plays.mjs';
 
 const close=(a,b,tolerance=.001)=>assert.ok(Math.abs(a-b)<tolerance,`${a} != ${b}`);
 const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+
+test('the winner exclusively occupies the centre message until the next sport', () => {
+  const svg=renderSportsAnimation();
+  const names=['intro-label','start-label','point-label','winner-red','winner-blue'];
+  const frames=Object.fromEntries(names.map(name=>{
+    const rule=svg.match(new RegExp(`@keyframes sports-${name}-visible\\{([^\\n]+)`))?.[1];
+    assert.ok(rule,`${name} needs explicit visibility, not just fading opacity`);
+    return [name,[...rule.matchAll(/([\d.]+)%\{visibility:(visible|hidden)\}/g)]
+      .map(([,percent,value])=>({time:Number(percent)*SPORTS_DURATION/100,value}))];
+  }));
+  const visibleAt=time=>names.filter(name=>frames[name].findLast(frame=>frame.time<=time)?.value==='visible');
+  for(const match of MATCHES) {
+    for(const offset of [.001,.1,.5,1,3,5,match.duration-match.winAt-.001]) {
+      assert.deepEqual(visibleAt(match.startAt+match.winAt+offset),[`winner-${match.winner}`],
+        `${match.sport}: a faded scoring or readiness message overlaps the winner`);
+    }
+    for(const round of match.rounds.slice(0,-1)) {
+      assert.deepEqual(visibleAt(match.startAt+round.scoreAt+.05),['point-label']);
+    }
+  }
+});
 
 test('football opens and restarts with the ball on the centre spot and keepers on the goal centreline', () => {
   const match=MATCHES[0];

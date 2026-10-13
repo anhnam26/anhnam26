@@ -19,9 +19,13 @@ function valuesAt(state) {
   add('ball-halo','size',[1+state.morph*.65]);
   add('court-shimmer','opacity',[state.morph*.24]);
   const whistle=state.introDuration-1.5;
+  // Visibility excludes inactive messages; opacity only fades the active one.
   add('intro-label','opacity',[state.phase==='intro'?windowIntro(state.matchTime,state.introDuration):0]);
+  add('intro-label-visible','visibility',[state.phase==='intro'&&state.matchTime<whistle?'visible':'hidden'],true);
   add('start-label','opacity',[state.phase==='intro'&&state.matchTime>=whistle?Math.min(1,(state.matchTime-whistle)*4,(state.introDuration-state.matchTime)*4):0]);
+  add('start-label-visible','visibility',[state.phase==='intro'&&state.matchTime>=whistle?'visible':'hidden'],true);
   add('point-label','opacity',[state.phase==='restart'?Math.max(0,1-(state.matchTime-state.round.scoreAt)/1.4):0]);
+  add('point-label-visible','visibility',[state.phase==='restart'&&!state.winner&&state.matchTime-state.round.scoreAt<1.4?'visible':'hidden'],true);
   const celebration=celebrationAt(state);
   add('celebration-opacity','opacity',[celebration.opacity]);
   add('celebration-color','color',[TEAMS[state.winner??'blue'].color],true);
@@ -64,6 +68,7 @@ function valuesAt(state) {
   for (const team of ['red','blue']) {
     for (let digit=0;digit<=3;digit++) add(`score-${team}-${digit}`,'opacity',[Number(state.score[team]===digit)],true);
     add(`winner-${team}`,'opacity',[Number(state.winner===team)],true);
+    add(`winner-${team}-visible`,'visibility',[state.winner===team?'visible':'hidden'],true);
     add(`possession-${team}`,'opacity',[Number(state.possession===team && state.sport!=='volleyball')],true);
     add(`serve-${team}`,'opacity',[Number(state.possession===team && state.sport==='volleyball')],true);
   }
@@ -162,8 +167,8 @@ function animationCSS() {
     let samples=frames.map(frame=>({time:frame.time,values:frame.values[name].values}));
     if (discrete) samples=samples.filter((sample,index,array)=>index===0 || index===array.length-1 || sample.values[0]!==array[index-1].values[0]);
     else samples=simplify(samples,kind);
-    const property=kind==='opacity'?'opacity':kind==='color'?'color':'transform';
-    const rules=samples.map(sample=>`${Number((sample.time/SPORTS_DURATION*100).toFixed(7))}%{${property}:${kind==='opacity'?n(sample.values[0]):kind==='color'?sample.values[0]:transform(kind,sample.values)}}`).join('');
+    const property=kind==='opacity'?'opacity':kind==='color'?'color':kind==='visibility'?'visibility':'transform';
+    const rules=samples.map(sample=>`${Number((sample.time/SPORTS_DURATION*100).toFixed(7))}%{${property}:${kind==='opacity'?n(sample.values[0]):kind==='color'||kind==='visibility'?sample.values[0]:transform(kind,sample.values)}}`).join('');
     return `.sports-${name}{animation:sports-${name} ${SPORTS_DURATION}s ${discrete?'steps(1,end)':'linear'} infinite}@keyframes sports-${name}{${rules}}`;
   }).join('\n');
   return cachedCSS;
@@ -184,9 +189,13 @@ function playerSVG(id,layer) {
 
 export function renderSportsAnimation() {
   const digits=['red','blue'].map(team=>Array.from({length:4},(_,digit)=>`<text class="sports-animated sports-score-${team}-${digit}" opacity="${digit===0?1:0}" x="${team==='red'?488:696}" y="142" text-anchor="middle" fill="${TEAMS[team].color}" font-size="58" font-weight="bold">${digit}</text>`).join('')).join('');
+  // Separate wrappers let visibility and opacity animate without one animation
+  // shorthand replacing the other on the same element.
   const labels=['red','blue'].map(team=>`<text class="sports-animated sports-possession-${team}" opacity="${team==='red'?1:0}" x="${team==='red'?47:1137}" y="255" text-anchor="${team==='red'?'start':'end'}" fill="#193c50">${TEAMS[team].name} BALL</text>
     <text class="sports-animated sports-serve-${team}" opacity="0" x="${team==='red'?47:1137}" y="255" text-anchor="${team==='red'?'start':'end'}" fill="#193c50">${TEAMS[team].name} SERVE</text>
-    <text class="sports-animated sports-winner-${team}" opacity="0" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="24" font-weight="bold">FULL TIME / ${TEAMS[team].name} WINS</text>`).join('');
+    <g class="sports-animated sports-winner-${team}-visible" visibility="hidden">
+      <text class="sports-animated sports-winner-${team}" opacity="0" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="24" font-weight="bold">FULL TIME / ${TEAMS[team].name} WINS</text>
+    </g>`).join('');
   return `<svg id="sports-arena" x="48" y="410" width="1184" height="666" viewBox="0 0 1184 666" role="img" aria-labelledby="sports-title sports-description">
     <title id="sports-title">Pixel Sports Club - red versus blue</title>
     <desc id="sports-description">Four distinct pixel cartoon athletes play a faster, repeatable four-minute football, basketball and volleyball loop. Each sport lasts 80 seconds including its first-to-three match, fireworks, confetti and court transition. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. Red steals and scores in the third basketball play. The ball rises, spins, glows and morphs as each court transforms. Football and basketball restart with the conceding team; the volleyball point winner serves behind the end line.</desc>
@@ -207,14 +216,16 @@ export function renderSportsAnimation() {
         ${drawBall()}
       </g>
       <g font-family="Consolas,monospace" font-size="15" letter-spacing="1">${labels}
-        <text class="sports-animated sports-intro-label" opacity="0" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="20" font-weight="bold">GET READY / FIRST TO 3</text>
-        <g class="sports-animated sports-start-label" opacity="0" fill="#193c50">
+        <g class="sports-animated sports-intro-label-visible" visibility="hidden">
+          <text class="sports-animated sports-intro-label" opacity="0" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="20" font-weight="bold">GET READY / FIRST TO 3</text>
+        </g>
+        <g class="sports-animated sports-start-label-visible" visibility="hidden"><g class="sports-animated sports-start-label" opacity="0" fill="#193c50">
           <path d="M512 225H528V231H538V237H520V243H512V237H506V231H512ZM544 225H552V228H544ZM544 236H556V239H544Z"/>
           <text x="596" y="240" text-anchor="middle" font-size="24" font-weight="bold">PLAY!</text>
-        </g>
-        <g class="sports-animated sports-point-label" opacity="0">
+        </g></g>
+        <g class="sports-animated sports-point-label-visible" visibility="hidden"><g class="sports-animated sports-point-label" opacity="0">
           ${['football','basketball','volleyball'].map((sport,i)=>`<text class="sports-animated sports-${sport}-title" opacity="${i===0?1:0}" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="24" font-weight="bold">${['GOAL!','BASKET!','POINT!'][i]}</text>`).join('')}
-        </g>
+        </g></g>
       </g>
       <g id="sports-scoreboard" font-family="Consolas,'Courier New',monospace">
         <path d="M380 50H804V60H814V196H804V206H380V196H370V60H380Z" fill="#397e91"/>
