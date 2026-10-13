@@ -86,16 +86,45 @@ during each running stride; jumps include a crouch and landing. Reduced motion
 shows a static football poster with all four players ready on the field.
 Sports scores belong to the illustration and do not change contribution counts.
 
-Run with the existing Node.js installation (Node 22 or newer):
+## Automatic activity updates
+
+The workflow in `.github/workflows/update-activity.yml` refreshes activity every
+hour at minute 23 (UTC). It also runs when its configuration or a file under
+`scripts/` is pushed to `main`, and can be started using **Actions > Update
+GitHub activity > Run workflow**. GitHub schedules and image caches may delay
+when new numbers become visible; the panel is refreshed periodically.
+
+Activate it by publishing the local commits to the repository's `main` branch:
+
+```powershell
+git push origin main
+```
+
+Once the workflow is on GitHub, it runs without this computer being on. It
+checks JavaScript syntax, runs the tests, fetches and validates public data,
+then rebuilds both SVG themes. It uses GitHub's automatically supplied
+`GITHUB_TOKEN`; no personal access token or manually configured secret is needed.
+The token authenticates REST API requests only, and is never saved in an asset.
+
+Only `assets/activity.json`, `assets/activity-dark.svg` and
+`assets/activity-light.svg` are staged and published by the bot. The workflow
+commits only actual changes, using a bot identity. Unchanged public data keeps
+the last published snapshot's `fetchedAt`, avoiding hourly timestamp-only
+commits. The generator still renders the artwork, so design changes are picked
+up even when the numbers stay the same. Each successful poll appears in the
+workflow logs. Concurrent refresh jobs are serialized.
+
+To refresh locally, use the existing Node.js installation (Node 22 or newer):
 
 ```powershell
 node scripts/update-activity.mjs
 node --test scripts/*.test.mjs
 ```
 
-No package installation, Python environment, token or third-party statistics
-service is required. The updater reads GitHub's public contribution calendar and
-paginated public repository API. It validates dates, counts and totals before
+No package installation, Python environment or third-party statistics service
+is required. Local refreshes work without a token. The updater reads GitHub's
+public contribution calendar and paginated public repository API. It validates
+dates, counts and totals before
 writing `assets/activity-dark.svg`, `assets/activity-light.svg` and
 `assets/activity.json`. The JSON records the source URLs and fetch timestamp.
 
@@ -104,14 +133,19 @@ anonymous private contribution counts if the account elects to show them.
 Repository stars count owned, non-fork public repositories. These are activity
 measurements, not a rating of engineering skill. Fetch dates remain in
 `assets/activity.json` and the SVG's accessible description; no timestamp line
-is displayed on the panel. This is saved data and does not update automatically.
+is displayed on the panel. The hourly workflow maintains the saved data.
 
 If GitHub changes its calendar markup, a response is incomplete, or the public
 API rate limit is reached, the updater exits with an error before replacing the
 saved snapshot. Inspect the error and update the parser if needed.
 
-Review the changes and commit only those three activity files. Publishing stays
-manual. There are no workflows that automatically commit or push.
+For local refreshes, review the changes and commit only those three activity
+files. The agent follows the supplied AGENTS.md rule and never pushes local
+commits automatically. The hourly workflow publishes its own activity updates
+after it has been enabled on GitHub. A failed fetch or validation stops the job
+before publishing; the previous profile images stay available. A rejected push
+fails normally without forcing, merging or rebasing, and the next run starts
+from the latest `main` branch. Disable the workflow in Actions to stop refreshes.
 
 ## Edit the design
 
@@ -123,6 +157,7 @@ manual. There are no workflows that automatically commit or push.
 - `assets/badges/*.svg`: contact buttons; destinations live in `README.md`.
 - `assets/project-*-*.svg`: retained artwork, unused in the current README.
 - `scripts/update-activity.mjs`: activity layout, colors and data collection.
+- `.github/workflows/update-activity.yml`: hourly refresh and bot publication.
 - `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
 - `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
 - `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.

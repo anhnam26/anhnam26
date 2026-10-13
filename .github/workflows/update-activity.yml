@@ -1,0 +1,63 @@
+name: Update GitHub activity
+
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/update-activity.yml'
+      - 'scripts/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: profile-activity
+  cancel-in-progress: false
+
+jobs:
+  update:
+    if: github.repository == 'anhnam26/anhnam26' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the current main branch
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: main
+
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: '24'
+
+      - name: Check syntax and run tests
+        run: |
+          for script in scripts/*.mjs; do
+            node --check "$script"
+          done
+          node --test scripts/*.test.mjs
+
+      - name: Refresh public activity
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/update-activity.mjs
+
+      - name: Publish changed activity assets
+        run: |
+          git status --short
+          git diff --stat -- assets/activity.json assets/activity-dark.svg assets/activity-light.svg
+          git add -- assets/activity.json assets/activity-dark.svg assets/activity-light.svg
+          git diff --cached --check
+          if git diff --cached --quiet; then
+            echo "Public activity is unchanged; no commit needed."
+            exit 0
+          fi
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -m "chore(profile): refresh GitHub activity"
+          git push origin HEAD:main
