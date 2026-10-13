@@ -3,7 +3,16 @@
 The README uses GitHub-supported Markdown, `<picture>` and repository-local SVGs.
 Dark and light images are selected by GitHub's theme-aware image support. The hero
 uses CSS animation inside its SVG; it becomes static when reduced motion is enabled.
-Project descriptions and technology lists remain plain text for mobile readers.
+Focus areas and the small repository section remain plain text for mobile readers.
+
+## Profile content
+
+Lead with the AI Engineer direction: AI agents, RAG, LLM APIs, Local AI, ML/DL
+and production AI. The focus table describes development goals, rather than
+claiming every listed capability has already shipped. The production diagram
+illustrates the engineering workflow being developed. Keep selected repositories
+as a short section at the end, after the introduction, focus and contact content.
+Avoid moving activity counts or large project cards back into the main profile.
 
 ## Contact buttons
 
@@ -15,6 +24,9 @@ for visitors who prefer another mail service. Keep the badge links and displayed
 address synchronized when changing contact details.
 
 ## Refresh the activity snapshot
+
+The activity assets are retained for optional use; the current README emphasizes
+AI engineering focus and does not display the statistics panel.
 
 Run with the existing Node.js installation (Node 22 or newer):
 
@@ -44,9 +56,12 @@ manual. There are no workflows that automatically commit or push.
 
 ## Edit the design
 
-- `README.md`: introduction, project descriptions, toolkit and contact links.
+- `README.md`: AI engineering direction, focus areas, contact links and small
+  repository section.
 - `assets/hero-*.svg`: header artwork and animation.
-- `assets/project-*-*.svg`: linked project illustrations.
+- `assets/production-*.svg`: the AI engineering workflow illustration.
+- `assets/badges/*.svg`: contact buttons; destinations live in `README.md`.
+- `assets/project-*-*.svg`: retained artwork, unused in the current README.
 - `scripts/update-activity.mjs`: activity layout, colors and data collection.
 
 Keep the paired light/dark SVGs synchronized. Keep facts and links aligned with

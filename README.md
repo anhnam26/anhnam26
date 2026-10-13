@@ -1,7 +1,7 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
   <source media="(prefers-color-scheme: light)" srcset="assets/hero-light.svg">
-  <img alt="Phạm Hòa Anh Nam — AI Engineer. From language models to useful products. Based in Ho Chi Minh City, Vietnam." src="assets/hero-dark.svg" width="100%">
+  <img alt="Phạm Hòa Anh Nam — AI Engineer. From models to production. Focus: AI agents, RAG, LLM APIs, Local AI and ML/DL." src="assets/hero-dark.svg" width="100%">
 </picture>
 
 <p align="center">
@@ -12,76 +12,48 @@
 
 <p align="center"><sub>Email: <code>anhnamnknt@gmail.com</code></sub></p>
 
-# Hi, I'm Nam.
+# Phạm Hòa Anh Nam
 
-**AI Engineer · Ho Chi Minh City, Vietnam**
+**AI Engineer · AI agents & RAG · LLM APIs & Local AI · ML/DL · Production AI**
 
-I build language models, retrieval systems and applications that put AI to work. My projects span Vietnamese history Q&A, on-device computer vision and interactive web experiences.
+I'm developing AI systems that connect **models, knowledge and tools** to real applications. My direction is **production AI**: taking ideas from experiments to systems that can be deployed, evaluated and improved in everyday use.
 
-I'm studying Information Technology at **HCMC University of Technology and Engineering** and working on internal AI assistants at **CyberAnt Service**. Right now, I'm exploring **AI agents, LLM applications and practical automation**.
+Based in **Ho Chi Minh City, Vietnam**. Studying Information Technology at **HCMC University of Technology and Engineering**.
 
-*Xin chào! Mình là Phạm Hòa Anh Nam — thích tìm hiểu cách mọi thứ hoạt động và biến ý tưởng thành sản phẩm chạy được.*
+*Mình tập trung phát triển theo hướng AI Engineer: xây dựng AI agents, RAG, ứng dụng LLM qua API hoặc chạy local, củng cố ML/DL và đưa AI vào production.*
 
-## Selected work
+## What I'm focused on
 
-<p>
-  <a href="https://github.com/anhnam26/NLPNew">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/project-language-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="assets/project-language-light.svg">
-      <img src="assets/project-language-dark.svg" alt="01 — Vietnamese History MiniGPT + RAG. A custom Transformer, hybrid retrieval and answers with sources. Open the NLPNew repository." width="400">
-    </picture>
-  </a>
-  <a href="https://github.com/anhnam26/ADC_Hackathon2026_PU-WIN">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="assets/project-dayzero-dark.svg">
-      <source media="(prefers-color-scheme: light)" srcset="assets/project-dayzero-light.svg">
-      <img src="assets/project-dayzero-dark.svg" alt="02 — Day Zero. A 3D workplace simulator with wheelchair navigation and collision history. Open the hackathon repository." width="400">
-    </picture>
-  </a>
-</p>
-
-### [Vietnamese History MiniGPT + RAG](https://github.com/anhnam26/NLPNew)
-
-A custom GPT-style Transformer in PyTorch, paired with SQLite/FTS5 and dense retrieval. Includes training workflows, retrieval evaluation, source reporting and tests.
-
-`Python` `PyTorch` `Transformer` `RAG` `SQLite`
-
-### [Day Zero — Workplace Simulator](https://github.com/anhnam26/ADC_Hackathon2026_PU-WIN)
-
-A 3D office experience built around wheelchair navigation, object interactions and collision history for managers to review. Developed for ADC Hackathon 2026.
-
-`TypeScript` `React` `Three.js` `React Three Fiber`
-
-**Also on my workbench:** [Android development](https://github.com/anhnam26/FonosShoppee) · [Web applications](https://github.com/anhnam26/FinalWeb2025) · [All repositories ↗](https://github.com/anhnam26?tab=repositories)
-
-## My toolkit
-
-| Area | What I work with |
+| Focus | What I'm working toward |
 | :--- | :--- |
-| **Language & AI** | Python · PyTorch · GPT-style Transformers · RAG · LLM APIs · Gradio |
-| **Web & 3D** | TypeScript · JavaScript · React · Three.js · Node.js · Express |
-| **Data & retrieval** | SQLite · FTS5 · Dense embeddings · Hybrid search · PostgreSQL |
-| **Vision & mobile** | Java · Android · MediaPipe · Firebase |
+| **AI agents** | Tool use, workflow orchestration, state management and automation that can complete useful tasks. |
+| **RAG** | Connecting AI to real knowledge: data preparation, chunking, embeddings, hybrid retrieval, reranking and source-grounded answers. |
+| **LLM APIs** | Integrating language models into applications with structured outputs, streaming and practical cost/latency trade-offs. |
+| **Local AI** | Running and serving models locally, exploring quantization and working within CPU/GPU memory constraints. |
+| **ML / Deep Learning** | Building stronger foundations in PyTorch, model architectures, training, fine-tuning and evaluation. |
+| **Production AI** | Serving APIs, repeatable deployment, evaluation, logging, monitoring and reliability beyond the prototype. |
 
-## The build log
+**My foundations:** `Python` `PyTorch` `SQL / SQLite` `Node.js` `TypeScript`
 
-<a href="https://github.com/anhnam26?tab=overview">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg">
-    <source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg">
-    <img src="assets/activity-dark.svg" alt="GitHub activity snapshot for anhnam26: yearly contribution calendar, public repositories and stars. The image includes its update date. Open my GitHub activity for current data." width="100%">
-  </picture>
-</a>
+## From prototype to production
 
-<sub>A dated snapshot of my GitHub activity. [See current activity ↗](https://github.com/anhnam26?tab=overview)</sub>
+The engineering workflow I'm developing:
 
-## Let's build something useful.
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/production-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/production-light.svg">
+  <img src="assets/production-dark.svg" alt="My AI engineering direction: build with ML/DL, ground answers with RAG, orchestrate agents, serve through LLM APIs or locally hosted models, evaluate quality/latency/cost, then deploy and monitor. Feed real-world observations back into development." width="100%">
+</picture>
 
-I'm happy to exchange ideas about **RAG, AI agents, language models and computer vision**, or collaborate on a project with a practical problem to solve.
+I want to build AI that people can actually use: **grounded answers, purposeful automation and dependable applications**. That means thinking about the data, model behavior, integration and operation together.
 
-[Message me on Facebook ↗](https://www.facebook.com/anhnamneverdie) · [Compose in Gmail ↗](https://mail.google.com/mail/?view=cm&fs=1&to=anhnamnknt%40gmail.com)
+## Let's connect
 
----
+I'd like to exchange ideas and collaborate on **AI agents, RAG, LLM applications, local inference and bringing AI into production**. Use the image buttons above to find me on Facebook, explore my portfolio or compose an email.
 
-<p align="center"><sub>Built with curiosity. Shared in the open.</sub></p>
+## Selected repositories
+
+- **[NLPNew](https://github.com/anhnam26/NLPNew)** — Vietnamese History MiniGPT + RAG: a custom PyTorch Transformer with hybrid retrieval.
+- **[Day Zero](https://github.com/anhnam26/ADC_Hackathon2026_PU-WIN)** — A 3D workplace simulator with wheelchair navigation.
+
+<sub>[Browse all repositories ↗](https://github.com/anhnam26?tab=repositories)</sub>

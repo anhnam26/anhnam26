@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" fill="none" role="img" aria-labelledby="title desc">
   <title id="title">Phạm Hòa Anh Nam — AI Engineer</title>
-  <desc id="desc">From language models to useful products. An animated network connects data, retrieval and a model. Ho Chi Minh City, Vietnam.</desc>
+  <desc id="desc">AI Engineer. From models to production. Focused on AI agents, RAG, LLM APIs, Local AI and ML/DL. Ho Chi Minh City, Vietnam.</desc>
   <defs>
     <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" stroke="#263638" stroke-opacity=".4"/></pattern>
     <style>
@@ -20,15 +20,11 @@
     <text x="66" y="45" fill="#9ee6c1" font-size="16" letter-spacing="2" class="mono">ANHNAM26 / ENGINEERING LOG</text>
     <text x="1240" y="45" text-anchor="end" fill="#afc1c0" font-size="14" class="mono">HO CHI MINH CITY, VN</text>
     <text x="48" y="120" fill="#afc1c0" font-size="16" letter-spacing="3" class="mono">PHẠM HÒA ANH NAM</text>
-    <text x="44" y="200" fill="#f1f6f2" font-size="64" font-weight="650" letter-spacing="-2.5" class="sans">From language models</text>
-    <text x="44" y="274" fill="#9ee6c1" font-size="64" font-weight="650" letter-spacing="-2.5" class="sans">to useful products.</text>
-    <text x="48" y="326" fill="#afc1c0" font-size="19" class="sans">AI Engineer. Curious by default. Building with purpose.</text>
-    <text x="48" y="410" fill="#afc1c0" font-size="14" letter-spacing="1.5" class="mono">NLP &amp; RAG</text>
-    <circle cx="198" cy="405" r="2" fill="#efb18a"/>
-    <text x="220" y="410" fill="#afc1c0" font-size="14" letter-spacing="1.5" class="mono">COMPUTER VISION</text>
-    <circle cx="438" cy="405" r="2" fill="#efb18a"/>
-    <text x="460" y="410" fill="#afc1c0" font-size="14" letter-spacing="1.5" class="mono">INTERACTIVE SYSTEMS</text>
-    <text x="1240" y="410" text-anchor="end" fill="#9ee6c1" font-size="14" class="mono">IDEA → BUILD → LEARN</text>
+    <text x="44" y="212" fill="#f1f6f2" font-size="88" font-weight="650" letter-spacing="-3" class="sans">AI Engineer</text>
+    <text x="44" y="278" fill="#9ee6c1" font-size="48" font-weight="650" letter-spacing="-1.5" class="sans">From models to production.</text>
+    <text x="48" y="326" fill="#afc1c0" font-size="19" class="sans">Build agents. Ground answers. Serve models. Ship AI.</text>
+    <text x="48" y="410" fill="#afc1c0" font-size="14" letter-spacing="1" class="mono">AI AGENTS · RAG · LLM APIs · LOCAL AI · ML/DL</text>
+    <text x="1240" y="410" text-anchor="end" fill="#9ee6c1" font-size="14" class="mono">BUILD → EVALUATE → DEPLOY → OBSERVE</text>
     <g stroke="#3f6057">
       <path d="M870 138L960 168L1040 214L1140 142L1200 236L1140 306L1040 214L926 300L870 138Z"/>
       <path d="M960 168L1140 142M926 300L1140 306M1200 236L1040 214"/>
@@ -43,7 +39,7 @@
     <rect x="1008" y="182" width="64" height="64" rx="12" fill="#9ee6c1"/>
     <path d="M1026 228V200L1054 228V200" stroke="#101b1d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
     <g fill="#afc1c0" font-size="12" letter-spacing="1.5" class="mono">
-      <text x="844" y="117">DATA</text><text x="1114" y="120">RETRIEVAL</text><text x="900" y="332">MODEL</text><text x="1114" y="339">PRODUCT</text>
+      <text x="844" y="117">AGENTS</text><text x="1114" y="120">RAG</text><text x="900" y="332">LLMs</text><text x="1114" y="339">PRODUCTION</text>
     </g>
   </g>
 </svg>
