@@ -541,18 +541,35 @@
     <path d="M38 574H1146" stroke="#dffbed" stroke-width="4"/>
       <g font-family="Consolas,'Courier New',monospace" font-weight="bold" fill="#193c50">
         <text x="32" y="35" font-size="20" letter-spacing="2">PIXEL SPORTS CLUB</text>
-        <text x="1152" y="35" text-anchor="end" font-size="14">2v2 / 3 SPORTS / INFINITE LOOP</text>
       </g>
       <g transform="translate(0 216)">
         <g class="sports-animated sports-football-scene" opacity="1">
       <path d="M126 124H1058V340H126Z" fill="#66bf4d" stroke="#193c50" stroke-width="6"/><rect x="126" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="242.5" y="124" width="116.5" height="216" fill="#76cf58"/><rect x="359" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="475.5" y="124" width="116.5" height="216" fill="#76cf58"/><rect x="592" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="708.5" y="124" width="116.5" height="216" fill="#76cf58"/><rect x="825" y="124" width="116.5" height="216" fill="#66bf4d"/><rect x="941.5" y="124" width="116.5" height="216" fill="#76cf58"/>
       <path d="M142 138H1042V326H142ZM592 138V326M142 170H248V298H142M1042 170H936V298H1042M142 207H197V264H142M1042 207H987V264H1042" fill="none" stroke="#fff9de" stroke-width="3"/>
       <ellipse cx="592" cy="232" rx="60" ry="45" fill="none" stroke="#fff9de" stroke-width="3"/><circle cx="592" cy="232" r="4" fill="#fff9de"/>
-      <path d="M34 308V214H126V308L48 302V225L34 214" fill="#d8f9ee" fill-opacity=".4" stroke="#193c50" stroke-width="6"/>
-    <path d="M48 225H126M64 225V302M80 225V302M96 225V302M112 225V302M48 241H126M48 257H126M48 273H126M48 289H126" stroke="#fffbed" stroke-width="2" fill="none"/>
-    <path d="M34 308V214H126V308" stroke="#fffbed" stroke-width="5" fill="none"/><g transform="translate(1184 0) scale(-1 1)"><path d="M34 308V214H126V308L48 302V225L34 214" fill="#d8f9ee" fill-opacity=".4" stroke="#193c50" stroke-width="6"/>
-    <path d="M48 225H126M64 225V302M80 225V302M96 225V302M112 225V302M48 241H126M48 257H126M48 273H126M48 289H126" stroke="#fffbed" stroke-width="2" fill="none"/>
-    <path d="M34 308V214H126V308" stroke="#fffbed" stroke-width="5" fill="none"/></g>
+      <g data-equipment="football-goal" stroke-linejoin="round">
+    <path d="M24 301L108 285L145 304L61 321Z" fill="#234f3d" opacity=".2"/>
+    <path d="M26 200L104 184V282L26 298Z" fill="#e6fff7" fill-opacity=".24" stroke="#b4d9d2" stroke-width="2"/>
+    <path d="M62 218L140 202L104 184L26 200ZM62 218L26 200V298L62 316Z" fill="#f1fff9" fill-opacity=".16" stroke="#d8f3e8" stroke-width="1.5"/>
+    <g fill="none" stroke="#edfff9" stroke-width="1.3" opacity=".8"><path d="M35.75 198V296"/><path d="M45.5 196V294"/><path d="M55.25 194V292"/><path d="M65 192V290"/><path d="M74.75 190V288"/><path d="M84.5 188V286"/><path d="M94.25 186V284"/><path d="M26 214L104 198"/><path d="M26 228L104 212"/><path d="M26 242L104 226"/><path d="M26 256L104 240"/><path d="M26 270L104 254"/><path d="M26 284L104 268"/>
+      <path d="M35.75 198L71.75 216M45.5 196L81.5 214M55.25 194L91.25 212M65 192L101 210M74.75 190L110.75 208M84.5 188L120.5 206M94.25 186L130.25 204M26 224L62 242M26 248L62 266M26 273L62 291"/>
+    </g>
+    <path d="M26 298V200L104 184V282M104 184L140 202M26 298L62 316" fill="none" stroke="#afcfc8" stroke-width="3"/>
+    <path d="M62 316V218L140 202V300" fill="none" stroke="#193c50" stroke-width="8"/>
+    <path d="M62 316V218L140 202V300" fill="none" stroke="#fffdf3" stroke-width="5"/>
+    <path d="M64 314V220L138 205" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  </g><g transform="translate(1184 0) scale(-1 1)"><g data-equipment="football-goal" stroke-linejoin="round">
+    <path d="M24 301L108 285L145 304L61 321Z" fill="#234f3d" opacity=".2"/>
+    <path d="M26 200L104 184V282L26 298Z" fill="#e6fff7" fill-opacity=".24" stroke="#b4d9d2" stroke-width="2"/>
+    <path d="M62 218L140 202L104 184L26 200ZM62 218L26 200V298L62 316Z" fill="#f1fff9" fill-opacity=".16" stroke="#d8f3e8" stroke-width="1.5"/>
+    <g fill="none" stroke="#edfff9" stroke-width="1.3" opacity=".8"><path d="M35.75 198V296"/><path d="M45.5 196V294"/><path d="M55.25 194V292"/><path d="M65 192V290"/><path d="M74.75 190V288"/><path d="M84.5 188V286"/><path d="M94.25 186V284"/><path d="M26 214L104 198"/><path d="M26 228L104 212"/><path d="M26 242L104 226"/><path d="M26 256L104 240"/><path d="M26 270L104 254"/><path d="M26 284L104 268"/>
+      <path d="M35.75 198L71.75 216M45.5 196L81.5 214M55.25 194L91.25 212M65 192L101 210M74.75 190L110.75 208M84.5 188L120.5 206M94.25 186L130.25 204M26 224L62 242M26 248L62 266M26 273L62 291"/>
+    </g>
+    <path d="M26 298V200L104 184V282M104 184L140 202M26 298L62 316" fill="none" stroke="#afcfc8" stroke-width="3"/>
+    <path d="M62 316V218L140 202V300" fill="none" stroke="#193c50" stroke-width="8"/>
+    <path d="M62 316V218L140 202V300" fill="none" stroke="#fffdf3" stroke-width="5"/>
+    <path d="M64 314V220L138 205" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  </g></g>
     </g>
     <g class="sports-animated sports-basketball-scene" opacity="0">
       <path d="M126 124H1058V340H126Z" fill="#ffbf78" stroke="#193c50" stroke-width="6"/><path d="M126 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M184 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M242 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M300 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M358 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M416 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M474 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M532 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M590 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M648 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M706 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M764 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M822 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M880 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M938 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M996 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/><path d="M1054 124V340" stroke="#de864e" stroke-width="1" opacity=".35"/>
@@ -1168,7 +1185,6 @@
   </g></g><text x="23" y="5" fill="#e6fff6" font-family="Consolas,monospace" font-size="15" font-weight="bold">BLUE 09</text>
     <rect x="22" y="12" width="65" height="3" fill="#3189ff"/>
   </g>
-      <text x="592" y="660" text-anchor="middle" fill="#e6fff6" font-family="Consolas,monospace" font-size="11" letter-spacing="1">FOOTBALL &gt; BASKETBALL &gt; VOLLEYBALL / 60 SECONDS EACH</text>
     </g>
   </svg>
 </svg>

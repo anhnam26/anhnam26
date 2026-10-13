@@ -167,7 +167,6 @@ export function renderSportsAnimation() {
       ${drawStadium()}
       <g font-family="Consolas,'Courier New',monospace" font-weight="bold" fill="#193c50">
         <text x="32" y="35" font-size="20" letter-spacing="2">PIXEL SPORTS CLUB</text>
-        <text x="1152" y="35" text-anchor="end" font-size="14">2v2 / 3 SPORTS / INFINITE LOOP</text>
       </g>
       <g transform="translate(0 216)">
         ${drawCourts()}
@@ -197,7 +196,6 @@ export function renderSportsAnimation() {
         <g transform="translate(380 194)"><path class="sports-animated sports-match-progress" d="M0 0H424" stroke="#80efc5" stroke-width="4" style="transform:scaleX(0)"/></g>
       </g>
       ${drawRoster()}
-      <text x="592" y="660" text-anchor="middle" fill="#e6fff6" font-family="Consolas,monospace" font-size="11" letter-spacing="1">FOOTBALL &gt; BASKETBALL &gt; VOLLEYBALL / 60 SECONDS EACH</text>
     </g>
   </svg>`;
 }

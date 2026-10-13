@@ -55,9 +55,25 @@ export function drawAthlete(id,player,group) {
 }
 
 function goal() {
-  return `<path d="M34 308V214H126V308L48 302V225L34 214" fill="#d8f9ee" fill-opacity=".4" stroke="${ink}" stroke-width="6"/>
-    <path d="M48 225H126M64 225V302M80 225V302M96 225V302M112 225V302M48 241H126M48 257H126M48 273H126M48 289H126" stroke="#fffbed" stroke-width="2" fill="none"/>
-    <path d="M34 308V214H126V308" stroke="#fffbed" stroke-width="5" fill="none"/>`;
+  const backGrid = Array.from({length:7},(_,i)=>{
+    const u=(i+1)/8,x=26+78*u;
+    return `<path d="M${x} ${200-16*u}V${298-16*u}"/>`;
+  }).join('') + Array.from({length:6},(_,i)=>{
+    const v=(i+1)/7;
+    return `<path d="M26 ${200+98*v}L104 ${184+98*v}"/>`;
+  }).join('');
+  return `<g data-equipment="football-goal" stroke-linejoin="round">
+    <path d="M24 301L108 285L145 304L61 321Z" fill="#234f3d" opacity=".2"/>
+    <path d="M26 200L104 184V282L26 298Z" fill="#e6fff7" fill-opacity=".24" stroke="#b4d9d2" stroke-width="2"/>
+    <path d="M62 218L140 202L104 184L26 200ZM62 218L26 200V298L62 316Z" fill="#f1fff9" fill-opacity=".16" stroke="#d8f3e8" stroke-width="1.5"/>
+    <g fill="none" stroke="#edfff9" stroke-width="1.3" opacity=".8">${backGrid}
+      <path d="M35.75 198L71.75 216M45.5 196L81.5 214M55.25 194L91.25 212M65 192L101 210M74.75 190L110.75 208M84.5 188L120.5 206M94.25 186L130.25 204M26 224L62 242M26 248L62 266M26 273L62 291"/>
+    </g>
+    <path d="M26 298V200L104 184V282M104 184L140 202M26 298L62 316" fill="none" stroke="#afcfc8" stroke-width="3"/>
+    <path d="M62 316V218L140 202V300" fill="none" stroke="${ink}" stroke-width="8"/>
+    <path d="M62 316V218L140 202V300" fill="none" stroke="#fffdf3" stroke-width="5"/>
+    <path d="M64 314V220L138 205" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+  </g>`;
 }
 
 function hoop() {
