@@ -2,7 +2,8 @@
 
 The README uses GitHub-supported Markdown, `<picture>` and repository-local SVGs.
 Dark and light images are selected by GitHub's theme-aware image support. The hero
-uses CSS animation inside its SVG; it becomes static when reduced motion is enabled.
+highlights the current AI focus list using CSS inside its SVG; it becomes static
+when reduced motion is enabled.
 Current work and the small repository section remain plain text for mobile readers.
 
 ## Profile content

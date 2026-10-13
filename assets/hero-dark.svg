@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="440" viewBox="0 0 1280 440" fill="none" role="img" aria-labelledby="title desc">
   <title id="title">Pham Hoa Anh Nam — AI Engineer</title>
-  <desc id="desc">AI Engineer. From models to production. Focused on AI agents, RAG, LLM APIs, Local AI and ML/DL. Ho Chi Minh City, Vietnam.</desc>
+  <desc id="desc">AI Engineer working on AI agents, RAG, LLM APIs, Local AI, ML/DL and production AI. An animated current-focus panel highlights these areas.</desc>
   <defs>
     <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" stroke="#263638" stroke-opacity=".4"/></pattern>
     <style>
       .sans{font-family:'Segoe UI',Arial,sans-serif}.mono{font-family:Consolas,'Courier New',monospace}
-      .signal{stroke-dasharray:10 180;animation:flow 9s linear infinite}.orbit{transform-origin:1040px 214px;animation:orbit 48s linear infinite}
-      @keyframes flow{to{stroke-dashoffset:-380}}@keyframes orbit{to{transform:rotate(360deg)}}
-      @media(prefers-reduced-motion:reduce){.signal,.orbit{animation:none}}
+      .focus-highlight{animation:focus-list 18s ease-in-out infinite}.focus-cursor{animation:blink 1s steps(2,end) infinite}
+      @keyframes focus-list{0%,12%{transform:translateY(0px);opacity:1}16.667%,28%{transform:translateY(28px)}33.333%,45%{transform:translateY(56px)}50%,62%{transform:translateY(84px)}66.667%,78%{transform:translateY(112px)}83.333%,95%{transform:translateY(140px);opacity:1}97%{transform:translateY(140px);opacity:0}98%{transform:translateY(0px);opacity:0}100%{transform:translateY(0px);opacity:1}}
+      @keyframes blink{50%{opacity:0}}
+      @media(prefers-reduced-motion:reduce){.focus-highlight,.focus-cursor{animation:none}}
     </style>
     <clipPath id="clip"><rect width="1280" height="440" rx="16"/></clipPath>
   </defs>
@@ -25,21 +26,18 @@
     <text x="48" y="326" fill="#afc1c0" font-size="19" class="sans">LLM APIs · Local AI · ML/DL · Production AI</text>
     <text x="48" y="410" fill="#afc1c0" font-size="14" letter-spacing="1" class="mono">AI AGENTS · RAG · LLM APIs · LOCAL AI · ML/DL</text>
     <text x="1240" y="410" text-anchor="end" fill="#9ee6c1" font-size="14" class="mono">AI APPLICATIONS / API &amp; LOCAL MODELS</text>
-    <g stroke="#3f6057">
-      <path d="M870 138L960 168L1040 214L1140 142L1200 236L1140 306L1040 214L926 300L870 138Z"/>
-      <path d="M960 168L1140 142M926 300L1140 306M1200 236L1040 214"/>
-      <circle cx="1040" cy="214" r="108" stroke-dasharray="2 9"/>
+    <rect x="832" y="104" width="400" height="236" rx="10" fill="#101b1d" stroke="#2c3e40"/>
+    <path d="M832 146H1232" stroke="#2c3e40"/>
+    <circle cx="851" cy="125" r="4" fill="#efb18a"/><circle cx="865" cy="125" r="4" fill="#afc1c0"/><circle cx="879" cy="125" r="4" fill="#9ee6c1"/>
+    <text x="906" y="130" fill="#9ee6c1" font-size="13" letter-spacing="1.5" class="mono">CURRENT FOCUS</text>
+    <g class="focus-highlight">
+      <rect x="848" y="154" width="368" height="26" rx="4" fill="#9ee6c1" fill-opacity=".12"/>
+      <path class="focus-cursor" d="M855 162L861 167L855 172" stroke="#9ee6c1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     </g>
-    <circle class="orbit" cx="1040" cy="214" r="91" stroke="#9ee6c1" stroke-opacity=".65" stroke-dasharray="68 504"/>
-    <path class="signal" d="M870 138L960 168L1040 214L1140 142L1200 236L1140 306L1040 214L926 300L870 138Z" stroke="#9ee6c1" stroke-width="2"/>
-    <g fill="#101b1d" stroke="#9ee6c1" stroke-width="2">
-      <circle cx="870" cy="138" r="7"/><circle cx="960" cy="168" r="7"/><circle cx="1140" cy="142" r="7"/><circle cx="1200" cy="236" r="7"/><circle cx="926" cy="300" r="7"/>
-    </g>
-    <circle cx="1140" cy="306" r="7" fill="#efb18a"/>
-    <rect x="1008" y="182" width="64" height="64" rx="12" fill="#9ee6c1"/>
-    <path d="M1026 228V200L1054 228V200" stroke="#101b1d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-    <g fill="#afc1c0" font-size="12" letter-spacing="1.5" class="mono">
-      <text x="844" y="117">AGENTS</text><text x="1114" y="120">RAG</text><text x="900" y="332">LLMs</text><text x="1114" y="339">PRODUCTION</text>
+    <g fill="#afc1c0" font-size="17" class="sans">
+      <text x="878" y="173">AI agents</text><text x="878" y="201">Retrieval-augmented generation</text>
+      <text x="878" y="229">LLM API integrations</text><text x="878" y="257">Local AI &amp; model inference</text>
+      <text x="878" y="285">Machine learning &amp; deep learning</text><text x="878" y="313">Production AI applications</text>
     </g>
   </g>
 </svg>
