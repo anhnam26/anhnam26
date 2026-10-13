@@ -26,15 +26,37 @@ address synchronized when changing contact details.
 ## Refresh the activity snapshot
 
 The README displays the activity panel after current work and before the small
-repository section. A separate arena below the calendar plays a fixed 24-second
-story: football passes and a goal, a defended basketball jump shot and basket,
-then a volleyball set and spike. The same two characters stay on screen. One
-continuous ball changes its surface as the courts crossfade, including the
-return from volleyball to football. No random events change the sequence.
+repository section. A separate arena below the calendar loops through three
+60-second matches: football, basketball and volleyball. Each team has two
+players; red stays on the left and blue on the right. A central scoreboard
+shows the current sport and score. Every scoring play counts as one point,
+including basketball, and the first team to three wins.
+
+The script is fixed, with points at seconds 10, 21, 32, 43 and 58 of each match:
+
+| Sport | Point winners, in order | Final score (red : blue) | Next possession |
+| --- | --- | --- | --- |
+| Football | Red, blue, red, blue, red | 3 : 2 | Conceding team |
+| Basketball | Blue, red, blue, red, blue | 2 : 3 | Conceding team |
+| Volleyball | Red, blue, blue, red, red | 3 : 2 | Point winner serves |
+
+Football starts with red possession, basketball with blue possession, and
+volleyball with a red serve. Between points there is a two-second reset.
+The winner appears at second 58; the court and ball surface crossfade during
+seconds 59–60. The same four players and one continuous ball stay on screen,
+including the return from volleyball to football. No random events change the
+three-minute sequence.
 
 The SVG contains generated CSS animations and local vector artwork, without
-runtime scripts or external assets. Inverse kinematics keeps limbs attached as
-the players kick, guard, shoot, set and spike. Reduced motion shows the opening
+runtime scripts or external assets. Authored shoulder and elbow angles keep
+limbs attached, with fixed bone lengths and bounded elbow bends. Forearms and
+shins are nested inside their parent joints so CSS interpolation cannot detach
+elbows or knees. Players face the ball, with hand contact timed to dribbles,
+shots, digs, sets and spikes. Turns occur when the ball crosses a player's
+position rather than waiting for the next regular animation sample.
+CSS keyframes sample the timeline at 8 Hz, plus exact action and scoring times,
+then discard redundant samples within position and angle tolerances. Browser
+interpolation keeps playback smooth. Reduced motion shows the opening
 football scene as a still image. Sports scores belong to the illustration and
 do not change contribution counts.
 
@@ -42,8 +64,7 @@ Run with the existing Node.js installation (Node 22 or newer):
 
 ```powershell
 node scripts/update-activity.mjs
-node --test scripts/update-activity.test.mjs
-node --test scripts/sports-animation.test.mjs
+node --test scripts/*.test.mjs
 ```
 
 No package installation, Python environment, token or third-party statistics
@@ -76,8 +97,11 @@ manual. There are no workflows that automatically commit or push.
 - `assets/badges/*.svg`: contact buttons; destinations live in `README.md`.
 - `assets/project-*-*.svg`: retained artwork, unused in the current README.
 - `scripts/update-activity.mjs`: activity layout, colors and data collection.
-- `scripts/sports-animation.mjs`: the fixed sports timeline, articulated players,
-  ball skins, court artwork and generated CSS. Refreshing activity preserves it.
+- `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
+- `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
+- `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.
+- `scripts/sports-animation.mjs`: team artwork, scoreboard and generated CSS.
+  Refreshing activity preserves the match script and animation.
 
 Keep the paired light/dark SVGs synchronized. Keep facts and links aligned with
 the public portfolio and repositories; do not turn planned project features into

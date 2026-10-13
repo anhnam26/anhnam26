@@ -1,66 +1,83 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { sportsStateAt, limbSegments, SPORTS_DURATION } from './sports-animation.mjs';
+import { sportsStateAt, SPORTS_DURATION } from './sports-animation.mjs';
+import { contactEvents } from './sports-timeline.mjs';
+import { playerBones, worldHand, ARM_LENGTHS, LEG_LENGTHS } from './sports-rig.mjs';
+import { POINT_TIMES } from './sports-matches.mjs';
 
-const close = (actual, expected, tolerance=.001) => assert.ok(Math.abs(actual-expected)<tolerance, `${actual} != ${expected}`);
+const close=(a,b,tolerance=.001)=>assert.ok(Math.abs(a-b)<tolerance,`${a} != ${b}`);
+const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 
-test('sports story repeats deterministically with a continuous loop seam', () => {
-  assert.deepEqual(sportsStateAt(0), sportsStateAt(SPORTS_DURATION));
-  for (const time of [0,.5,4.8,7,8,12.2,15,18.1,19.5,23]) {
-    assert.deepEqual(sportsStateAt(time), sportsStateAt(time+SPORTS_DURATION));
+test('the three-minute animation closes without a ball or player jump', () => {
+  assert.equal(SPORTS_DURATION,180);
+  assert.deepEqual(sportsStateAt(0),sportsStateAt(180));
+  const before=sportsStateAt(180-1e-7),after=sportsStateAt(0);
+  close(before.ball.x,after.ball.x);close(before.ball.y,after.ball.y);
+  for (const id of Object.keys(after.players)) {
+    close(before.players[id].x,after.players[id].x);
+    close(before.players[id].y,after.players[id].y);
   }
-  const last = sportsStateAt(24-1e-7), first = sportsStateAt(0);
-  close(last.ball.x,first.ball.x); close(last.ball.y,first.ball.y);
-  close(last.a.x,first.a.x); close(last.b.x,first.b.x);
-  assert.throws(() => sportsStateAt(NaN), /finite/);
 });
 
-test('ball remains visible, in bounds and continuous during all three scene changes', () => {
-  let previous = sportsStateAt(0);
-  for (let time=.01; time<24; time+=.01) {
-    const state = sportsStateAt(time);
-    const weights = Object.values(state.scenes);
-    close(weights.reduce((sum,n)=>sum+n,0),1);
-    assert.ok(weights.every(n=>n>=0 && n<=1));
+test('one ball stays visible and continuous over rallies, resets and court changes', () => {
+  let previous=sportsStateAt(0);
+  for (let time=.02;time<180;time+=.02) {
+    const state=sportsStateAt(time);
+    close(Object.values(state.scenes).reduce((sum,n)=>sum+n,0),1);
     assert.ok(state.ball.x-13>24 && state.ball.x+13<1160);
-    assert.ok(state.ball.y-13>0 && state.ball.y+13<=236.01);
-    assert.ok(Math.hypot(state.ball.x-previous.ball.x,state.ball.y-previous.ball.y)<12);
+    assert.ok(state.ball.y-13>98 && state.ball.y+13<314);
+    assert.ok(distance([state.ball.x,state.ball.y],[previous.ball.x,previous.ball.y])<16,`Ball jumps at ${time}`);
     previous=state;
   }
-  for (const time of [7,15,23]) assert.equal(Object.values(sportsStateAt(time).scenes).filter(n=>n>0).length,2);
+  for (const time of [59.5,119.5,179.5]) assert.equal(Object.values(sportsStateAt(time).scenes).filter(n=>n>0).length,2);
 });
 
-test('football lands in the goal, basketball passes the rim, and the spike clears the net', () => {
-  const goal = sportsStateAt(4.8);
-  assert.equal(goal.scenes.football,1);
-  assert.ok(goal.ball.x>992 && goal.ball.x<1126 && goal.ball.y>142 && goal.ball.y<236);
-  const basket = sportsStateAt(12.2);
-  assert.equal(basket.scenes.basketball,1);
-  close(basket.ball.x,996); close(basket.ball.y,130);
-  const spike = sportsStateAt(18.1);
-  close(spike.ball.x,700); close(spike.ball.y,78);
-  assert.ok(Math.hypot(spike.b.x+spike.b.rightHand[0]-spike.ball.x,spike.b.y+spike.b.rightHand[1]-spike.ball.y)<13);
-  for (let time=18.1;time<18.75;time+=.002) {
-    const {ball} = sportsStateAt(time);
-    if (ball.x>=802 && ball.x<=862) assert.ok(ball.y+13<132, 'Spike hits the net');
+test('four players stay on their team side and face the ball throughout the story', () => {
+  for (let time=0;time<180;time+=.125) {
+    const state=sportsStateAt(time);
+    assert.equal(Object.keys(state.players).length,4);
+    for (const player of Object.values(state.players)) {
+      assert.ok(player.team==='red'?player.x<592:player.x>592,player.id);
+      assert.equal(player.facing,state.ball.x>=player.x?1:-1,`Facing error: ${player.id} at ${time}`);
+      assert.ok(Number.isFinite(player.headAngle));
+    }
   }
-  const landing = sportsStateAt(18.75);
-  close(landing.ball.y,223); assert.ok(landing.ball.x>862);
 });
 
-test('two-joint limbs preserve segment lengths throughout the animation', () => {
-  for (let time=0;time<24;time+=.125) {
-    const state = sportsStateAt(time);
-    for (const actor of [state.a,state.b]) {
-      for (const [origin,target,l1,l2,bend] of [
-        [[-9,-78],actor.leftHand,23,23,1],[[9,-78],actor.rightHand,23,23,-1],
-        [[-8,-41],actor.leftFoot,21,23,-1],[[8,-41],actor.rightFoot,21,23,-1],
-      ]) {
-        const limb = limbSegments(origin,target,l1,l2,bend);
-        close(Math.hypot(limb.lower.x-origin[0],limb.lower.y-origin[1]),l1);
-        close(Math.hypot(limb.end[0]-limb.lower.x,limb.end[1]-limb.lower.y),l2);
-        assert.ok(Number.isFinite(limb.upper.angle) && Number.isFinite(limb.lower.angle));
+test('arm joints remain anatomically bounded and all bone lengths stay fixed', () => {
+  for (let time=0;time<180;time+=.2) {
+    for (const player of Object.values(sportsStateAt(time).players)) {
+      for (const arm of Object.values(player.arms)) {
+        assert.ok(Math.abs(arm[1]-arm[0])<=120,`Hyperextended elbow: ${player.id}`);
+        assert.ok(arm.every(angle=>angle>=-240 && angle<=60));
+      }
+      for (const [name,bone] of Object.entries(playerBones(player))) {
+        const lengths=name.startsWith('arm')?ARM_LENGTHS:LEG_LENGTHS;
+        close(distance(bone.upper,bone.lower),lengths[0]);
+        close(distance(bone.lower,bone.end),lengths[1]);
       }
     }
+  }
+});
+
+test('basketball releases, volleyball serves, sets, digs and spikes meet the actual hands', () => {
+  for (const match of [1,2]) for (let round=0;round<5;round++) {
+    for (const event of contactEvents(match,round)) {
+      const state=sportsStateAt(event.time),player=state.players[event.player];
+      const point=event.hand==='both'
+        ? worldHand(player).map((n,i)=>(n+worldHand(player,'back')[i])/2)
+        : worldHand(player,event.hand);
+      assert.ok(distance(point,[state.ball.x,state.ball.y])<.02,`${event.action} misses hands at ${event.time}`);
+    }
+  }
+});
+
+test('every scored point has the ball at the correct opposing goal, rim or court', () => {
+  for (let match=0;match<3;match++) for (const point of POINT_TIMES) {
+    const state=sportsStateAt(match*60+point);
+    const scorer=state.round.scorer;
+    const expectedX=scorer==='red'?(match===2?1034:1110):(match===2?150:74);
+    close(state.ball.x,expectedX);
+    close(state.ball.y,match===0?276:match===1?158:296);
   }
 });

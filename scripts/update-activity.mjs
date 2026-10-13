@@ -89,10 +89,10 @@ export function renderActivity(snapshot, theme) {
   }).format(new Date(snapshot.fetchedAt));
   const format = (value) => new Intl.NumberFormat('en-US').format(value);
   const title = `GitHub activity — ${format(calendar.total)} contributions shown in the last year`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="728" viewBox="0 0 1280 728" role="img" aria-labelledby="title desc">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="816" viewBox="0 0 1280 816" role="img" aria-labelledby="title desc">
   <title id="title">${escapeXml(title)}</title>
-  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7). Two animated players pass and score in football, basketball and volleyball beneath the calendar.</desc>
-  <rect x=".5" y=".5" width="1279" height="727" rx="16" fill="${p.bg}" stroke="${p.line}"/>
+  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7). Red and blue teams play three one-minute matches beneath the calendar, with a central scoreboard and fixed 3–2 results.</desc>
+  <rect x=".5" y=".5" width="1279" height="815" rx="16" fill="${p.bg}" stroke="${p.line}"/>
   <g font-family="Consolas,'Courier New',monospace" fill="${p.accent}" font-size="14" letter-spacing="2">
     <text x="48" y="40">BUILD LOG / GITHUB ACTIVITY</text>
     <text x="1232" y="40" text-anchor="end" fill="${p.muted}" letter-spacing="0">@${USERNAME}</text>

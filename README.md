@@ -37,7 +37,7 @@ Based in **Ho Chi Minh City, Vietnam**. Studying Information Technology at **HCM
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg">
-    <img src="assets/activity-dark.svg" alt="My GitHub activity: yearly contributions, public repositories and stars. Below the calendar, two players exchange passes and score in a continuous football, basketball and volleyball animation. Click to see current GitHub activity." width="100%">
+    <img src="assets/activity-dark.svg" alt="My GitHub activity: yearly contributions, public repositories and stars. Red and blue teams play one-minute football, basketball and volleyball matches below the calendar. The central scoreboard ends at red 3–2, blue 3–2 and red 3–2. Click to see current GitHub activity." width="100%">
   </picture>
 </a>
 
