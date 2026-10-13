@@ -26,69 +26,65 @@ address synchronized when changing contact details.
 ## Refresh the activity snapshot
 
 The README displays the activity panel after current work and before the small
-repository section. A separate arena below the calendar loops through three
-60-second matches: football, basketball and volleyball. Each team has two
-players; red's home end is on the left and blue's on the right. Football and
-basketball players cross midfield to attack and contest possession. Volleyball
-players stay on their own half. A central scoreboard
-shows the current sport and score. Every scoring play counts as one point,
-including basketball, and the first team to three wins.
+repository section. A separate 16:9 arena below the calendar runs Pixel Sports
+Club: football,
+basketball and volleyball, 60 seconds each, in a seamless 180-second loop.
+Four hand-authored pixel cartoon athletes keep their identities across sports:
+Red 07 has spiky dark hair, Red 11 has curls and a yellow headband, Blue 04 has
+an orange ponytail, and Blue 09 has cropped hair and a mint headband. Exactly
+two players per team are visible on the court. The bright arcade stadium stays
+in place while the playing surface and equipment transform.
 
-The script is fixed, with points at seconds 10, 21, 32, 43 and 58 of each match:
+Each match opens with an eight-second entrance and readiness sequence. The five
+points arrive at seconds 18, 28, 38, 48 and 56. The scoreboard displays the final
+score and FULL TIME winner from 56 until 60; the court transition runs from
+58 until 60. Every scoring play, including a basket, adds exactly one point.
 
 | Sport | Point winners, in order | Final score (red : blue) | Next possession |
 | --- | --- | --- | --- |
-| Football | Red, blue, red, blue, red | 3 : 2 | Conceding team |
-| Basketball | Blue, red, blue, red, blue | 2 : 3 | Conceding team |
-| Volleyball | Red, blue, blue, red, red | 3 : 2 | Point winner serves |
+| Football | Red, blue, red, blue, blue | 2 : 3 | Conceding team |
+| Basketball | Blue, red, red, blue, red | 3 : 2 | Conceding team |
+| Volleyball | Red, blue, red, blue, blue | 2 : 3 | Point winner serves |
 
 Football starts with red possession, basketball with blue possession, and
-volleyball with a red serve. Between points there is a two-second reset.
-The winner appears at second 58; the court and ball surface crossfade during
-seconds 59–60. The same four players and one continuous ball stay on screen,
-including the return from volleyball to football. No random events change the
-three-minute sequence.
+volleyball with a red serve. After each of the first four points, the players
+return to position over two seconds. Blue steals from red before the final
+football goal. Red steals from blue during the third basketball play. These
+turnovers reconcile the fixed scoring order with the normal restart rules.
+The final eight-second scoring window includes the reset and a faster attack.
+No random events change the script.
 
-Football rallies include an approaching defender, a tackle and temporary
-possession change, a recovery, a deflected pass, a supporting runner and a shot
-under pressure. Basketball has a drive, a steal and recovery, a give-and-go,
-a step-back and a jump shot against two defenders. The possession label follows
-these live steals as well as the restarts after scoring. These events are part
-of the same repeatable script and do not change the fixed scores above.
+Football shows contested dribbling, a tackle, recovery, a give-and-go and a shot
+past a saving defender. Basketball includes dribbling, a steal, passing and a
+contested jump shot. Volleyball includes a serve, receive, set, spike, low dig
+attempts and a jumping block. Winning spikes land inside the opponent's court.
+The server stays behind the end line until after
+contact; both shoes remain outside x=162 or x=1022. Players keep looking at the
+ball and run past each other on separate paths, with at least 30 logical pixels
+of clearance between their court positions. Supporting players use a back lane.
+Four depth bands choose the paint order, with one visible drawing per athlete.
+The small portraits in the footer are the roster, rather than extra court players.
 
-The thief runs past the attacker instead of staying in front of them. The
-attacker then changes lanes, recovers and overtakes the defender before shooting.
-Supporting runners use the back of the court. Return paths are separated too.
-The ball follows its carrier's lane. Players occupy distinct positions in the
-court plane, with at least 30 pixels of clearance between their centres.
-Four depth bands determine SVG paint order; exactly one drawing of each athlete
-is visible, so a runner can pass behind or in front without bodies stacking.
-Athletes farther back are slightly smaller. Hands, foot placement and stride
-length use the same perspective scale as the drawing.
+The same ball remains visible throughout. During each transition it lifts into
+the air, spins, gains a halo and blends its surface into the next sport's ball.
+The green football pitch, orange basketball court and sandy volleyball court
+crossfade continuously. The ending returns to the next entrance state, including
+the volleyball-to-football seam.
 
-Volleyball servers hold their position in the marked service zone until after
-contact. Both shoes remain outside the end line (`x=162` or `x=1022`). After the
-serve, the player runs into the court for the next dig or attack.
+The SVG uses local artwork and generated CSS, with no runtime script, remote
+images or font dependencies. Normal motion is sampled at 12 Hz, returns at
+24 Hz, and court transitions at 48 Hz, together with exact contact, scoring,
+facing and depth changes. Redundant samples are discarded within 0.4 logical
+pixels for position and 1.2 degrees for joints; browser interpolation fills the
+gaps. The full three-minute asset is about 3.2 MB per theme. Tests enforce a
+3.5 MB size ceiling. The generated CSS is cached within the render process so
+both themes use the identical choreography.
 
-The SVG contains generated CSS animations and local vector artwork, without
-runtime scripts or external assets. Authored shoulder and elbow angles keep
-limbs attached, with fixed bone lengths and bounded elbow bends. Forearms and
-shins are nested inside their parent joints so CSS interpolation cannot detach
-elbows or knees. Both knees use the same forward-facing anatomical branch.
-A foot stays planted during the stance portion of each stride while the other
-swings clear of the floor. Running arms counterbalance the legs, the dribbling
-arm pumps with the ball, and jumps include crouching, flight and landing.
-Torso lean pivots at the hips while the legs remain attached to the pelvis.
-Players run back into position between points. Players face the ball, with
-hand contact timed to dribbles,
-shots, digs, sets and spikes. Turns occur when the ball crosses a player's
-position rather than waiting for the next regular animation sample.
-CSS keyframes sample normal play at 16 Hz and faster returns at 48 Hz (96 Hz
-during court transitions), plus exact action and scoring times,
-then discard redundant samples within position and angle tolerances. Browser
-interpolation keeps playback smooth. Reduced motion shows the opening
-football scene as a still image. Sports scores belong to the illustration and
-do not change contribution counts.
+Shoulders, elbows, hips and knees stay connected through nested fixed-length
+bones. Both knees use the same anatomical branch. A support shoe stays planted
+during each running stride; jumps include a crouch and landing. Reduced motion
+shows a static football poster with all four players ready on the field.
+Sports scores belong to the illustration and do not change contribution counts.
 
 Run with the existing Node.js installation (Node 22 or newer):
 
@@ -130,7 +126,8 @@ manual. There are no workflows that automatically commit or push.
 - `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
 - `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
 - `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.
-- `scripts/sports-animation.mjs`: team artwork, scoreboard and generated CSS.
+- `scripts/sports-art.mjs`: hand-authored pixel athletes, stadium, courts and ball.
+- `scripts/sports-animation.mjs`: scoreboard and generated CSS playback.
   Refreshing activity preserves the match script and animation.
 
 Keep the paired light/dark SVGs synchronized. Keep facts and links aligned with

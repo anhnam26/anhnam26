@@ -1,6 +1,7 @@
-import { sportsStateAt, PLAYER_IDS, SPORTS_DURATION, VOLLEYBALL_BASELINES, actionDuration, contactEvents } from './sports-timeline.mjs';
-import { FLOOR, ARM_LENGTHS, LEG_LENGTHS, playerBones } from './sports-rig.mjs';
+import { sportsStateAt, PLAYER_IDS, SPORTS_DURATION, actionTimeAt, contactEvents } from './sports-timeline.mjs';
+import { playerBones } from './sports-rig.mjs';
 import { MATCHES, MATCH_DURATION, TEAMS } from './sports-matches.mjs';
+import { drawAthlete, drawStadium, drawCourts, drawBall, drawRoster } from './sports-art.mjs';
 export { sportsStateAt, SPORTS_DURATION };
 
 const n = value => Number(value.toFixed(3));
@@ -12,6 +13,12 @@ function valuesAt(state) {
   const add=(name,kind,values_,discrete=false) => {values[name]={kind,values:values_,discrete};};
   add('ball-position','translate',[state.ball.x,state.ball.y]);
   add('ball-rotation','rotate',[state.ball.rotation]);
+  add('ball-glow','opacity',[state.morph*.9]);
+  add('ball-halo','size',[1+state.morph*.65]);
+  add('court-shimmer','opacity',[state.morph*.24]);
+  add('intro-label','opacity',[state.phase==='intro'?windowIntro(state.matchTime):0]);
+  add('start-label','opacity',[state.phase==='intro'&&state.matchTime>=6.5?Math.min(1,(state.matchTime-6.5)*4,(8-state.matchTime)*4):0]);
+  add('point-label','opacity',[state.phase==='restart'?Math.max(0,1-(state.matchTime-state.round.scoreAt)/1.4):0]);
   for (const sport of ['football','basketball','volleyball']) {
     add(`${sport}-scene`,'opacity',[state.scenes[sport]]);
     add(`${sport}-skin`,'opacity',[state.scenes[sport]]);
@@ -48,7 +55,7 @@ function valuesAt(state) {
 // Remove redundant samples while bounding screen-space and joint-angle errors.
 // This keeps the three-minute SVG much smaller than a frame-by-frame export.
 function simplify(samples, kind) {
-  const tolerances=kind==='opacity'?[.002]:kind==='rotate'?[.5]:kind==='translate'?[.2,.2]:[.002];
+  const tolerances=kind==='opacity'?[.004]:kind==='rotate'?[1.2]:kind==='translate'?[.4,.4]:[.004];
   const retained=new Set([0,samples.length-1]);
   const visit=(first,last) => {
     let worst=1,index=-1;
@@ -63,24 +70,26 @@ function simplify(samples, kind) {
   return [...retained].sort((a,b)=>a-b).map(index=>samples[index]);
 }
 
+const windowIntro = time => time<6?1:Math.max(0,(6.5-time)*2);
+let cachedCSS;
 function animationCSS() {
-  const times=new Set(Array.from({length:SPORTS_DURATION*16+1},(_,index)=>index/16));
+  if(cachedCSS) return cachedCSS;
+  const times=new Set(Array.from({length:SPORTS_DURATION*12+1},(_,index)=>index/12));
   for (const [index,match] of MATCHES.entries()) {
     const offset=index*MATCH_DURATION;
     // Returns to position are faster than normal play. Sample their running
     // cycles more densely to preserve planted feet between rendered keyframes.
     for (const round of match.rounds.slice(0,-1)) {
-      for(let frame=0;frame<=96;frame++) times.add(offset+round.scoreAt+frame/48);
+      for(let frame=0;frame<=48;frame++) times.add(offset+round.scoreAt+frame/24);
     }
-    for(let frame=0;frame<=96;frame++) times.add(offset+59+frame/96);
+    for(let frame=0;frame<=96;frame++) times.add(offset+58+frame/48);
     for (const round of match.rounds) {
-      const start=offset+round.scoreAt-actionDuration(match.sport,round);
       for (const time of [round.start,round.scoreAt]) times.add(offset+time);
-      times.add(start);
+      times.add(actionTimeAt(index,round.index,0));
       for (const event of contactEvents(index,round.index)) times.add(event.time);
       const actions=match.sport==='football'?[.75,1.35,1.55,1.6,1.85,1.95,2.05,2.1,2.2,2.4,3.15,3.7,3.85,4.15,5.1,6,6.35,6.65,6.85,7.2,8.8]
         :match.sport==='basketball'?[.8,1.4,1.55,1.6,1.8,1.85,2.1,2.2,2.4,2.5,3.2,3.85,4.25,4.9,5.1,5.15,5.95,6.2,6.55,6.8,7.2,7.24,7.4,7.75,8.8]:[1.1];
-      for(const q of actions) times.add(start+q);
+      for(const q of actions) times.add(actionTimeAt(index,round.index,q));
     }
   }
   // Facing changes are discrete. Locate the actual crossing instead of waiting
@@ -113,10 +122,10 @@ function animationCSS() {
   }
   const frames=[...times].sort((a,b)=>a-b).map(time=>{
     const state=sportsStateAt(time);
-    if (time===SPORTS_DURATION) state.ball.rotation=SPORTS_DURATION*180;
+    if (time===SPORTS_DURATION) state.ball.rotation=SPORTS_DURATION*180+MATCHES.length*720;
     return {time,values:valuesAt(state)};
   });
-  return Object.keys(frames[0].values).map(name=>{
+  cachedCSS=Object.keys(frames[0].values).map(name=>{
     const {kind,discrete}=frames[0].values[name];
     let samples=frames.map(frame=>({time:frame.time,values:frame.values[name].values}));
     if (discrete) samples=samples.filter((sample,index,array)=>index===0 || index===array.length-1 || sample.values[0]!==array[index-1].values[0]);
@@ -125,133 +134,70 @@ function animationCSS() {
     const rules=samples.map(sample=>`${Number((sample.time/SPORTS_DURATION*100).toFixed(7))}%{${property}:${kind==='opacity'?n(sample.values[0]):transform(kind,sample.values)}}`).join('');
     return `.sports-${name}{animation:sports-${name} ${SPORTS_DURATION}s ${discrete?'steps(1,end)':'linear'} infinite}@keyframes sports-${name}{${rules}}`;
   }).join('\n');
+  return cachedCSS;
 }
 
-function playerSVG(id,p,layer) {
-  const state=sportsStateAt(0),player=state.players[id],initial=valuesAt(state);
-  const color=TEAMS[player.team].color;
+function playerSVG(id,layer) {
+  const state=sportsStateAt(8),player=state.players[id],initial=valuesAt(state);
   const group=(part,content) => {
     const value=initial[`${id}-${part}`];
     return `<g class="sports-animated sports-${id}-${part}" style="transform:${transform(value.kind,value.values)}${part==='lean'?';transform-origin:0px -41px':''}">${content}</g>`;
   };
-  const shoe=name=>`<g transform="translate(0 ${LEG_LENGTHS[1]})">${group(`${name}-shoe`,`<path d="M-3-2H7L13 1V4H-3Z" fill="${p.text}" stroke="#596675" stroke-width=".5"/>`)}</g>`;
-  const segment=(length,width,fill)=>`<path d="M0 0V${length}" stroke="${fill}" stroke-width="${width}" stroke-linecap="round"/>`;
-  const bone=name=>{
-    const arm=name.startsWith('arm'),lengths=arm?ARM_LENGTHS:LEG_LENGTHS;
-    const origin=playerBones(player)[name].upper;
-    return `<g transform="translate(${origin[0]} ${origin[1]})">${group(`${name}-upper`,segment(lengths[0],arm?8:10,arm?color:'#ddb08d')+
-      `<g transform="translate(0 ${lengths[0]})">${group(`${name}-lower`,segment(lengths[1],7,'#e5b391')+(arm?'':shoe(name)))}</g>`)}</g>`;
-  };
-  // SVG paints in document order. One visible instance per athlete selects a
-  // depth band, allowing someone to pass behind and then in front of another.
+  // One visible instance per athlete selects the correct court depth band.
   return `<g ${layer===3?'data-player':'data-player-copy'}="${id}" data-team="${player.team}" data-layer="${layer}" class="sports-animated sports-${id}-layer-${layer}" opacity="${player.layer===layer?1:0}">
-    ${group('shadow',`<ellipse rx="18" ry="3" fill="${p.muted}" opacity=".18"/>`)}
-    ${group('position',group('size',group('facing',`
-    ${bone('leg-back')}
-    ${bone('leg-front')}
-    <path d="M-12-53H13L11-36H1L0-44L-2-36H-12Z" fill="#344451"/>
-    ${group('lean',`
-    ${bone('arm-back')}
-    <path d="M-12-88Q0-94 12-87L11-52H-12Z" fill="${color}"/>
-    <path d="M-12-87L-5-89V-52H-12Z" fill="#172f29" opacity=".12"/>
-    <path d="M-3-100V-91H4V-100" fill="#ddb08d"/>
-    <g transform="translate(0 -110)">${group('head',`
-      <circle r="11" fill="#e5b391"/>
-      <path d="M8-4L14 1L9 3Z" fill="#e5b391"/>
-      <path d="M-11-1Q-12-16 2-12Q12-12 11-5L5-8L-3-5Z" fill="#293640"/>
-      <circle cx="-8" cy="1" r="2.5" fill="#ddb08d"/>
-      <circle cx="5" cy="-2" r="1.3" fill="#293640"/>
-      <path d="M3-5H7M5 6Q8 8 10 5" stroke="#8a5744" stroke-width="1.2" stroke-linecap="round"/>
-    `)}</g>
-    ${group('number',`<text x="0" y="-66" text-anchor="middle" fill="#ffffff" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700">${id.endsWith('1')?'1':'2'}</text>`)}
-    ${bone('arm-front')}
-    `)}
-  `)))}</g>`;
+    ${group('shadow','<ellipse rx="21" ry="5" fill="#173e44" opacity=".22"/>')}
+    ${group('position',group('size',drawAthlete(id,player,group)))}
+  </g>`;
 }
 
-function goal(p) {
-  return `<path d="M34 308V214H126V308M34 214L48 224H126M48 224V308" stroke="${p.text}" stroke-width="3" fill="none"/>
-    <path d="M64 224V308M80 224V308M96 224V308M112 224V308M48 241H126M48 258H126M48 275H126M48 292H126" stroke="${p.muted}" opacity=".45" fill="none"/>`;
-}
-
-function hoop(p) {
-  return `<path d="M38 308V99H53" stroke="${p.muted}" stroke-width="6" fill="none"/>
-    <rect x="25" y="94" width="46" height="64" rx="2" fill="${p.bg}" stroke="${p.text}" stroke-width="2"/>
-    <rect x="48" y="130" width="17" height="23" fill="none" stroke="${p.muted}"/>
-    <path d="M56 158L64 188H84L94 158M60 158L81 188M68 158L89 177M84 158L66 188M92 158L62 174M61 174H89M63 181H86" stroke="${p.text}" stroke-width="1.2" fill="none"/>
-    <path d="M54 158H95" stroke="#e6a267" stroke-width="4" stroke-linecap="round"/>`;
-}
-
-function ballSVG() {
-  return `<g class="sports-animated sports-ball-position" style="transform:translate(592px,296px)"><g class="sports-animated sports-ball-rotation">
-    <circle r="13" fill="#f5f5ef"/>
-    <g clip-path="url(#sports-ball-clip)">
-      <g class="sports-animated sports-football-skin" opacity="1"><circle r="13" fill="#f5f5ef"/>
-        <path d="M0-5L4.76-1.55L2.94 4.05H-2.94L-4.76-1.55Z" fill="#293640"/>
-        <path d="M0-5V-11M4.76-1.55L10.46-3.4M2.94 4.05L6.47 8.9M-2.94 4.05L-6.47 8.9M-4.76-1.55L-10.46-3.4" stroke="#536269" stroke-width=".8" fill="none"/>
-        <path d="M-3-13H3L2-9H-2ZM11-7L14-1L10 0L8-3ZM10 8L4 14L3 10L6 7ZM-10 8L-4 14L-3 10L-6 7ZM-11-7L-14-1L-10 0L-8-3Z" fill="#293640"/>
-      </g>
-      <g class="sports-animated sports-basketball-skin" opacity="0"><circle r="13" fill="#eb8c3c"/>
-        <path d="M-13 0H13M0-13V13M-9-10Q4 0-9 10M9-10Q-4 0 9 10" stroke="#75401f" stroke-width="1.2" fill="none"/>
-      </g>
-      <g class="sports-animated sports-volleyball-skin" opacity="0"><circle r="13" fill="#fbf0c7"/>
-        <path d="M-13-3Q0-11 9-9L14-2Q1-6-9 7Z" fill="#e2bf41"/>
-        <path d="M9-9Q2 3 6 13L-2 14Q-6 2 0-10Z" fill="#3f72aa"/>
-        <path d="M-10 9Q-1 2 13 5L14 11Q0 7-4 14Z" fill="#e2bf41"/>
-        <path d="M-13-3Q0-11 9-9M9-9Q2 3 6 13M-10 9Q-1 2 13 5" stroke="#637478" stroke-width=".7" fill="none"/>
-      </g>
-    </g><circle r="13" fill="none" stroke="#536269" stroke-width="1"/>
-  </g></g>`;
-}
-
-export function renderSportsAnimation(p) {
-  const digits=['red','blue'].map(team=>Array.from({length:4},(_,digit)=>`<text class="sports-animated sports-score-${team}-${digit}" opacity="${digit===0?1:0}" x="${team==='red'?552:632}" y="63" text-anchor="middle" fill="${TEAMS[team].color}" font-size="30" font-weight="700">${digit}</text>`).join('')).join('');
-  const labels=['red','blue'].map(team=>`<text class="sports-animated sports-possession-${team}" opacity="${team==='red'?1:0}" x="1160" y="30" text-anchor="end" fill="${TEAMS[team].color}">${TEAMS[team].name} BALL</text>
-    <text class="sports-animated sports-serve-${team}" opacity="0" x="1160" y="30" text-anchor="end" fill="${TEAMS[team].color}">${TEAMS[team].name} SERVE</text>
-    <text class="sports-animated sports-winner-${team}" opacity="0" x="592" y="124" text-anchor="middle" fill="${TEAMS[team].color}" font-size="17" font-weight="700">${TEAMS[team].name} WINS 3–2</text>`).join('');
-  return `<svg id="sports-arena" x="48" y="410" width="1184" height="380" viewBox="0 0 1184 380" role="img" aria-labelledby="sports-title sports-description">
-    <title id="sports-title">Red versus blue — three one-minute matches</title>
-    <desc id="sports-description">A fixed three-minute loop. Red wins football 3–2, blue wins basketball 3–2, and red wins volleyball 3–2. Two players per side face the ball. Football and basketball restart with the conceding team; volleyball serves go to the point winner. Every scoring play counts as one point.</desc>
-    <defs><clipPath id="sports-stage-clip"><rect width="1184" height="380" rx="10"/></clipPath><clipPath id="sports-ball-clip"><circle r="13"/></clipPath>
+export function renderSportsAnimation() {
+  const digits=['red','blue'].map(team=>Array.from({length:4},(_,digit)=>`<text class="sports-animated sports-score-${team}-${digit}" opacity="${digit===0?1:0}" x="${team==='red'?488:696}" y="142" text-anchor="middle" fill="${TEAMS[team].color}" font-size="58" font-weight="bold">${digit}</text>`).join('')).join('');
+  const labels=['red','blue'].map(team=>`<text class="sports-animated sports-possession-${team}" opacity="${team==='red'?1:0}" x="${team==='red'?47:1137}" y="255" text-anchor="${team==='red'?'start':'end'}" fill="#193c50">${TEAMS[team].name} BALL</text>
+    <text class="sports-animated sports-serve-${team}" opacity="0" x="${team==='red'?47:1137}" y="255" text-anchor="${team==='red'?'start':'end'}" fill="#193c50">${TEAMS[team].name} SERVE</text>
+    <text class="sports-animated sports-winner-${team}" opacity="0" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="24" font-weight="bold">FULL TIME / ${TEAMS[team].name} WINS</text>`).join('');
+  return `<svg id="sports-arena" x="48" y="410" width="1184" height="666" viewBox="0 0 1184 666" role="img" aria-labelledby="sports-title sports-description">
+    <title id="sports-title">Pixel Sports Club - red versus blue</title>
+    <desc id="sports-description">Four distinct pixel cartoon athletes in a seamless 180-second loop: football, basketball and volleyball, 60 seconds each. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. Scores change at 18, 28, 38, 48 and 56 seconds. Red steals and scores in the third basketball play. The ball rises, spins, glows and morphs as each court transforms. Football and basketball restart with the conceding team; the volleyball point winner serves behind the end line.</desc>
+    <defs><clipPath id="sports-stage-clip"><path d="M12 0H1172V12H1184V654H1172V666H12V654H0V12H12Z"/></clipPath><clipPath id="sports-ball-clip"><circle r="13"/></clipPath>
       <style>${animationCSS()}
-      @media(prefers-reduced-motion:reduce){.sports-animated{animation:none!important}}
+      @media(prefers-reduced-motion:reduce){.sports-animated{animation:none!important}.sports-intro-label{opacity:0}}
       </style>
     </defs>
     <g clip-path="url(#sports-stage-clip)">
-      <rect width="1184" height="380" rx="10" fill="${p.bg}"/>
-      <path d="M24 ${FLOOR+2}H1160" stroke="${p.line}" stroke-width="2"/>
-      <g class="sports-animated sports-football-scene" opacity="1">
-        <path d="M126 310L176 222H1008L1058 310M592 222V310M204 222V310M980 222V310" fill="none" stroke="${p.line}"/>
-        <ellipse cx="592" cy="270" rx="44" ry="28" fill="none" stroke="${p.line}"/>
-        ${goal(p)}<g transform="translate(1184 0) scale(-1 1)">${goal(p)}</g>
+      ${drawStadium()}
+      <g font-family="Consolas,'Courier New',monospace" font-weight="bold" fill="#193c50">
+        <text x="32" y="35" font-size="20" letter-spacing="2">PIXEL SPORTS CLUB</text>
+        <text x="1152" y="35" text-anchor="end" font-size="14">2v2 / 3 SPORTS / INFINITE LOOP</text>
       </g>
-      <g class="sports-animated sports-basketball-scene" opacity="0">
-        <path d="M126 310L176 222H1008L1058 310ZM182 310Q210 266 85 248M1002 310Q974 266 1099 248M592 222V310" fill="none" stroke="${p.line}"/>
-        ${hoop(p)}<g transform="translate(1184 0) scale(-1 1)">${hoop(p)}</g>
+      <g transform="translate(0 216)">
+        ${drawCourts()}
+        <rect class="sports-animated sports-court-shimmer" x="24" y="90" width="1136" height="280" fill="#fffbd0" opacity="0"/>
+        ${Array.from({length:4},(_,layer)=>PLAYER_IDS.map(id=>playerSVG(id,layer)).join('')).join('')}
+        ${drawBall()}
       </g>
-      <g class="sports-animated sports-volleyball-scene" opacity="0">
-        <path d="M162 310L202 284H982L1022 310ZM382 284V310M802 284V310" fill="none" stroke="${p.line}"/>
-        <path d="M${VOLLEYBALL_BASELINES.left} 284V314M${VOLLEYBALL_BASELINES.right} 284V314" stroke="${p.text}" stroke-width="2" opacity=".7"/>
-        <g fill="${p.muted}" font-family="Consolas,monospace" font-size="9" text-anchor="middle">
-          <text x="96" y="331">SERVE ZONE</text><text x="1088" y="331">SERVE ZONE</text>
+      <g font-family="Consolas,monospace" font-size="15" letter-spacing="1">${labels}
+        <text class="sports-animated sports-intro-label" opacity="0" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="20" font-weight="bold">GET READY / FIRST TO 3</text>
+        <g class="sports-animated sports-start-label" opacity="0" fill="#193c50">
+          <path d="M512 225H528V231H538V237H520V243H512V237H506V231H512ZM544 225H552V228H544ZM544 236H556V239H544Z"/>
+          <text x="596" y="240" text-anchor="middle" font-size="24" font-weight="bold">PLAY!</text>
         </g>
-        <path d="M578 160V310M606 160V310" stroke="${p.muted}" stroke-width="3"/>
-        <path d="M578 176H606V274H578Z" fill="none" stroke="${p.text}" stroke-width="2"/>
-        <path d="M585 176V274M592 176V274M599 176V274M578 192H606M578 208H606M578 224H606M578 240H606M578 256H606" fill="none" stroke="${p.muted}"/>
+        <g class="sports-animated sports-point-label" opacity="0">
+          ${['football','basketball','volleyball'].map((sport,i)=>`<text class="sports-animated sports-${sport}-title" opacity="${i===0?1:0}" x="592" y="240" text-anchor="middle" fill="#193c50" font-size="24" font-weight="bold">${['GOAL!','BASKET!','POINT!'][i]}</text>`).join('')}
+        </g>
       </g>
-      <g font-family="Consolas,monospace" font-size="13" letter-spacing="1">${labels}</g>
-      ${Array.from({length:4},(_,layer)=>PLAYER_IDS.map(id=>playerSVG(id,p,layer)).join('')).join('')}
-      ${ballSVG()}
-      <g id="sports-scoreboard" font-family="'Segoe UI',Arial,sans-serif">
-        <rect x="468" y="12" width="248" height="86" rx="8" fill="${p.bg}" stroke="${p.line}"/>
-        <text x="510" y="34" fill="${TEAMS.red.color}" font-size="12" font-weight="700">RED</text>
-        <text x="674" y="34" text-anchor="end" fill="${TEAMS.blue.color}" font-size="12" font-weight="700">BLUE</text>
-        ${digits}<text x="592" y="61" text-anchor="middle" fill="${p.muted}" font-size="24">:</text>
-        ${['football','basketball','volleyball'].map(sport=>`<text class="sports-animated sports-${sport}-title" opacity="${sport==='football'?1:0}" x="592" y="84" text-anchor="middle" fill="${p.muted}" font-size="12" letter-spacing="1">${sport.toUpperCase()}</text>`).join('')}
-        <g transform="translate(478 95)"><path class="sports-animated sports-match-progress" d="M0 0H228" stroke="${p.accent}" stroke-width="2" style="transform:scaleX(0)"/></g>
+      <g id="sports-scoreboard" font-family="Consolas,'Courier New',monospace">
+        <path d="M380 50H804V60H814V196H804V206H380V196H370V60H380Z" fill="#397e91"/>
+        <path d="M380 44H804V54H814V188H804V198H380V188H370V54H380Z" fill="#193c50"/>
+        <rect x="380" y="55" width="208" height="94" fill="#342e45"/><rect x="596" y="55" width="208" height="94" fill="#183958"/>
+        <rect x="380" y="55" width="208" height="5" fill="${TEAMS.red.color}"/><rect x="596" y="55" width="208" height="5" fill="${TEAMS.blue.color}"/>
+        <text x="488" y="84" text-anchor="middle" fill="#ff8791" font-size="20" font-weight="bold">TEAM RED</text>
+        <text x="696" y="84" text-anchor="middle" fill="#8fc6ff" font-size="20" font-weight="bold">TEAM BLUE</text>
+        ${digits}<text x="592" y="134" text-anchor="middle" fill="#d6f4f2" font-size="36">:</text>
+        ${['football','basketball','volleyball'].map(sport=>`<text class="sports-animated sports-${sport}-title" opacity="${sport==='football'?1:0}" x="592" y="178" text-anchor="middle" fill="#fff3bc" font-size="20" font-weight="bold" letter-spacing="2">${sport.toUpperCase()}</text>`).join('')}
+        <g transform="translate(380 194)"><path class="sports-animated sports-match-progress" d="M0 0H424" stroke="#80efc5" stroke-width="4" style="transform:scaleX(0)"/></g>
       </g>
-      <text x="24" y="358" fill="${p.muted}" font-family="Consolas,monospace" font-size="11" letter-spacing="1">60s PER SPORT / FIRST TO 3 / RED HOME LEFT · BLUE HOME RIGHT</text>
+      ${drawRoster()}
+      <text x="592" y="660" text-anchor="middle" fill="#e6fff6" font-family="Consolas,monospace" font-size="11" letter-spacing="1">FOOTBALL &gt; BASKETBALL &gt; VOLLEYBALL / 60 SECONDS EACH</text>
     </g>
-    <rect x=".5" y=".5" width="1183" height="379" rx="10" fill="none" stroke="${p.line}"/>
   </svg>`;
 }

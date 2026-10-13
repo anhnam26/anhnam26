@@ -48,5 +48,10 @@ test('render keeps year boundaries in bounds and uses Vietnam snapshot date', ()
     assert.equal(cells.length, 365);
     assert.ok(cells.every(([, x, y]) => Number(x) + 15 <= 1232 && Number(y) + 15 < 363));
     assert.ok(!/<script|foreignObject|\b(?:href|src)="https?:/.test(svg));
+    assert.match(svg, /viewBox="0 0 1184 666"/);
+    assert.match(svg, /Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2/);
+    assert.match(svg, /FULL TIME \/ BLUE WINS/);
+    assert.match(svg, /FULL TIME \/ RED WINS/);
+    assert.ok(Buffer.byteLength(svg)<3_500_000,'Keep the full three-minute SVG below 3.5 MB');
   }
 });

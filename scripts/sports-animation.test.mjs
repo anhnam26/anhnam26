@@ -1,7 +1,8 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { sportsStateAt, SPORTS_DURATION } from './sports-animation.mjs';
-import { contactEvents } from './sports-timeline.mjs';
+import { contactEvents, actionTimeAt } from './sports-timeline.mjs';
+import { PLAYER_LOOKS } from './sports-art.mjs';
 import { playerBones, worldHand, worldFoot, ARM_LENGTHS, LEG_LENGTHS } from './sports-rig.mjs';
 import { MATCHES, POINT_TIMES } from './sports-matches.mjs';
 
@@ -19,14 +20,57 @@ test('the three-minute animation closes without a ball or player jump', () => {
   }
 });
 
+test('the four pixel identities retain distinct numbers, hair and skin across sports', () => {
+  assert.equal(Object.keys(PLAYER_LOOKS).length,4);
+  assert.equal(new Set(Object.values(PLAYER_LOOKS).map(look=>look.number)).size,4);
+  assert.equal(new Set(Object.values(PLAYER_LOOKS).map(look=>look.style)).size,4);
+  assert.equal(new Set(Object.values(PLAYER_LOOKS).map(look=>look.skin)).size,4);
+  for(const time of [8,68,128]) {
+    const players=Object.values(sportsStateAt(time).players);
+    assert.deepEqual(players.map(player=>player.id),Object.keys(PLAYER_LOOKS));
+    assert.equal(players.filter(player=>player.team==='red').length,2);
+    assert.equal(players.filter(player=>player.team==='blue').length,2);
+  }
+});
+
+test('each ending holds the final score while a glowing ball lifts and both courts blend', () => {
+  for(let index=0;index<3;index++) {
+    const ending=sportsStateAt(index*60+56);
+    const middle=sportsStateAt(index*60+59);
+    assert.deepEqual(middle.score,ending.score);
+    assert.equal(middle.phase,'transition');
+    close(middle.morph,1);
+    close(middle.scenes[ending.sport],.5);
+    close(middle.scenes[ending.nextSport],.5);
+    assert.ok(middle.ball.y<ending.ball.y-60);
+    const before=sportsStateAt((index+1)*60-1e-7),after=sportsStateAt((index+1)*60);
+    close(before.ball.x,after.ball.x);close(before.ball.y,after.ball.y);
+    close(Math.cos(before.ball.rotation*Math.PI/180),Math.cos(after.ball.rotation*Math.PI/180));
+    if(index<2) close(before.ball.rotation,after.ball.rotation);
+    for(const id of Object.keys(after.players)) {
+      close(before.players[id].x,after.players[id].x);
+      close(before.players[id].y,after.players[id].y);
+      close(before.players[id].floor,after.players[id].floor);
+    }
+  }
+});
+
+test('the third basketball play starts blue and contains the decisive red steal', () => {
+  const steal=contactEvents(1,2).find(event=>event.action==='steal');
+  assert.equal(steal.player,'red-1');
+  assert.equal(sportsStateAt(90).possession,'blue');
+  assert.equal(sportsStateAt(steal.time+.05).possession,'red');
+  assert.deepEqual(sportsStateAt(98).score,{red:2,blue:1});
+});
+
 test('one ball stays visible and continuous over rallies, resets and court changes', () => {
   let previous=sportsStateAt(0);
-  for (let time=.02;time<180;time+=.02) {
+  for (let time=.005;time<180;time+=.005) {
     const state=sportsStateAt(time);
     close(Object.values(state.scenes).reduce((sum,n)=>sum+n,0),1);
     assert.ok(state.ball.x-13>24 && state.ball.x+13<1160);
-    assert.ok(state.ball.y-13>98 && state.ball.y+13<314);
-    assert.ok(distance([state.ball.x,state.ball.y],[previous.ball.x,previous.ball.y])<16,`Ball jumps at ${time}`);
+    assert.ok(state.ball.y-13>40 && state.ball.y+13<314);
+    assert.ok(distance([state.ball.x,state.ball.y],[previous.ball.x,previous.ball.y])<12,`Ball jumps at ${time}`);
     previous=state;
   }
   for (const time of [59.5,119.5,179.5]) assert.equal(Object.values(sportsStateAt(time).scenes).filter(n=>n>0).length,2);
@@ -67,23 +111,23 @@ test('arm joints remain anatomically bounded and all bone lengths stay fixed', (
 
 test('football and basketball include close challenges and an actual steal followed by recovery', () => {
   for (const matchIndex of [0,1]) for (const round of MATCHES[matchIndex].rounds) {
-    const start=matchIndex*60+round.scoreAt-8.8;
-    const attack=round.possession,defence=attack==='red'?'blue':'red';
-    const duel=sportsStateAt(start+(matchIndex===0?1.35:1.8));
+    const at=q=>actionTimeAt(matchIndex,round.index,q);
+    const attack=round.scorer,defence=attack==='red'?'blue':'red';
+    const duel=sportsStateAt(at(matchIndex===0?1.35:1.8));
     assert.ok(Math.abs(duel.players[`${attack}-1`].x-duel.players[`${defence}-1`].x)<68);
-    assert.equal(sportsStateAt(start+2).possession,defence,'Defender must actually gain the ball');
-    assert.equal(sportsStateAt(start+2.7).possession,attack,'Attacker must visibly recover it');
-    const late=sportsStateAt(start+6);
+    assert.equal(sportsStateAt(at(2)).possession,defence,'The opponent must actually control the ball');
+    assert.equal(sportsStateAt(at(2.7)).possession,attack,'The scorer must visibly recover or steal it');
+    const late=sportsStateAt(at(6));
     assert.ok(attack==='red'?late.players[`${attack}-1`].x>592:late.players[`${attack}-1`].x<592);
   }
 });
 
 test('a thief runs past the attacker and the attacker later beats the defender', () => {
   for(const matchIndex of [0,1]) for(const round of MATCHES[matchIndex].rounds) {
-    const start=matchIndex*60+round.scoreAt-8.8,attack=round.possession;
+    const at=q=>actionTimeAt(matchIndex,round.index,q),attack=round.scorer;
     const defence=attack==='red'?'blue':'red',sign=attack==='red'?1:-1;
     const relative=q=>{
-      const players=sportsStateAt(start+q).players;
+      const players=sportsStateAt(at(q)).players;
       return sign*(players[`${attack}-1`].x-players[`${defence}-1`].x);
     };
     assert.ok(relative(1.6)<0,'Defender starts in front');
@@ -115,11 +159,13 @@ test('every volleyball serve is hit from behind the end line, with both feet out
 
 test('football tackles, recoveries and shots put the shoe against the ball', () => {
   for (const round of MATCHES[0].rounds) {
-    const start=round.scoreAt-8.8,defence=round.possession==='red'?'blue':'red';
-    for(const [q,id] of [[1.35,`${defence}-1`],[2.4,`${round.possession}-1`],[3.85,`${round.possession}-2`],[7.2,`${round.possession}-1`]]) {
-      const state=sportsStateAt(start+q),player=state.players[id],foot=worldFoot(player);
+    const at=q=>actionTimeAt(0,round.index,q),defence=round.scorer==='red'?'blue':'red';
+    const events=[[2.4,`${round.scorer}-1`],[3.85,`${round.scorer}-2`],[7.2,`${round.scorer}-1`]];
+    if(round.possession===round.scorer) events.push([1.35,`${defence}-1`]);
+    for(const [q,id] of events) {
+      const state=sportsStateAt(at(q)),player=state.players[id],foot=worldFoot(player);
       const toe=[foot[0]+player.scale*player.facing*10,foot[1]];
-      assert.ok(distance(toe,[state.ball.x,state.ball.y])<15,`${id} misses football at ${start+q}`);
+      assert.ok(distance(toe,[state.ball.x,state.ball.y])<15,`${id} misses football at ${at(q)}`);
       close(worldFoot(player,'back')[1],player.floor);
     }
   }
@@ -150,7 +196,7 @@ test('every scored point has the ball at the correct opposing goal, rim or court
   for (let match=0;match<3;match++) for (const point of POINT_TIMES) {
     const state=sportsStateAt(match*60+point);
     const scorer=state.round.scorer;
-    const expectedX=scorer==='red'?(match===2?1034:1110):(match===2?150:74);
+    const expectedX=scorer==='red'?(match===2?990:1110):(match===2?194:74);
     close(state.ball.x,expectedX);
     close(state.ball.y,match===0?276:match===1?158:296);
   }

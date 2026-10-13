@@ -1,4 +1,4 @@
-import { MATCHES, SPORTS_DURATION, matchStateAt } from './sports-matches.mjs';
+import { MATCHES, SPORTS_DURATION, INTRO_DURATION, TRANSITION_START, matchStateAt } from './sports-matches.mjs';
 import { FLOOR, POSES, makePlayer, worldHand, legAngles, strideFeet, blendPose, smooth, mix, clamp, windowWeight } from './sports-rig.mjs';
 export { SPORTS_DURATION };
 
@@ -29,8 +29,15 @@ function flight(time,segments) {
 }
 
 export function actionDuration(sport,round) {
-  return sport==='volleyball'?(round.possession===round.scorer?8.8:6.4):8.8;
+  return Math.min(round.scoreAt-round.start, choreographyDuration(sport,round));
 }
+
+export const choreographyDuration = (sport,round) => sport==='volleyball'?(round.possession===round.scorer?8.8:6.4):8.8;
+export const actionTimeAt = (matchIndex,roundIndex,q) => {
+  const match=MATCHES[matchIndex],round=match.rounds[roundIndex];
+  return matchIndex*60+round.scoreAt-actionDuration(match.sport,round)
+    +q*actionDuration(match.sport,round)/choreographyDuration(match.sport,round);
+};
 
 function basePlayers(sport) {
   const xs=sport==='football'?[500,220]:sport==='basketball'?[470,310]:[96,430];
@@ -73,7 +80,7 @@ function jump(player,q,contact,height=48) {
   const progress=clamp((q-takeoff)/(land-takeoff));
   const airborne=4*progress*(1-progress);
   player.y-=player.scale*height*airborne;
-  player.airborne=airborne;
+  player.airborne=Math.max(player.airborne??0,airborne);
   crouch(player,windowWeight(q,land,land+.12,land+.18,land+.4),8);
 }
 
@@ -127,7 +134,7 @@ function poseLegs(player) {
 }
 
 function playersDuring(sport,round,q) {
-  const players=basePlayers(sport),team=round.possession,opponent=other(team);
+  const players=basePlayers(sport),team=sport==='volleyball'?round.possession:round.scorer,opponent=other(team);
   const lead=players[`${team}-1`],mate=players[`${team}-2`];
   const guard=players[`${opponent}-1`],keeper=players[`${opponent}-2`];
   const place=(player,points)=>move(player,team,points,q);
@@ -145,7 +152,8 @@ function playersDuring(sport,round,q) {
     place(guard,[[0,660],[.75,632],[1.35,640],[1.6,650],[2.05,576],[2.2,564],[2.4,565],[3.15,690],[3.7,673],[4.15,710],[5.1,781],[6.35,902],[6.65,872],[7.2,868],[8.8,868]]);
     place(mate,[[0,220],[.75,328],[1.5,458],[2.5,527],[3.15,559],[3.7,560],[3.85,560],[4.15,594],[5.1,658],[6.35,810],[8.8,840]]);
     place(keeper,[[0,1008],[6.35,1008],[7.65,1028],[8.8,1038]]);
-    challenge(guard,q,1.35,sport);challenge(lead,q,2.4,sport,28);
+    if(round.possession===round.scorer) challenge(guard,q,1.35,sport);
+    challenge(lead,q,2.4,sport,28);
     challenge(guard,q,3.15,sport);challenge(guard,q,6.65,sport);
     kick(mate,q,3.85);kick(lead,q,7.2);
     arms(lead,'shield',windowWeight(q,.9,1.25,1.5,1.9));
@@ -163,7 +171,8 @@ function playersDuring(sport,round,q) {
     lead.arms.front=[-25+10*push,-78+22*push];
     arms(guard,'shield',.5);
     crouch(lead,windowWeight(q,.55,.8,1.05,1.35),7);
-    challenge(guard,q,1.65,sport);challenge(lead,q,2.3,sport);
+    if(round.possession===round.scorer) challenge(guard,q,1.65,sport);
+    challenge(lead,q,2.3,sport);
     arms(guard,'carry',windowWeight(q,1.65,1.8,2.2,2.4));
     arms(lead,'carry',windowWeight(q,2.25,2.5,2.85,3.2));
     arms(lead,'reach',windowWeight(q,2.9,3.2,3.25,3.6));
@@ -180,9 +189,10 @@ function playersDuring(sport,round,q) {
     arms(keeper,'guard',windowWeight(q,6.75,7.2,7.5,7.9));
     jump(lead,q,7.2,44);jump(guard,q,7.24,38);jump(keeper,q,7.4,22);
   } else {
+    lane(mate,86);lane(keeper,86);
     const returns=team===round.scorer,firstHit=returns?4.5:5.1;
-    place(lead,[[0,96],[1.1,96],[3.8,222],[5.2,286],[6.5,286],[7,345],[8.8,345]]);
-    move(guard,opponent,[[0,286],[3.1,286],[firstHit-.5,345],[firstHit+.5,345],[8.8,286]],q);
+    place(lead,[[0,96],[1.1,96],[3.8,222],[5.2,286],[6.5,286],[7.5,520],[8.8,520]]);
+    move(guard,opponent,[[0,286],[3.1,286],[firstHit-.5,520],[firstHit+.5,520],[7.5,550],[8.8,550]],q);
     arms(lead,'carry',windowWeight(q,0,0,.2,.5));
     arms(lead,'strike',windowWeight(q,.25,.8,.9,1.2));
     arms(lead,'follow',windowWeight(q,.9,1.15,1.4,1.75));
@@ -198,6 +208,14 @@ function playersDuring(sport,round,q) {
       arms(mate,'set',windowWeight(q,6.05,6.5,6.6,6.9));
       crouch(mate,windowWeight(q,6.05,6.25,6.3,6.5),5);
       spike(lead,q,7.5);
+      arms(guard,'guard',windowWeight(q,6.9,7.5,7.65,8.0));
+      jump(guard,q,7.5,53);
+    } else {
+      // A losing defender lunges low for the last spike; the ball lands just
+      // beyond the outstretched hands, rather than everybody watching it fall.
+      const dive=windowWeight(q,firstHit+.12,firstHit+.7,firstHit+.9,6.4);
+      arms(lead,'bump',dive);
+      crouch(lead,dive,18);lead.lean+=36*dive;
     }
   }
   for(const player of Object.values(players)) poseLegs(player);
@@ -211,12 +229,13 @@ function handAt(sport,round,q,id,hand='front') {
 }
 
 function ballDuring(sport,round,q) {
-  const team=round.possession,opponent=other(team);
+  const team=sport==='volleyball'?round.possession:round.scorer,opponent=other(team);
   const leadId=`${team}-1`,mateId=`${team}-2`,guardId=`${opponent}-1`;
   const transform=point=>[sideX(team,point[0]),point[1]];
   if(sport==='football') {
     const players=playersDuring(sport,round,q),lead=players[leadId],guard=players[guardId];
     const footBall=(player,time=q)=>[player.x+player.scale*direction(player.team)*32,player.floor-12-2*Math.sin(time*Math.PI*4)**2];
+    if(round.possession!==round.scorer && q<2.2) return footBall(guard);
     if(q<1.35 || q>=2.4 && q<3.15 || q>=4.15 && q<7.2) return footBall(lead);
     if(q>=1.6 && q<2.2) return footBall(guard);
     const at=(id,time)=>footBall(playersDuring(sport,round,time)[id],time);
@@ -233,6 +252,10 @@ function ballDuring(sport,round,q) {
   if(sport==='basketball') {
     const hand=(id,time)=>handAt(sport,round,time,id);
     const looseFrom=hand(guardId,2.2),looseTo=hand(leadId,2.5);
+    if(round.possession!==round.scorer && q<2.2) {
+      const point=hand(guardId,q),bounce=Math.sin(Math.PI*q/.6)**2*windowWeight(q,0,.1,1.5,1.8);
+      return [point[0],mix(point[1],playersDuring(sport,round,q)[guardId].floor-12,bounce)];
+    }
     if(q<1.4 || q>=5.15 && q<6.55) {
       const point=hand(leadId,q),bounce=Math.sin(Math.PI*(q<1.4?q:q-5.15)/.6)**2
         * (q<1.4?windowWeight(q,0,.1,1.2,1.4):windowWeight(q,5.15,5.25,6.35,6.55));
@@ -253,7 +276,7 @@ function ballDuring(sport,round,q) {
   const serve=handAt(sport,round,.8,leadId),receive=handAt(sport,round,2.2,guardId,'both');
   const setter=handAt(sport,round,3.1,`${opponent}-2`,'both');
   const hitter=handAt(sport,round,firstHit,guardId);
-  const scoreFloor=[round.scorer==='red'?1034:150,296];
+  const scoreFloor=[round.scorer==='red'?990:194,296];
   const shots=[
     [0,.8,[handAt(sport,round,0,leadId),[sideX(team,125),132],serve]],
     [.8,2.2,[serve,[592,64],receive]],
@@ -273,6 +296,13 @@ function ballDuring(sport,round,q) {
 
 function initialState(sport,round) {
   return {players:playersDuring(sport,round,0),ball:ballDuring(sport,round,0)};
+}
+
+function entranceState(sport,round) {
+  const initial=initialState(sport,round);
+  const floors={'red-1':308,'red-2':218,'blue-1':278,'blue-2':248};
+  const xs={'red-1':80,'red-2':160,'blue-1':1104,'blue-2':1024};
+  return {players:Object.fromEntries(PLAYER_IDS.map(id=>[id,makePlayer(id,initial.players[id].team,xs[id],floors[id])])),ball:[592,296]};
 }
 
 function interpolatePlayers(a,b,weight,progress,duration) {
@@ -300,13 +330,22 @@ function interpolatePlayers(a,b,weight,progress,duration) {
 
 export function sportsStateAt(seconds) {
   const match=matchStateAt(seconds),duration=actionDuration(match.sport,match.round);
-  const q=clamp(match.roundTime-(match.roundDuration-duration),0,duration);
+  const q=clamp(match.roundTime-(match.roundDuration-duration),0,duration)
+    *choreographyDuration(match.sport,match.round)/duration;
   let players=playersDuring(match.sport,match.round,q),ball=ballDuring(match.sport,match.round,q);
   let possession=match.possession;
   const scenes={football:0,basketball:0,volleyball:0};scenes[match.sport]=1;
+  let morph=0;
+  if(match.phase==='intro') {
+    const entrance=entranceState(match.sport,match.round),initial=initialState(match.sport,match.round);
+    const progress=clamp(match.matchTime/5);
+    players=interpolatePlayers(entrance.players,initial.players,smooth(progress),progress,5);
+    ball=pair(entrance.ball,initial.ball,smooth((match.matchTime-5)/(INTRO_DURATION-5)));
+  }
   if(match.phase==='play' && match.sport!=='volleyball') {
     const stolen=match.sport==='football'?q>=1.6&&q<2.4:q>=1.8&&q<2.5;
-    if(stolen) possession=other(match.round.possession);
+    if(match.round.possession!==match.round.scorer) possession=q<(match.sport==='football'?2.4:2.5)?match.round.possession:match.round.scorer;
+    else if(stolen) possession=other(match.round.possession);
   }
   if(match.phase==='restart') {
     const nextRound=MATCHES[match.matchIndex].rounds[match.round.index+1];
@@ -318,12 +357,16 @@ export function sportsStateAt(seconds) {
       :[ball,[ball[0],112],[next.ball[0],112],next.ball];
     ball=curve(controls,clamp(elapsed/2));
   } else if(match.winner) {
-    for(const player of Object.values(players)) if(player.team===match.winner) arms(player,'celebrate',windowWeight(match.matchTime,58,58.4,59,59.8));
+    for(const player of Object.values(players)) if(player.team===match.winner) {
+      arms(player,'celebrate',windowWeight(match.matchTime,56,56.3,58,59.8));
+      jump(player,match.matchTime,57+(player.id.endsWith('2')?.15:0),32);
+    }
     if(match.phase==='transition') {
       const nextIndex=(match.matchIndex+1)%3,nextMatch=MATCHES[nextIndex];
-      const next=initialState(nextMatch.sport,nextMatch.rounds[0]),weight=smooth(match.matchTime-59);
-      players=interpolatePlayers(players,next.players,weight,match.matchTime-59,1);
-      ball=curve([ball,[ball[0],138],[next.ball[0],138],next.ball],match.matchTime-59);
+      const next=entranceState(nextMatch.sport,nextMatch.rounds[0]),progress=(match.matchTime-TRANSITION_START)/(60-TRANSITION_START),weight=smooth(progress);
+      players=interpolatePlayers(players,next.players,weight,progress,2);
+      ball=curve([ball,[ball[0],25],[next.ball[0],25],next.ball],smooth(progress));
+      morph=Math.sin(Math.PI*progress);
       scenes[match.sport]=1-weight;scenes[match.nextSport]=weight;
     }
   }
@@ -336,28 +379,30 @@ export function sportsStateAt(seconds) {
     player.headAngle=clamp(Math.atan2(ball[1]-headY,Math.abs(ball[0]-headX))*180/Math.PI-player.lean,-55,55);
     player.layer=player.floor<233?0:player.floor<263?1:player.floor<293?2:3;
   }
-  return {...match,possession,players,scenes,ball:{x:ball[0],y:ball[1],rotation:match.time*180},actionTime:q};
+  const extraTurns=match.matchIndex*720+(match.phase==='transition'?720*smooth((match.matchTime-TRANSITION_START)/(60-TRANSITION_START)):0);
+  return {...match,possession,players,scenes,morph,ball:{x:ball[0],y:ball[1],rotation:match.time*180+extraTurns},actionTime:q};
 }
 
 export function contactEvents(matchIndex,roundIndex) {
-  const match=MATCHES[matchIndex],round=match.rounds[roundIndex],duration=actionDuration(match.sport,round);
-  const start=matchIndex*60+round.scoreAt-duration;
-  const player=`${round.possession}-1`,mate=`${round.possession}-2`,opp=other(round.possession);
+  const match=MATCHES[matchIndex],round=match.rounds[roundIndex];
+  const at=q=>actionTimeAt(matchIndex,roundIndex,q);
+  const team=match.sport==='volleyball'?round.possession:round.scorer;
+  const player=`${team}-1`,mate=`${team}-2`,opp=other(team);
   if(match.sport==='football') return [];
   if(match.sport==='basketball') return [
-    {time:start+1.8,player:`${opp}-1`,hand:'front',action:'steal'},
-    {time:start+2.5,player,hand:'front',action:'recover'},
-    {time:start+3.2,player,hand:'front',action:'pass'},
-    {time:start+3.85,player:mate,hand:'front',action:'catch'},
-    {time:start+4.25,player:mate,hand:'front',action:'pass'},
-    {time:start+5.15,player,hand:'front',action:'catch'},
-    {time:start+7.2,player,hand:'front',action:'shoot'},
+    {time:at(1.8),player:`${opp}-1`,hand:'front',action:round.possession===round.scorer?'steal':'carry'},
+    {time:at(2.5),player,hand:'front',action:round.possession===round.scorer?'recover':'steal'},
+    {time:at(3.2),player,hand:'front',action:'pass'},
+    {time:at(3.85),player:mate,hand:'front',action:'catch'},
+    {time:at(4.25),player:mate,hand:'front',action:'pass'},
+    {time:at(5.15),player,hand:'front',action:'catch'},
+    {time:at(7.2),player,hand:'front',action:'shoot'},
   ];
-  const events=[{time:start+.8,player,hand:'front',action:'serve'},
-    {time:start+2.2,player:`${opp}-1`,hand:'both',action:'bump'},
-    {time:start+3.1,player:`${opp}-2`,hand:'both',action:'set'},
-    {time:start+(round.scorer===round.possession?4.5:5.1),player:`${opp}-1`,hand:'front',action:'spike'}];
-  if(round.scorer===round.possession) events.push({time:start+5.6,player,hand:'both',action:'bump'},
-    {time:start+6.5,player:mate,hand:'both',action:'set'},{time:start+7.5,player,hand:'front',action:'spike'});
+  const events=[{time:at(.8),player,hand:'front',action:'serve'},
+    {time:at(2.2),player:`${opp}-1`,hand:'both',action:'bump'},
+    {time:at(3.1),player:`${opp}-2`,hand:'both',action:'set'},
+    {time:at(round.scorer===round.possession?4.5:5.1),player:`${opp}-1`,hand:'front',action:'spike'}];
+  if(round.scorer===round.possession) events.push({time:at(5.6),player,hand:'both',action:'bump'},
+    {time:at(6.5),player:mate,hand:'both',action:'set'},{time:at(7.5),player,hand:'front',action:'spike'});
   return events;
 }

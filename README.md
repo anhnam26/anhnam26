@@ -37,7 +37,7 @@ Based in **Ho Chi Minh City, Vietnam**. Studying Information Technology at **HCM
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg">
-    <img src="assets/activity-dark.svg" alt="My GitHub activity: yearly contributions, public repositories and stars. Red and blue teams contest the ball in one-minute football and basketball matches, then play volleyball with serves from behind the end lines. The central scoreboard ends at red 3–2, blue 3–2 and red 3–2. Click to see current GitHub activity." width="100%">
+    <img src="assets/activity-dark.svg" alt="My GitHub activity: yearly contributions, public repositories and stars. Pixel Sports Club: four distinct red and blue players in a seamless three-minute football, basketball and volleyball loop. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. The ball glows and morphs as the courts transform. Click to see current GitHub activity." width="100%">
   </picture>
 </a>
 
