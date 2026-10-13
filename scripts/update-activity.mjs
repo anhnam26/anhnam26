@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isDeepStrictEqual } from 'node:util';
+import { renderSportsAnimation } from './sports-animation.mjs';
 
 const USERNAME = 'anhnam26';
 const DAY = 86_400_000;
@@ -89,10 +90,10 @@ export function renderActivity(snapshot, theme) {
   }).format(new Date(snapshot.fetchedAt));
   const format = (value) => new Intl.NumberFormat('en-US').format(value);
   const title = `GitHub activity — ${format(calendar.total)} contributions shown in the last year`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="414" viewBox="0 0 1280 414" role="img" aria-labelledby="title desc">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1100" viewBox="0 0 1280 1100" role="img" aria-labelledby="title desc">
   <title id="title">${escapeXml(title)}</title>
-  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7).</desc>
-  <rect x=".5" y=".5" width="1279" height="413" rx="16" fill="${p.bg}" stroke="${p.line}"/>
+  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7). Red and blue teams play three faster first-to-three matches beneath the calendar, with a central scoreboard and fixed 3–2 results. Each sport lasts 80 seconds including celebration and transition, for a four-minute loop.</desc>
+  <rect x=".5" y=".5" width="1279" height="1099" rx="16" fill="${p.bg}" stroke="${p.line}"/>
   <g font-family="Consolas,'Courier New',monospace" fill="${p.accent}" font-size="14" letter-spacing="2">
     <text x="48" y="40">BUILD LOG / GITHUB ACTIVITY</text>
     <text x="1232" y="40" text-anchor="end" fill="${p.muted}" letter-spacing="0">@${USERNAME}</text>
@@ -109,7 +110,7 @@ export function renderActivity(snapshot, theme) {
       <text x="916" y="150">Stars · owned non-fork repos</text>
     </g>
   </g>
-  <path d="M460 80V150M868 80V150M48 174H1232M48 363H1232" stroke="${p.line}"/>
+  <path d="M460 80V150M868 80V150M48 174H1232M48 363H1232M48 402H1232" stroke="${p.line}"/>
   <g font-family="Consolas,monospace" fill="${p.muted}" font-size="12">
     ${months.join('\n    ')}
     <text x="72" y="254">Mon</text><text x="72" y="294">Wed</text><text x="72" y="334">Fri</text>
@@ -120,6 +121,7 @@ export function renderActivity(snapshot, theme) {
     ${p.levels.map((color, i) => `<rect x="1060" y="378" width="12" height="12" rx="2" fill="${color}" transform="translate(${i * 19} 0)"/>`).join('')}
     <text x="1166" y="389">More</text>
   </g>
+  ${renderSportsAnimation(p)}
 </svg>
 `;
 }
