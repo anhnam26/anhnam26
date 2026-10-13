@@ -1,23 +1,37 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { MATCHES, SPORTS_DURATION, TEAMS, CELEBRATION_DURATION, matchStateAt } from './sports-matches.mjs';
-import { choreographyDuration, elapsedAtQ } from './sports-paths.mjs';
+import { MATCHES, MATCH_DURATION, SPORTS_DURATION, TEAMS, CELEBRATION_DURATION, matchStateAt } from './sports-matches.mjs';
+import { choreographyDuration, playDuration, returnPlan, courtAt, ENTRANCE_COURT } from './sports-paths.mjs';
 
-test('match lengths follow normal-paced plays, restarts and celebrations', () => {
+test('each sport lasts 80 seconds including entrances, restarts, celebration and transition', () => {
+  assert.equal(MATCH_DURATION,80);
+  assert.equal(SPORTS_DURATION,240);
+  assert.deepEqual(MATCHES.map(match=>match.startAt),[0,80,160]);
   assert.equal(SPORTS_DURATION,MATCHES.reduce((sum,m)=>sum+m.duration,0));
   assert.deepEqual(matchStateAt(0),matchStateAt(SPORTS_DURATION));
   for(const [index,match] of MATCHES.entries()) {
-    assert.notEqual(match.duration,60);
+    assert.equal(match.duration,80);
     assert.equal(matchStateAt(match.startAt).sport,match.sport);
     assert.equal(matchStateAt(match.startAt+match.duration-.001).sport,match.sport);
     assert.equal(matchStateAt(match.startAt+match.duration).sport,MATCHES[(index+1)%3].sport);
     assert.ok(Math.abs(match.transitionStart-match.winAt-CELEBRATION_DURATION)<1e-6);
-    assert.ok(match.rounds.every(round=>round.duration>=choreographyDuration(match.sport,round)));
-    for(const round of match.rounds) {
-      for(let q=.1;q<choreographyDuration(match.sport,round);q+=.1) {
-        assert.ok(elapsedAtQ(match.sport,round,q)-elapsedAtQ(match.sport,round,q-.1)>=.1-1e-9);
+    assert.ok(match.timeScale>0&&match.timeScale<1,'Every sport must play faster than the previous clock');
+    assert.equal(match.introBallDuration,3*match.timeScale);
+    const checkPlan=(actual,baseline)=>{
+      for(const key of ['enter','cross','settle','duration']) {
+        assert.ok(Math.abs(actual[key]-baseline[key]*match.timeScale)<1e-6);
       }
+    };
+    checkPlan(match.introPlan,returnPlan(ENTRANCE_COURT,courtAt(match.sport,match.rounds[0],0)));
+    for(const round of match.rounds) {
+      assert.equal(round.timeScale,match.timeScale,'Use one speed factor throughout each match');
+      assert.equal(round.duration,playDuration(match.sport,round)*match.timeScale);
+      const end=courtAt(match.sport,round,choreographyDuration(match.sport,round));
+      const next=match.rounds[round.index+1];
+      if(next) checkPlan(round.returnPlan,returnPlan(end,courtAt(match.sport,next,0)));
+      else checkPlan(match.transitionPlan,returnPlan(end,ENTRANCE_COURT));
     }
+    assert.ok(Math.abs(match.transitionStart+match.transitionPlan.duration-match.duration)<2e-6);
   }
   assert.equal(TEAMS.red.side,'left');assert.equal(TEAMS.blue.side,'right');
 });
@@ -62,7 +76,7 @@ test('volleyball awards the next serve to the point winner', () => {
   }
 });
 
-test('the fixed scoring order and required turnovers survive the relaxed timing', () => {
+test('the fixed scoring order and required turnovers survive faster playback', () => {
   assert.deepEqual(MATCHES.map(match=>match.rounds.map(round=>round.scorer)),[
     ['red','blue','red','blue','blue'],['blue','red','red','blue','red'],['red','blue','red','blue','blue'],
   ]);
@@ -76,6 +90,9 @@ test('the fixed scoring order and required turnovers survive the relaxed timing'
 });
 
 test('every sampled time is repeatable and scores stop after a winner', () => {
+  for(const time of [SPORTS_DURATION-1e-10,SPORTS_DURATION+1e-10,-1e-10]) {
+    assert.deepEqual(matchStateAt(time),matchStateAt(0),'Sub-nanosecond seam rounding must wrap safely');
+  }
   for(let time=0;time<SPORTS_DURATION;time+=.25) {
     const state=matchStateAt(time);
     assert.deepEqual(state,matchStateAt(time+SPORTS_DURATION));

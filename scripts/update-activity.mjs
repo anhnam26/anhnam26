@@ -92,7 +92,7 @@ export function renderActivity(snapshot, theme) {
   const title = `GitHub activity — ${format(calendar.total)} contributions shown in the last year`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="1100" viewBox="0 0 1280 1100" role="img" aria-labelledby="title desc">
   <title id="title">${escapeXml(title)}</title>
-  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7). Red and blue teams play three first-to-three matches beneath the calendar at normal running speed, with a central scoreboard and fixed 3–2 results.</desc>
+  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7). Red and blue teams play three faster first-to-three matches beneath the calendar, with a central scoreboard and fixed 3–2 results. Each sport lasts 80 seconds including celebration and transition, for a four-minute loop.</desc>
   <rect x=".5" y=".5" width="1279" height="1099" rx="16" fill="${p.bg}" stroke="${p.line}"/>
   <g font-family="Consolas,'Courier New',monospace" fill="${p.accent}" font-size="14" letter-spacing="2">
     <text x="48" y="40">BUILD LOG / GITHUB ACTIVITY</text>

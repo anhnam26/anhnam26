@@ -27,9 +27,10 @@ address synchronized when changing contact details.
 
 The README displays the activity panel after current work and before the small
 repository section. A separate 16:9 arena below the calendar runs Pixel Sports
-Club: football, basketball and volleyball, in a seamless loop. Matches follow
-the pace of their plays and end when a team reaches three points. They have no
-one-minute deadline. The current loop takes approximately seven minutes.
+Club: football, basketball and volleyball, in a seamless four-minute loop.
+Each sport lasts exactly 80 seconds, including entrance, five scoring plays,
+restarts, the winner's celebration and the transition to the next court.
+Football starts at 0 seconds, basketball at 80 and volleyball at 160.
 Four hand-authored pixel cartoon athletes keep their identities across sports:
 Red 07 has spiky dark hair, Red 11 has curls and a yellow headband, Blue 04 has
 an orange ponytail, and Blue 09 has cropped hair and a mint headband. Exactly
@@ -52,15 +53,18 @@ motion hides them. Every scoring play, including a basket, adds one point.
 
 Football starts with red possession, basketball with blue possession, and
 volleyball with a red serve. After each of the first four points, the players
-return to position at the same normal pace. Blue steals from red before the final
+return to position at the same increased pace. Blue steals from red before the final
 football goal. Red steals from blue during the third basketball play. These
 turnovers reconcile the fixed scoring order with the normal restart rules.
 The final attack uses the same pace as the opening play. No random events change
-the script. A shared monotone play clock slows fast movement before direction
-changes and keeps all running below 105 logical pixels per second. It never
-speeds up authored play to fit a duration. Contact times and scoring use that
-same clock. Return trips change court depth, cross in separate lanes, then
-settle into formation; each leg receives enough time for the same speed limit.
+the script. A shared monotone baseline clock smooths movement around direction
+changes. Each sport applies one uniform time scale to entrances, plays, restarts
+and court transitions, fitting them into 74.5 seconds while preserving a
+5.5-second celebration. Football and basketball run about twice as fast as the
+previous animation; volleyball runs about 1.3 times as fast. Contact times,
+limb movement and scoring follow the same scaled clock. Return trips change
+court depth, cross in separate lanes, then settle into formation. The final
+attack uses the opening attack's speed factor, with no deadline catch-up.
 
 Football shows contested dribbling, a tackle, recovery, a give-and-go and a shot
 past a saving defender. Basketball includes dribbling, a steal, passing and a
@@ -84,8 +88,7 @@ images or font dependencies. Motion is sampled at 12 Hz, together with exact
 path waypoints, return phases, contact, scoring,
 facing and depth changes. Redundant samples are discarded within 0.4 logical
 pixels for position and 1.2 degrees for joints; browser interpolation fills the
-gaps. The longer normal-paced asset is about 4.6 MB per theme. Tests enforce a
-5 MB size ceiling for this expanded loop. The generated CSS is cached within the render process so
+gaps. Tests enforce a 5 MB size ceiling per theme. The generated CSS is cached within the render process so
 both themes use the identical choreography.
 
 Shoulders, elbows, hips and knees stay connected through nested fixed-length
@@ -167,7 +170,7 @@ from the latest `main` branch. Disable the workflow in Actions to stop refreshes
 - `scripts/update-activity.mjs`: activity layout, colors and data collection.
 - `.github/workflows/update-activity.yml`: hourly refresh and bot publication.
 - `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
-- `scripts/sports-paths.mjs`: court paths, normal-paced play clocks and returns.
+- `scripts/sports-paths.mjs`: court paths, baseline play clocks and returns.
 - `scripts/sports-celebration.mjs`: winner-only fireworks and confetti.
 - `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
 - `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.

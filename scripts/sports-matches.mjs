@@ -1,6 +1,7 @@
 import { choreographyDuration, courtAt, playDuration, returnPlan, ENTRANCE_COURT } from './sports-paths.mjs';
 
-// One repeatable first-to-three script. Timing follows normal-paced movement.
+// One repeatable first-to-three script, retimed evenly within each sport.
+export const MATCH_DURATION = 80;
 export const CELEBRATION_DURATION = 5.5;
 export const TEAMS = Object.freeze({
   red: Object.freeze({ side:'left', color:'#ff4b60', name:'RED' }),
@@ -29,9 +30,20 @@ function makeMatch(sport,initialPossession,scorers) {
   }
   const last=rounds.at(-1),winAt=last.scoreAt;
   const transitionPlan=returnPlan(courtAt(sport,last,choreographyDuration(sport,last)),ENTRANCE_COURT);
-  const transitionStart=rounded(winAt+CELEBRATION_DURATION);
-  return {sport,rounds:Object.freeze(rounds.map(Object.freeze)),winner:scorers.at(-1),introPlan,introDuration,winAt,
-    transitionStart,transitionPlan,duration:rounded(transitionStart+transitionPlan.duration)};
+  // Keep the celebration readable; speed up every movement by the same factor.
+  // The opening and winning attacks share a clock, with no final-play rush.
+  const timeScale=(MATCH_DURATION-CELEBRATION_DURATION)/(winAt+transitionPlan.duration);
+  const scalePlan=plan=>Object.fromEntries(Object.entries(plan).map(([key,value])=>[key,value*timeScale]));
+  const timedRounds=rounds.map(round=>Object.freeze({
+    ...round,timeScale,start:rounded(round.start*timeScale),duration:round.duration*timeScale,
+    scoreAt:rounded(round.scoreAt*timeScale),
+    ...(round.returnPlan?{returnPlan:scalePlan(round.returnPlan)}:{}),
+  }));
+  const timedWinAt=timedRounds.at(-1).scoreAt;
+  return {sport,rounds:Object.freeze(timedRounds),winner:scorers.at(-1),timeScale,
+    introPlan:scalePlan(introPlan),introBallDuration:3*timeScale,introDuration:rounded(introDuration*timeScale),
+    winAt:timedWinAt,transitionStart:rounded(timedWinAt+CELEBRATION_DURATION),
+    transitionPlan:scalePlan(transitionPlan),duration:MATCH_DURATION};
 }
 
 let cursor=0;
@@ -48,7 +60,8 @@ export const SPORTS_DURATION = cursor;
 
 export function matchStateAt(seconds) {
   if(!Number.isFinite(seconds)) throw new Error('Animation time must be finite.');
-  const time=Math.round(((seconds%SPORTS_DURATION+SPORTS_DURATION)%SPORTS_DURATION)*1e9)/1e9;
+  // Rounding a time just below the seam can reach the full duration; wrap it again.
+  const time=(Math.round(((seconds%SPORTS_DURATION+SPORTS_DURATION)%SPORTS_DURATION)*1e9)/1e9)%SPORTS_DURATION;
   const matchIndex=MATCHES.findIndex(match=>time<match.startAt+match.duration-1e-10);
   const match=MATCHES[matchIndex],matchTime=Math.round((time-match.startAt)*1e9)/1e9;
   const score={red:0,blue:0};

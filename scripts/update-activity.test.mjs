@@ -56,7 +56,7 @@ test('render keeps year boundaries in bounds and uses Vietnam snapshot date', ()
     assert.match(svg, /Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2/);
     assert.match(svg, /FULL TIME \/ BLUE WINS/);
     assert.match(svg, /FULL TIME \/ RED WINS/);
-    assert.ok(Buffer.byteLength(svg)<5_000_000,'Keep the full normal-paced SVG below 5 MB');
+    assert.ok(Buffer.byteLength(svg)<5_000_000,'Keep the full four-minute SVG below 5 MB');
   }
 });
 

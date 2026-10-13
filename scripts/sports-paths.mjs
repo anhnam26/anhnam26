@@ -65,8 +65,8 @@ export function courtAt(sport,round,q) {
   ]));
 }
 
-// Stretch only passages that would exceed normal running speed. The same
-// monotone clock drives the players, ball, contacts and score, with no deadline.
+// Build a baseline clock that smooths fast passages and direction changes.
+// The match's uniform time scale retimes this clock for 80-second playback.
 const clocks = new Map();
 const Q_STEP = 1/120;
 function playClock(sport,round) {
@@ -109,7 +109,7 @@ export function paceAtQ(sport,round,q) {
 }
 
 // Change depth first, cross in separate lanes, then settle into formation.
-// Each leg of the return gets enough time to stay below the same speed limit.
+// Match timing scales all three legs together with the authored plays.
 export function returnPlan(from,to) {
   const ids=Object.keys(from);
   const enter=Math.max(.65,...ids.map(id=>1.5*Math.abs(from[id].floor-RETURN_LANES[id])/RUN_SPEED));

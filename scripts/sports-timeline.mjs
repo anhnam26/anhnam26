@@ -22,10 +22,10 @@ function flight(time,segments) {
   return curve(points,clamp((time-from)/(to-from)));
 }
 
-export const actionDuration = (sport,round) => playDuration(sport,round);
+export const actionDuration = (sport,round) => playDuration(sport,round)*round.timeScale;
 export const actionTimeAt = (matchIndex,roundIndex,q) => {
   const match=MATCHES[matchIndex],round=match.rounds[roundIndex];
-  return match.startAt+round.start+elapsedAtQ(match.sport,round,q);
+  return match.startAt+round.start+elapsedAtQ(match.sport,round,q)*round.timeScale;
 };
 
 function basePlayers(sport) {
@@ -126,7 +126,7 @@ function playersDuring(sport,round,q) {
   const players=basePlayers(sport),team=sport==='volleyball'?round.possession:round.scorer,opponent=other(team);
   const lead=players[`${team}-1`],mate=players[`${team}-2`];
   const guard=players[`${opponent}-1`],keeper=players[`${opponent}-2`];
-  const tracks=courtTracks(sport,round.possession===round.scorer),pace=paceAtQ(sport,round,q);
+  const tracks=courtTracks(sport,round.possession===round.scorer),pace=paceAtQ(sport,round,q)/round.timeScale;
   const place=(player,points)=>move(player,team,points,q,pace);
   const lane=(player,depth)=>{player.floor=FLOOR-depth;player.y=player.floor;player.scale=1-depth*.002;};
   for(const [role,player] of Object.entries({lead,mate,guard,keeper})) lane(player,FLOOR-roleFloor(sport,role,q));
@@ -301,7 +301,7 @@ function interpolatePlayers(a,b,elapsed,plan) {
 
 export function sportsStateAt(seconds) {
   const match=matchStateAt(seconds),script=MATCHES[match.matchIndex];
-  const q=qAtElapsed(match.sport,match.round,match.roundTime);
+  const q=qAtElapsed(match.sport,match.round,match.roundTime/match.round.timeScale);
   let players=playersDuring(match.sport,match.round,q),ball=ballDuring(match.sport,match.round,q);
   let possession=match.possession;
   const scenes={football:0,basketball:0,volleyball:0};scenes[match.sport]=1;
@@ -309,7 +309,7 @@ export function sportsStateAt(seconds) {
   if(match.phase==='intro') {
     const entrance=entranceState(match.sport,match.round),initial=initialState(match.sport,match.round);
     players=interpolatePlayers(entrance.players,initial.players,match.matchTime,script.introPlan);
-    ball=pair(entrance.ball,initial.ball,smooth((match.matchTime-script.introPlan.duration)/3));
+    ball=pair(entrance.ball,initial.ball,smooth((match.matchTime-script.introPlan.duration)/script.introBallDuration));
   }
   if(match.phase==='play' && match.sport!=='volleyball') {
     const stolen=match.sport==='football'?q>=1.6&&q<2.4:q>=1.8&&q<2.5;

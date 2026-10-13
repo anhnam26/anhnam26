@@ -12,7 +12,7 @@ import { celebrationAt } from './sports-celebration.mjs';
 const close=(a,b,tolerance=.001)=>assert.ok(Math.abs(a-b)<tolerance,`${a} != ${b}`);
 const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
 
-test('the normal-paced animation closes without a ball or player jump', () => {
+test('the four-minute animation closes without a ball or player jump', () => {
   assert.deepEqual(sportsStateAt(0),sportsStateAt(SPORTS_DURATION));
   const before=sportsStateAt(SPORTS_DURATION-1e-7),after=sportsStateAt(0);
   close(before.ball.x,after.ball.x);close(before.ball.y,after.ball.y);
@@ -157,13 +157,14 @@ test('a thief runs past the attacker and the attacker later beats the defender',
   }
 });
 
-test('all player paths stay clear and below normal running speed, including returns', () => {
+test('all player paths stay clear and respect the uniformly increased speed, including returns', () => {
   let previous=sportsStateAt(0);
   for(let time=0;time<SPORTS_DURATION;time+=.01) {
     const state=sportsStateAt(time),players=Object.values(state.players);
     if(time>0) for(const player of players) {
       const prior=previous.players[player.id];
-      assert.ok(Math.hypot(player.x-prior.x,player.floor-prior.floor)/.01<=RUN_SPEED+.05,player.id+' accelerates at '+time);
+      const speedLimit=RUN_SPEED/Math.min(MATCHES[state.matchIndex].timeScale,MATCHES[previous.matchIndex].timeScale);
+      assert.ok(Math.hypot(player.x-prior.x,player.floor-prior.floor)/.01<=speedLimit+.05,player.id+' accelerates at '+time);
     }
     previous=state;
     for(let i=0;i<players.length;i++) for(let j=i+1;j<players.length;j++) {
