@@ -1,6 +1,10 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { parseContributionCalendar, summarizeRepositories, renderActivity } from './update-activity.mjs';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { dirname, join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { parseContributionCalendar, summarizeRepositories, renderActivity, updateActivity } from './update-activity.mjs';
 
 function calendarHtml() {
   const days = Array.from({ length: 365 }, (_, i) => {
@@ -54,4 +58,53 @@ test('render keeps year boundaries in bounds and uses Vietnam snapshot date', ()
     assert.match(svg, /FULL TIME \/ RED WINS/);
     assert.ok(Buffer.byteLength(svg)<3_500_000,'Keep the full three-minute SVG below 3.5 MB');
   }
+});
+
+test('automated refresh authenticates only the REST API and publishes validated data', async (t) => {
+  const tempRoot = resolve(tmpdir());
+  const directory = await mkdtemp(join(tempRoot, 'profile-activity-'));
+  assert.equal(dirname(resolve(directory)), tempRoot);
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const calls = [];
+  let stars = 9;
+  const fetchImpl = async (url, options) => {
+    calls.push({ url, headers: options.headers });
+    const body = url.startsWith('https://api.github.com/')
+      ? [{ owner: { login: 'anhnam26' }, private: false, fork: false, stargazers_count: stars }]
+      : calendarHtml();
+    return { ok: true, json: async () => body, text: async () => body };
+  };
+  const assets = pathToFileURL(directory + '/');
+  await updateActivity({ assets, fetchImpl, token: 'test-only-token', now: () => new Date('2026-10-13T18:00:00Z') });
+  const snapshot = JSON.parse(await readFile(join(directory, 'activity.json'), 'utf8'));
+  assert.equal(snapshot.calendar.total, 1234);
+  assert.equal(snapshot.repositories, 1);
+  assert.equal(snapshot.stars, 9);
+  assert.equal(snapshot.fetchedAt, '2026-10-13T18:00:00.000Z');
+  assert.equal(calls.find(call => call.url.startsWith('https://api.github.com/')).headers.Authorization, 'Bearer test-only-token');
+  assert.equal(calls.find(call => call.url.startsWith('https://github.com/')).headers.Authorization, undefined);
+  for (const file of ['activity.json', 'activity-dark.svg', 'activity-light.svg']) {
+    assert.ok(!(await readFile(join(directory, file), 'utf8')).includes('test-only-token'));
+  }
+
+  // Identical hourly polls retain the published timestamp and all output bytes.
+  const before = await Promise.all(['activity.json', 'activity-dark.svg', 'activity-light.svg'].map(file => readFile(join(directory, file), 'utf8')));
+  await updateActivity({ assets, fetchImpl, token: 'test-only-token', now: () => new Date('2026-10-13T19:00:00Z') });
+  const after = await Promise.all(['activity.json', 'activity-dark.svg', 'activity-light.svg'].map(file => readFile(join(directory, file), 'utf8')));
+  assert.deepEqual(after, before);
+
+  await writeFile(join(directory, 'activity-dark.svg'), '<svg>outdated design</svg>');
+  await updateActivity({ assets, fetchImpl, now: () => new Date('2026-10-13T19:30:00Z') });
+  assert.equal(await readFile(join(directory, 'activity-dark.svg'), 'utf8'), before[1], 'Unchanged data must still rebuild the current design');
+
+  stars = 10;
+  await updateActivity({ assets, fetchImpl, now: () => new Date('2026-10-13T20:00:00Z') });
+  const changed = JSON.parse(await readFile(join(directory, 'activity.json'), 'utf8'));
+  assert.equal(changed.stars, 10);
+  assert.equal(changed.fetchedAt, '2026-10-13T20:00:00.000Z');
+  const beforeFailure = await Promise.all(['activity.json', 'activity-dark.svg', 'activity-light.svg'].map(file => readFile(join(directory, file), 'utf8')));
+
+  await assert.rejects(updateActivity({ assets, fetchImpl: async () => ({ ok: false, status: 503 }), token: '' }), /HTTP 503/);
+  const afterFailure = await Promise.all(['activity.json', 'activity-dark.svg', 'activity-light.svg'].map(file => readFile(join(directory, file), 'utf8')));
+  assert.deepEqual(afterFailure, beforeFailure, 'A failed refresh must keep the published assets');
 });

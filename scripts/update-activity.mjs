@@ -1,5 +1,6 @@
-import { mkdir, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath, pathToFileURL } from 'node:url';
+import { isDeepStrictEqual } from 'node:util';
 import { renderSportsAnimation } from './sports-animation.mjs';
 
 const USERNAME = 'anhnam26';
@@ -125,19 +126,24 @@ export function renderActivity(snapshot, theme) {
 `;
 }
 
-async function request(url, json = false) {
-  const response = await fetch(url, {
-    headers: { 'User-Agent': `${USERNAME}-profile`, ...(json ? { Accept: 'application/vnd.github+json' } : {}) },
+async function request(url, json, { fetchImpl, token }) {
+  const api = new URL(url).origin === 'https://api.github.com';
+  const response = await fetchImpl(url, {
+    headers: {
+      'User-Agent': `${USERNAME}-profile`,
+      ...(json ? { Accept: 'application/vnd.github+json' } : {}),
+      ...(api && token ? { Authorization: `Bearer ${token}` } : {}),
+    },
     signal: AbortSignal.timeout(20_000),
   });
   if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status} for ${url}`);
   return json ? response.json() : response.text();
 }
 
-async function fetchRepositories() {
+async function fetchRepositories(options) {
   const repositories = [];
   for (let page = 1; ; page++) {
-    const batch = await request(`https://api.github.com/users/${USERNAME}/repos?type=owner&per_page=100&page=${page}`, true);
+    const batch = await request(`https://api.github.com/users/${USERNAME}/repos?type=owner&per_page=100&page=${page}`, true, options);
     if (!Array.isArray(batch)) throw new Error('GitHub repository response is not an array.');
     repositories.push(...batch);
     if (batch.length < 100) return repositories;
@@ -145,14 +151,17 @@ async function fetchRepositories() {
   }
 }
 
-export async function updateActivity() {
+export async function updateActivity({
+  assets = ASSETS, fetchImpl = fetch, token = process.env.GITHUB_TOKEN, now = () => new Date(),
+} = {}) {
+  const options = { fetchImpl, token };
   const [html, repositories] = await Promise.all([
-    request(`https://github.com/users/${USERNAME}/contributions`), fetchRepositories(),
+    request(`https://github.com/users/${USERNAME}/contributions`, false, options), fetchRepositories(options),
   ]);
   // Finish fetching, validating and rendering before touching existing assets.
   const snapshot = {
     username: USERNAME,
-    fetchedAt: new Date().toISOString(),
+    fetchedAt: now().toISOString(),
     sources: {
       calendar: `https://github.com/users/${USERNAME}/contributions`,
       repositories: `https://api.github.com/users/${USERNAME}/repos?type=owner&per_page=100`,
@@ -160,15 +169,26 @@ export async function updateActivity() {
     ...summarizeRepositories(repositories),
     calendar: parseContributionCalendar(html),
   };
+  let previous;
+  try {
+    previous = JSON.parse(await readFile(new URL('activity.json', assets), 'utf8'));
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+  }
+  // Preserve the last published timestamp when public data is unchanged. Still
+  // render both themes so a design change is picked up by the same workflow.
+  const content = (value) => Object.fromEntries(Object.entries(value).filter(([key]) => key !== 'fetchedAt'));
+  const unchanged = previous && isDeepStrictEqual(content(previous), content(snapshot));
+  if (unchanged) snapshot.fetchedAt = previous.fetchedAt;
   const dark = renderActivity(snapshot, 'dark');
   const light = renderActivity(snapshot, 'light');
   const data = JSON.stringify(snapshot, null, 2) + '\n';
-  await mkdir(ASSETS, { recursive: true });
-  await writeFile(new URL('activity-dark.svg', ASSETS), dark, 'utf8');
-  await writeFile(new URL('activity-light.svg', ASSETS), light, 'utf8');
-  await writeFile(new URL('activity.json', ASSETS), data, 'utf8');
-  console.log(`Updated activity: ${snapshot.calendar.total} contributions, ${snapshot.repositories} public repos, ${snapshot.stars} stars.`);
-  console.log(`Assets: ${fileURLToPath(ASSETS)}`);
+  await mkdir(assets, { recursive: true });
+  await writeFile(new URL('activity-dark.svg', assets), dark, 'utf8');
+  await writeFile(new URL('activity-light.svg', assets), light, 'utf8');
+  await writeFile(new URL('activity.json', assets), data, 'utf8');
+  console.log(`${unchanged ? 'Verified unchanged' : 'Updated'} activity: ${snapshot.calendar.total} contributions, ${snapshot.repositories} public repos, ${snapshot.stars} stars.`);
+  console.log(`Assets: ${fileURLToPath(assets)}`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
