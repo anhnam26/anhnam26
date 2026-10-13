@@ -17,7 +17,7 @@ include the original game meshes, rigs, material maps or camera tracks.
 | Movement | Code drives connected limbs, walking, aiming, recoil, jumping, floating, fighting and hand contact. The source's detailed acting and motion capture are not reproduced exactly; action patterns are simplified. |
 | Cameras | Rear, low, wide, weapon and facial views follow the major reference framing. Perspective, framing, depth of field and camera movement differ. |
 | Environments | Warehouse streets, crates, wall, lab reactor, screens, office, hangar and blue space are rebuilt. Geometry and surface detail differ from the original game. |
-| UI | Squad count, phone/chat, loadout, extraction, commander, scope and roster inserts are represented. English labels and representative chat text replace Chinese UI/dialogue; text is not a full verbatim translation. |
+| UI | Squad count, phone/chat, loadout, extraction, commander, scope and roster inserts are represented. The technical diagram reuses its reference graphic with a code-driven zoom. English labels and representative chat text replace Chinese UI/dialogue; text is not a full verbatim translation. |
 | Ending photos | A source-derived printed-photo prop appears in an animated stack. It reuses one photograph rather than the source's varied photograph collection. |
 | Black interval | The source is black at 213.233-216.900. The app deliberately continues visible hangar action for those seconds. |
 | Loop seam | The final 1.133 seconds blend the scene and UI into the opening. This smooth join is an intentional adaptation; the source itself does not have that join. |
@@ -42,8 +42,9 @@ black interval. Source images are on the left, recreated images on the right.
 - [Fight, black-interval adaptation and return](k1-reference/comparison-7.jpg)
 - [Conversation, photo ending and loop adaptation](k1-reference/comparison-8.jpg)
 
-Across all pairs, average absolute RGB difference is **48.21 / 255** (individual
-pairs 21.92-90.10). This includes deliberately adapted frames and measures raw
+Across all pairs, average absolute RGB difference is **46.16 / 255** (individual
+pairs 0.02-90.10). The best-matching frame uses the source's static UI graphic.
+This includes deliberately adapted frames and measures raw
 pixel mismatch, not semantic quality. It confirms that the recreation is visibly
 different and must not be presented as pixel-perfect. Metrics and native checks
 are recorded in [verification.json](k1-reference/verification.json).
@@ -55,6 +56,8 @@ are recorded in [verification.json](k1-reference/verification.json).
   seek mode. Visible character identities and attached rig lengths were checked.
 - The skull operator alone is airborne during the 200.8-second leap; the defending
   operator stays grounded.
+- The seated character's phone stays within 0.018 rig units of the mean hand
+  position, rather than moving independently of the hands.
 - No source-video request, video element, iframe or interactive controls are used.
 - Autoplay produces changing frames. At the infinite-loop join, the final sampled
   render differs from the opening by only **0.33 / 255** mean RGB intensity.
@@ -63,6 +66,8 @@ are recorded in [verification.json](k1-reference/verification.json).
   The displayed animation remains 16:9 and does not cause horizontal scrolling.
 - Reduced motion freezes the opening pose. WebGL fallback is an independent
   GIF; its reduced-motion version is the code-rendered opening PNG.
+- After loading, both canvas layers are visible; screenshot changes verify
+  actual playback rather than relying only on the animation's internal clock.
 - Sampled warmed-up animation-frame intervals averaged about **6.06 ms** in
   headless Chrome on the local NVIDIA RTX 4060 Laptop GPU. This exceeds the 60 fps
   target on this machine. The mobile result is viewport emulation on that same

@@ -26,6 +26,8 @@ with sync_playwright() as p:
     page.on('pageerror',lambda e:report['errors'].append(str(e)))
     page.goto(args.base_url+'?inspect=1')
     page.wait_for_function('document.documentElement.dataset.ready==="true"',timeout=60000)
+    for selector in ['#scene','#interface']:
+        assert page.locator(selector).evaluate('(e)=>getComputedStyle(e).opacity')=='1','Rendered canvases must be visible after loading'
     assert page.locator('video,iframe,button').count()==0
     assert not any('K1.mp4' in name for name in page.evaluate('performance.getEntriesByType("resource").map(e=>e.name)'))
     sequence=page.evaluate('''()=>{
@@ -33,6 +35,7 @@ with sync_playwright() as p:
       for(let cycle=0;cycle<2;cycle++) {
         for(let t=0;t<K1.duration;t+=1) {
           const s=K1.seek(t+cycle*K1.duration),metrics=K1.inspect();rendered++;
+          if(s.shot.action==='phone'&&metrics.phoneGripError>.03)errors.push({t,kind:'phoneGrip',error:metrics.phoneGripError});
           if(s.loopBlend===0&&JSON.stringify([...metrics.visibleActors].sort())!==JSON.stringify([...s.shot.cast].sort()))errors.push({t,kind:'cast'});
           for(const joint of metrics.joints)if(Math.abs(joint.length-joint.expected)>1e-6)errors.push({t,kind:'joint',joint});
         }

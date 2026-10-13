@@ -16,7 +16,7 @@
     },
     {
       "seconds": 16,
-      "mae_8bit": 33.032
+      "mae_8bit": 32.359
     },
     {
       "seconds": 24,
@@ -108,7 +108,7 @@
     },
     {
       "seconds": 218,
-      "mae_8bit": 63.024
+      "mae_8bit": 0.021
     },
     {
       "seconds": 232,
@@ -134,12 +134,31 @@
   "desktop": {
     "drawCalls": 151,
     "triangles": 121684,
+    "phoneGripError": null,
     "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4060 Laptop GPU (0x000028E0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
     "geometries": 36,
     "textures": 38,
     "visibleActors": [
       "skull",
       "operator"
+    ],
+    "poses": [
+      {
+        "id": "skull",
+        "position": [
+          -1.9,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "id": "operator",
+        "position": [
+          0,
+          0,
+          -0.0
+        ]
+      }
     ],
     "joints": [
       {
@@ -149,7 +168,7 @@
       },
       {
         "actor": "skull",
-        "length": 0.42999999999999977,
+        "length": 0.4300000000000002,
         "expected": 0.43
       },
       {
@@ -159,7 +178,7 @@
       },
       {
         "actor": "operator",
-        "length": 0.43000000000000005,
+        "length": 0.4299999999999998,
         "expected": 0.43
       }
     ],
@@ -169,6 +188,7 @@
   "mobile": {
     "drawCalls": 240,
     "triangles": 137912,
+    "phoneGripError": null,
     "gpu": "ANGLE (NVIDIA, NVIDIA GeForce RTX 4060 Laptop GPU (0x000028E0) Direct3D11 vs_5_0 ps_5_0, D3D11)",
     "geometries": 36,
     "textures": 36,
@@ -177,20 +197,41 @@
       "operator",
       "rookie"
     ],
+    "poses": [
+      {
+        "id": "skull",
+        "position": [
+          -1.9,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "id": "operator",
+        "position": [
+          0,
+          0,
+          -0.0
+        ]
+      },
+      {
+        "id": "rookie",
+        "position": [
+          1.9,
+          0,
+          -1.7
+        ]
+      }
+    ],
     "joints": [
       {
         "actor": "skull",
-        "length": 0.4299999999999997,
+        "length": 0.43000000000000044,
         "expected": 0.43
       },
       {
         "actor": "skull",
-        "length": 0.4300000000000004,
-        "expected": 0.43
-      },
-      {
-        "actor": "operator",
-        "length": 0.43000000000000027,
+        "length": 0.4300000000000002,
         "expected": 0.43
       },
       {
@@ -199,18 +240,23 @@
         "expected": 0.43
       },
       {
-        "actor": "rookie",
-        "length": 0.42999999999999994,
+        "actor": "operator",
+        "length": 0.43000000000000016,
         "expected": 0.43
       },
       {
         "actor": "rookie",
-        "length": 0.4300000000000001,
+        "length": 0.4300000000000002,
+        "expected": 0.43
+      },
+      {
+        "actor": "rookie",
+        "length": 0.4299999999999998,
         "expected": 0.43
       }
     ],
     "playing": true,
-    "frameMs": 6.061111111111111,
+    "frameMs": 6.061666666666679,
     "stage": {
       "x": 0,
       "y": 312.3125,
@@ -223,6 +269,14 @@
     "seconds": 200.8,
     "skull_airborne": true,
     "defender_grounded": true
+  },
+  "phone_grip_check": {
+    "seconds": 16,
+    "distance_to_mean_hands": 0.018027756377319
+  },
+  "technical_diagram_check": {
+    "seconds": 218,
+    "mae_8bit": 0.021196831597222
   },
   "gif": {
     "format": "GIF",
@@ -281,5 +335,6 @@
     "palette_colors": 64,
     "dither": "none",
     "seam_mae_8bit": 0.6451826131687243
-  }
+  },
+  "visible_canvases": true
 }
