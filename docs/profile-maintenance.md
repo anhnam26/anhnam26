@@ -5,6 +5,15 @@ Dark and light images are selected by GitHub's theme-aware image support. The he
 uses CSS animation inside its SVG; it becomes static when reduced motion is enabled.
 Project descriptions and technology lists remain plain text for mobile readers.
 
+## Contact buttons
+
+The linked SVG badges in `assets/badges/` open Facebook, the portfolio and Gmail
+in the browser. Email uses Gmail's web compose URL, with the recipient already
+filled in, rather than relying on an installed mail application. Gmail may ask
+the visitor to sign in. The email address is also displayed as selectable text
+for visitors who prefer another mail service. Keep the badge links and displayed
+address synchronized when changing contact details.
+
 ## Refresh the activity snapshot
 
 Run with the existing Node.js installation (Node 22 or newer):

@@ -5,14 +5,12 @@
 </picture>
 
 <p align="center">
-  <a href="https://anhnam26.vercel.app/"><b>Explore my portfolio ↗</b></a>
-  &nbsp; · &nbsp;
-  <a href="#selected-work">Selected work</a>
-  &nbsp; · &nbsp;
-  <a href="mailto:anhnamnknt@gmail.com">Say hello</a>
-  &nbsp; · &nbsp;
-  <a href="https://www.facebook.com/anhnamneverdie">Facebook</a>
+  <a href="https://www.facebook.com/anhnamneverdie"><img src="assets/badges/facebook.svg" alt="Facebook — open my profile to connect" width="208" height="34"></a>
+  <a href="https://anhnam26.vercel.app/"><img src="assets/badges/portfolio.svg" alt="Portfolio — explore my work" width="208" height="34"></a>
+  <a href="https://mail.google.com/mail/?view=cm&amp;fs=1&amp;to=anhnamnknt%40gmail.com"><img src="assets/badges/email.svg" alt="Email — compose a message in Gmail on the web" width="208" height="34"></a>
 </p>
+
+<p align="center"><sub>Email: <code>anhnamnknt@gmail.com</code></sub></p>
 
 # Hi, I'm Nam.
 
@@ -82,7 +80,7 @@ A 3D office experience built around wheelchair navigation, object interactions a
 
 I'm happy to exchange ideas about **RAG, AI agents, language models and computer vision**, or collaborate on a project with a practical problem to solve.
 
-**[Portfolio ↗](https://anhnam26.vercel.app/)** · **[Email me ↗](mailto:anhnamnknt@gmail.com)** · **[Facebook ↗](https://www.facebook.com/anhnamneverdie)**
+[Message me on Facebook ↗](https://www.facebook.com/anhnamneverdie) · [Compose in Gmail ↗](https://mail.google.com/mail/?view=cm&fs=1&to=anhnamnknt%40gmail.com)
 
 ---
 
