@@ -35,6 +35,8 @@ export function poseActor(actor,state,slot) {
     group.rotation.y=-Math.PI/2;group.position.z=0;group.position.x=(progress-.5)*1.2;
   }
   if(action==='phone') {
+    root.position.y-=.25;
+    legs.forEach(l=>{l.upper.rotation.x=-1.1;l.lower.rotation.x=1.4;});
     reach(arms[1],[.2,1.39,.5]);reach(arms[0],[-.07,1.35,.46]);head.rotation.x=.3;
     group.rotation.y=Math.PI*.78;
   }

@@ -27,7 +27,8 @@ export async function makeRenderer(canvas,overlay) {
   particles.instanceMatrix.setUsage(T.DynamicDrawUsage);particles.frustumCulled=false;scene.add(particles);
   const flame=new T.PointLight('#ffa63f',0,8);scene.add(flame);
   const phone=new T.Group();box(phone,[.15,.26,.025],[0,0,0],material('#121d21'));
-  box(phone,[.13,.23,.008],[0,0,.018],material('#4ebc9b',.1,.4,'#18593a'));scene.add(phone);
+  box(phone,[.13,.23,.008],[0,0,.018],material('#4ebc9b',.1,.4,'#18593a'));
+  phone.position.set(.08,1.38,.48);phone.rotation.set(-.1,Math.PI,0);actors.bald.root.add(phone);
   const transform=new T.Object3D(),loop=new LoopBlend(gpu),look=new T.Vector3();
   const views={wide:[[2.8,1.95,4.7],[0,1.25,0],49],low:[[2.7,.65,4.1],[0,1.35,0],54],
     medium:[[1.15,2.05,4.6],[0,1.48,0],45],close:[[.55,2.07,2.45],[0,1.93,.04],43],
@@ -77,7 +78,7 @@ export async function makeRenderer(canvas,overlay) {
       camera.position.x+=Math.sin(local*.13)*.13;camera.position.y+=Math.sin(local*.23)*.025;
     }
     camera.lookAt(look);camera.updateProjectionMatrix();
-    phone.visible=shot.action==='phone';phone.position.set(.15,1.4,.45);phone.rotation.set(-.1,.2,0);
+    phone.visible=shot.action==='phone';
     const firing=['fire','smoke','sparks','leap'].includes(shot.action);
     for(let i=0;i<particles.count;i++) {
       const age=(local*1.6+i*.037)%1,theta=i*2.39996;
@@ -106,7 +107,11 @@ export async function makeRenderer(canvas,overlay) {
   }
   function inspect() {
     const gl=gpu.getContext(),debug=gl.getExtension('WEBGL_debug_renderer_info');
+    scene.updateMatrixWorld(true);
+    const grips=actors.bald.arms.map(l=>l.lower.localToWorld(new T.Vector3(0,-l.b,0)));
+    const gripCenter=grips[0].add(grips[1]).multiplyScalar(.5);
     return {drawCalls:gpu.info.render.calls,triangles:gpu.info.render.triangles,
+      phoneGripError:phone.visible?phone.getWorldPosition(new T.Vector3()).distanceTo(gripCenter):null,
       gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'WebGL2',
       geometries:gpu.info.memory.geometries,textures:gpu.info.memory.textures,
       visibleActors:Object.values(actors).filter(a=>a.group.visible).map(a=>a.id),
