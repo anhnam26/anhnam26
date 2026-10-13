@@ -58,13 +58,13 @@ export function legAngles(hip, foot) {
 
 // The stance phase offsets body travel exactly, so its shoe stays in place.
 // The other foot lifts, swings forward, then lands for the next stride.
-export function strideFeet(x, travelled, direction, floor=FLOOR) {
-  const stride=48,stance=.6;
+export function strideFeet(x, travelled, direction, floor=FLOOR,scale=1) {
+  const stride=48*scale,stance=.6;
   return Object.fromEntries(['front','back'].map((leg,index)=>{
     const phase=((travelled/stride+index*.5)%1+1)%1;
     const swing=clamp((phase-stance)/(1-stance));
-    const offset=phase<stance?12-stride*phase:mix(12-stride*stance,12,smooth(swing));
-    return [leg,{x:x+direction*offset,y:floor-18*Math.sin(Math.PI*swing),planted:phase<stance}];
+    const offset=phase<stance?12*scale-stride*phase:mix(12*scale-stride*stance,12*scale,smooth(swing));
+    return [leg,{x:x+direction*offset,y:floor-18*scale*Math.sin(Math.PI*swing),planted:phase<stance}];
   }));
 }
 
@@ -73,7 +73,7 @@ export function handPoint(pose, hand='front') {
 }
 
 export function makePlayer(id, team, x, y=FLOOR) {
-  return { id,team,x,y,floor:y,lean:0,arms:blendPose(POSES.idle,POSES.idle,0),
+  return { id,team,x,y,floor:y,scale:1,lean:0,arms:blendPose(POSES.idle,POSES.idle,0),
     legs:{front:legAngles([5,-41],[9,0]),back:legAngles([-5,-41],[-9,0])},
     facing:team==='red'?1:-1,headAngle:0,action:'idle' };
 }
@@ -91,11 +91,11 @@ export function worldHand(player, hand='front') {
   const local=handPoint(player.arms,hand);
   const radians=player.lean*Math.PI/180;
   const vertical=local[1]+41;
-  return [player.x+player.facing*(local[0]*Math.cos(radians)-vertical*Math.sin(radians)),
-    player.y-41+local[0]*Math.sin(radians)+vertical*Math.cos(radians)];
+  return [player.x+player.scale*player.facing*(local[0]*Math.cos(radians)-vertical*Math.sin(radians)),
+    player.y+player.scale*(-41+local[0]*Math.sin(radians)+vertical*Math.cos(radians))];
 }
 
 export function worldFoot(player, leg='front') {
   const local=playerBones(player)[`leg-${leg}`].end;
-  return [player.x+player.facing*local[0],player.y+local[1]];
+  return [player.x+player.scale*player.facing*local[0],player.y+player.scale*local[1]];
 }

@@ -5,7 +5,7 @@ export { sportsStateAt, SPORTS_DURATION };
 
 const n = value => Number(value.toFixed(3));
 const transform = (kind, values) => kind==='translate' ? `translate(${n(values[0])}px,${n(values[1])}px)`
-  : kind==='rotate' ? `rotate(${n(values[0])}deg)` : `scaleX(${n(values[0])})`;
+  : kind==='rotate' ? `rotate(${n(values[0])}deg)` : kind==='size'?`scale(${n(values[0])})`:`scaleX(${n(values[0])})`;
 
 function valuesAt(state) {
   const values={};
@@ -19,7 +19,9 @@ function valuesAt(state) {
   }
   for (const id of PLAYER_IDS) {
     const player=state.players[id];
+    for(let layer=0;layer<4;layer++) add(`${id}-layer-${layer}`,'opacity',[Number(player.layer===layer)],true);
     add(`${id}-position`,'translate',[player.x,player.y]);
+    add(`${id}-size`,'size',[player.scale]);
     add(`${id}-shadow`,'translate',[player.x,player.floor+2]);
     add(`${id}-facing`,'scale',[player.facing],true);
     add(`${id}-number`,'scale',[player.facing],true);
@@ -76,8 +78,8 @@ function animationCSS() {
       for (const time of [round.start,round.scoreAt]) times.add(offset+time);
       times.add(start);
       for (const event of contactEvents(index,round.index)) times.add(event.time);
-      const actions=match.sport==='football'?[.75,1.35,1.6,1.9,2.2,2.4,3.15,3.7,3.85,4.15,5.1,6.35,6.65,7.2,8.8]
-        :match.sport==='basketball'?[.8,1.4,1.6,1.8,2.2,2.5,3.2,3.85,4.25,5.15,6.2,6.55,6.8,7.2,7.24,7.4,7.75,8.8]:[1.1];
+      const actions=match.sport==='football'?[.75,1.35,1.55,1.6,1.85,1.95,2.05,2.1,2.2,2.4,3.15,3.7,3.85,4.15,5.1,6,6.35,6.65,6.85,7.2,8.8]
+        :match.sport==='basketball'?[.8,1.4,1.55,1.6,1.8,1.85,2.1,2.2,2.4,2.5,3.2,3.85,4.25,4.9,5.1,5.15,5.95,6.2,6.55,6.8,7.2,7.24,7.4,7.75,8.8]:[1.1];
       for(const q of actions) times.add(start+q);
     }
   }
@@ -87,6 +89,17 @@ function animationCSS() {
   for (let i=1;i<sampled.length;i++) {
     const from=sampled[i-1],to=sampled[i];
     for (const id of PLAYER_IDS) {
+      for(const boundary of [233,263,293]) {
+        const side=from.state.players[id].floor>=boundary;
+        if(side===(to.state.players[id].floor>=boundary)) continue;
+        let low=from.time,high=to.time;
+        for(let step=0;step<32;step++) {
+          const mid=(low+high)/2;
+          if((sportsStateAt(mid).players[id].floor>=boundary)===side) low=mid;
+          else high=mid;
+        }
+        times.add(Math.min(SPORTS_DURATION,high+.000001));
+      }
       const facing=from.state.players[id].facing;
       if (facing===to.state.players[id].facing) continue;
       let low=from.time,high=to.time;
@@ -114,7 +127,7 @@ function animationCSS() {
   }).join('\n');
 }
 
-function playerSVG(id,p) {
+function playerSVG(id,p,layer) {
   const state=sportsStateAt(0),player=state.players[id],initial=valuesAt(state);
   const color=TEAMS[player.team].color;
   const group=(part,content) => {
@@ -129,9 +142,11 @@ function playerSVG(id,p) {
     return `<g transform="translate(${origin[0]} ${origin[1]})">${group(`${name}-upper`,segment(lengths[0],arm?8:10,arm?color:'#ddb08d')+
       `<g transform="translate(0 ${lengths[0]})">${group(`${name}-lower`,segment(lengths[1],7,'#e5b391')+(arm?'':shoe(name)))}</g>`)}</g>`;
   };
-  return `<g data-player="${id}" data-team="${player.team}">
+  // SVG paints in document order. One visible instance per athlete selects a
+  // depth band, allowing someone to pass behind and then in front of another.
+  return `<g ${layer===3?'data-player':'data-player-copy'}="${id}" data-team="${player.team}" data-layer="${layer}" class="sports-animated sports-${id}-layer-${layer}" opacity="${player.layer===layer?1:0}">
     ${group('shadow',`<ellipse rx="18" ry="3" fill="${p.muted}" opacity=".18"/>`)}
-    ${group('position',group('facing',`
+    ${group('position',group('size',group('facing',`
     ${bone('leg-back')}
     ${bone('leg-front')}
     <path d="M-12-53H13L11-36H1L0-44L-2-36H-12Z" fill="#344451"/>
@@ -151,7 +166,7 @@ function playerSVG(id,p) {
     ${group('number',`<text x="0" y="-66" text-anchor="middle" fill="#ffffff" font-family="'Segoe UI',Arial,sans-serif" font-size="13" font-weight="700">${id.endsWith('1')?'1':'2'}</text>`)}
     ${bone('arm-front')}
     `)}
-  `))}</g>`;
+  `)))}</g>`;
 }
 
 function goal(p) {
@@ -206,12 +221,12 @@ export function renderSportsAnimation(p) {
       <rect width="1184" height="380" rx="10" fill="${p.bg}"/>
       <path d="M24 ${FLOOR+2}H1160" stroke="${p.line}" stroke-width="2"/>
       <g class="sports-animated sports-football-scene" opacity="1">
-        <path d="M126 310L176 285H1008L1058 310M592 285V310M204 285V310M980 285V310" fill="none" stroke="${p.line}"/>
-        <ellipse cx="592" cy="298" rx="44" ry="12" fill="none" stroke="${p.line}"/>
+        <path d="M126 310L176 222H1008L1058 310M592 222V310M204 222V310M980 222V310" fill="none" stroke="${p.line}"/>
+        <ellipse cx="592" cy="270" rx="44" ry="28" fill="none" stroke="${p.line}"/>
         ${goal(p)}<g transform="translate(1184 0) scale(-1 1)">${goal(p)}</g>
       </g>
       <g class="sports-animated sports-basketball-scene" opacity="0">
-        <path d="M182 310Q182 248 85 248M1002 310Q1002 248 1099 248M592 280V310" fill="none" stroke="${p.line}"/>
+        <path d="M126 310L176 222H1008L1058 310ZM182 310Q210 266 85 248M1002 310Q974 266 1099 248M592 222V310" fill="none" stroke="${p.line}"/>
         ${hoop(p)}<g transform="translate(1184 0) scale(-1 1)">${hoop(p)}</g>
       </g>
       <g class="sports-animated sports-volleyball-scene" opacity="0">
@@ -225,6 +240,8 @@ export function renderSportsAnimation(p) {
         <path d="M585 176V274M592 176V274M599 176V274M578 192H606M578 208H606M578 224H606M578 240H606M578 256H606" fill="none" stroke="${p.muted}"/>
       </g>
       <g font-family="Consolas,monospace" font-size="13" letter-spacing="1">${labels}</g>
+      ${Array.from({length:4},(_,layer)=>PLAYER_IDS.map(id=>playerSVG(id,p,layer)).join('')).join('')}
+      ${ballSVG()}
       <g id="sports-scoreboard" font-family="'Segoe UI',Arial,sans-serif">
         <rect x="468" y="12" width="248" height="86" rx="8" fill="${p.bg}" stroke="${p.line}"/>
         <text x="510" y="34" fill="${TEAMS.red.color}" font-size="12" font-weight="700">RED</text>
@@ -233,8 +250,6 @@ export function renderSportsAnimation(p) {
         ${['football','basketball','volleyball'].map(sport=>`<text class="sports-animated sports-${sport}-title" opacity="${sport==='football'?1:0}" x="592" y="84" text-anchor="middle" fill="${p.muted}" font-size="12" letter-spacing="1">${sport.toUpperCase()}</text>`).join('')}
         <g transform="translate(478 95)"><path class="sports-animated sports-match-progress" d="M0 0H228" stroke="${p.accent}" stroke-width="2" style="transform:scaleX(0)"/></g>
       </g>
-      ${PLAYER_IDS.map(id=>playerSVG(id,p)).join('')}
-      ${ballSVG()}
       <text x="24" y="358" fill="${p.muted}" font-family="Consolas,monospace" font-size="11" letter-spacing="1">60s PER SPORT / FIRST TO 3 / RED HOME LEFT · BLUE HOME RIGHT</text>
     </g>
     <rect x=".5" y=".5" width="1183" height="379" rx="10" fill="none" stroke="${p.line}"/>

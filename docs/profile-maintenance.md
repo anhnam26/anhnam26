@@ -56,6 +56,16 @@ a step-back and a jump shot against two defenders. The possession label follows
 these live steals as well as the restarts after scoring. These events are part
 of the same repeatable script and do not change the fixed scores above.
 
+The thief runs past the attacker instead of staying in front of them. The
+attacker then changes lanes, recovers and overtakes the defender before shooting.
+Supporting runners use the back of the court. Return paths are separated too.
+The ball follows its carrier's lane. Players occupy distinct positions in the
+court plane, with at least 30 pixels of clearance between their centres.
+Four depth bands determine SVG paint order; exactly one drawing of each athlete
+is visible, so a runner can pass behind or in front without bodies stacking.
+Athletes farther back are slightly smaller. Hands, foot placement and stride
+length use the same perspective scale as the drawing.
+
 Volleyball servers hold their position in the marked service zone until after
 contact. Both shoes remain outside the end line (`x=162` or `x=1022`). After the
 serve, the player runs into the court for the next dig or attack.

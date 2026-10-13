@@ -49,9 +49,9 @@ function move(player,team,points,q) {
     if(q>=points[i][0]) travelled+=Math.abs(points[i][1]-points[i-1][1]);
     else {travelled+=Math.abs(position-points[i-1][1]);break;}
   }
-  const amount=clamp(Math.abs(speed)/55),wave=Math.sin(travelled/48*Math.PI*2);
+  const amount=clamp(Math.abs(speed)/55),wave=Math.sin(travelled/(48*player.scale)*Math.PI*2);
   player.motion={travelled,direction:direction(team)*(speed>=0?1:-1),amount};
-  player.y+=amount*(6.5+1.5*Math.cos(travelled/48*Math.PI*4));
+  player.y+=player.scale*amount*(6.5+1.5*Math.cos(travelled/(48*player.scale)*Math.PI*4));
   player.lean=amount*8;
   player.arms=blendPose(POSES.idle,{front:[-10-wave*28,-46-wave*28],back:[-10+wave*28,-46+wave*28]},amount);
   if(amount>.1) player.action='run';
@@ -63,7 +63,7 @@ function arms(player,pose,amount=1) {
 }
 
 function crouch(player,weight,depth=8) {
-  player.y+=depth*weight;
+  player.y+=player.scale*depth*weight;
   player.lean+=12*weight;
 }
 
@@ -72,7 +72,7 @@ function jump(player,q,contact,height=48) {
   crouch(player,windowWeight(q,takeoff-.3,takeoff-.16,takeoff-.09,takeoff),7);
   const progress=clamp((q-takeoff)/(land-takeoff));
   const airborne=4*progress*(1-progress);
-  player.y-=height*airborne;
+  player.y-=player.scale*height*airborne;
   player.airborne=airborne;
   crouch(player,windowWeight(q,land,land+.12,land+.18,land+.4),8);
 }
@@ -112,14 +112,14 @@ function spike(player,q,when) {
 
 function poseLegs(player) {
   const motion=player.motion??{travelled:0,direction:player.facing,amount:0};
-  const stride=strideFeet(player.x,motion.travelled,motion.direction,player.floor);
+  const stride=strideFeet(player.x,motion.travelled,motion.direction,player.floor,player.scale);
   for(const [index,leg] of ['front','back'].entries()) {
-    const neutral=player.x+player.facing*(index===0?9:-9);
+    const neutral=player.x+player.scale*player.facing*(index===0?9:-9);
     let target=[mix(neutral,stride[leg].x,motion.amount),mix(player.floor,stride[leg].y,motion.amount)];
     if(player.kickWeight) target=pair(target,leg==='front'
-      ?[player.x+player.facing*(player.kickReach??32),player.floor-8]
-      :[player.x-player.facing*14,player.floor],player.kickWeight);
-    const local=[player.facing*(target[0]-player.x),target[1]-player.y];
+      ?[player.x+player.scale*player.facing*(player.kickReach??32),player.floor-player.scale*8]
+      :[player.x-player.scale*player.facing*14,player.floor],player.kickWeight);
+    const local=[player.facing*(target[0]-player.x)/player.scale,(target[1]-player.y)/player.scale];
     const grounded=legAngles([index===0?5:-5,-41],local);
     const tuck=leg==='front'?[-24,58]:[5,88];
     player.legs[leg]=pair(grounded,tuck,player.airborne??0);
@@ -131,9 +131,18 @@ function playersDuring(sport,round,q) {
   const lead=players[`${team}-1`],mate=players[`${team}-2`];
   const guard=players[`${opponent}-1`],keeper=players[`${opponent}-2`];
   const place=(player,points)=>move(player,team,points,q);
+  const lane=(player,depth)=>{player.floor=FLOOR-depth;player.y=player.floor;player.scale=1-depth*.002;};
+  if(sport!=='volleyball') {
+    lane(mate,86);lane(keeper,0);
+    // The attacker sidesteps into the back of the court before either crossing.
+    // The thief keeps the front lane while the opponent turns back to recover.
+    lane(lead,56*Math.max(windowWeight(q,1.55,1.85,2.1,2.4),
+      sport==='football'?windowWeight(q,6.0,6.35,6.85,7.2):windowWeight(q,4.9,5.1,5.95,6.2)));
+    lane(guard,0);
+  }
   if(sport==='football') {
-    place(lead,[[0,500],[.75,558],[1.35,588],[1.9,604],[2.4,598],[3.15,635],[3.7,624],[4.15,656],[5.1,735],[6.35,864],[7.2,910],[8.8,910]]);
-    place(guard,[[0,660],[.75,632],[1.35,640],[1.9,650],[2.4,655],[3.15,690],[3.7,673],[4.15,710],[5.1,781],[6.35,922],[7.2,956],[8.8,963]]);
+    place(lead,[[0,500],[.75,558],[1.35,588],[1.6,604],[1.95,603],[2.2,542],[2.4,523],[3.15,635],[3.7,624],[4.15,656],[5.1,735],[6.35,864],[7.2,910],[8.8,910]]);
+    place(guard,[[0,660],[.75,632],[1.35,640],[1.6,650],[2.05,576],[2.2,564],[2.4,565],[3.15,690],[3.7,673],[4.15,710],[5.1,781],[6.35,902],[6.65,872],[7.2,868],[8.8,868]]);
     place(mate,[[0,220],[.75,328],[1.5,458],[2.5,527],[3.15,559],[3.7,560],[3.85,560],[4.15,594],[5.1,658],[6.35,810],[8.8,840]]);
     place(keeper,[[0,1008],[6.35,1008],[7.65,1028],[8.8,1038]]);
     challenge(guard,q,1.35,sport);challenge(lead,q,2.4,sport,28);
@@ -143,10 +152,10 @@ function playersDuring(sport,round,q) {
     const save=windowWeight(q,7.25,7.9,8.55,8.8);
     arms(keeper,'save',save);crouch(keeper,save,10);
   } else if(sport==='basketball') {
-    place(lead,[[0,470],[.8,530],[1.6,578],[2.5,603],[3.3,672],[3.8,698],[4.5,764],[5.4,855],[6.2,888],[6.55,868],[7.2,910],[8.8,910]]);
-    place(guard,[[0,615],[.8,580],[1.6,625],[2.5,651],[3.3,718],[3.8,738],[4.5,811],[5.4,902],[6.2,932],[6.55,947],[7.2,958],[8.8,972]]);
+    place(lead,[[0,470],[.8,530],[1.6,578],[1.8,578],[2.1,553],[2.2,496],[2.5,493],[3.3,672],[3.8,698],[4.5,764],[5.4,855],[6.2,888],[6.55,868],[7.2,910],[8.8,910]]);
+    place(guard,[[0,615],[.8,580],[1.6,625],[1.8,618],[2.1,540],[2.2,527],[2.5,552],[3.3,718],[3.8,760],[4.5,825],[5.4,870],[6.2,825],[6.55,832],[7.2,860],[8.8,878]]);
     place(mate,[[0,310],[1.6,515],[2.5,680],[3.3,765],[3.8,790],[4.5,790],[5.4,804],[7.2,850],[8.8,850]]);
-    place(keeper,[[0,952],[3.3,990],[6.2,1002],[7.2,1028],[8.8,1042]]);
+    place(keeper,[[0,952],[3.3,990],[6.2,962],[7.2,962],[8.8,994]]);
     const balanceArm=lead.arms.back;
     arms(lead,'dribble');lead.arms.back=balanceArm;
     const dribbling=q<1.4 || q>=5.15 && q<6.55;
@@ -207,13 +216,14 @@ function ballDuring(sport,round,q) {
   const transform=point=>[sideX(team,point[0]),point[1]];
   if(sport==='football') {
     const players=playersDuring(sport,round,q),lead=players[leadId],guard=players[guardId];
-    const footBall=(player,time=q)=>[player.x+direction(player.team)*32,296-2*Math.sin(time*Math.PI*4)**2];
+    const footBall=(player,time=q)=>[player.x+player.scale*direction(player.team)*32,player.floor-12-2*Math.sin(time*Math.PI*4)**2];
     if(q<1.35 || q>=2.4 && q<3.15 || q>=4.15 && q<7.2) return footBall(lead);
     if(q>=1.6 && q<2.2) return footBall(guard);
     const at=(id,time)=>footBall(playersDuring(sport,round,time)[id],time);
+    const looseFrom=at(guardId,2.2),looseTo=at(leadId,2.4);
     return flight(q,[
       [1.35,1.6,[at(leadId,1.35),transform([612,284]),at(guardId,1.6)]],
-      [2.2,2.4,[at(guardId,2.2),transform([626,289]),at(leadId,2.4)]],
+      [2.2,2.4,[looseFrom,[(looseFrom[0]+looseTo[0])/2,286],looseTo]],
       [3.15,3.7,[at(leadId,3.15),transform([624,283]),at(mateId,3.7)]],
       [3.7,3.85,[at(mateId,3.7),at(mateId,3.7)]],
       [3.85,4.15,[at(mateId,3.7),transform([642,282]),at(leadId,4.15)]],
@@ -222,17 +232,18 @@ function ballDuring(sport,round,q) {
   }
   if(sport==='basketball') {
     const hand=(id,time)=>handAt(sport,round,time,id);
+    const looseFrom=hand(guardId,2.2),looseTo=hand(leadId,2.5);
     if(q<1.4 || q>=5.15 && q<6.55) {
       const point=hand(leadId,q),bounce=Math.sin(Math.PI*(q<1.4?q:q-5.15)/.6)**2
         * (q<1.4?windowWeight(q,0,.1,1.2,1.4):windowWeight(q,5.15,5.25,6.35,6.55));
-      return [point[0],mix(point[1],296,bounce)];
+      return [point[0],mix(point[1],playersDuring(sport,round,q)[leadId].floor-12,bounce)];
     }
     if(q>=1.8 && q<2.2) return hand(guardId,q);
     if(q>=2.5 && q<3.2 || q>=6.55 && q<=7.2) return hand(leadId,q);
     if(q>=3.85 && q<4.25) return hand(mateId,q);
     return flight(q,[
       [1.4,1.8,[hand(leadId,1.4),transform([608,292]),hand(guardId,1.8)]],
-      [2.2,2.5,[hand(guardId,2.2),transform([620,280]),hand(leadId,2.5)]],
+      [2.2,2.5,[looseFrom,[(looseFrom[0]+looseTo[0])/2,280],looseTo]],
       [3.2,3.85,[hand(leadId,3.2),transform([750,196]),hand(mateId,3.85)]],
       [4.25,5.15,[hand(mateId,4.25),transform([840,196]),hand(leadId,5.15)]],
       [7.2,8.8,[hand(leadId,7.2),transform([1040,100]),transform([1110,158])]],
@@ -267,6 +278,12 @@ function initialState(sport,round) {
 function interpolatePlayers(a,b,weight,progress,duration) {
   return Object.fromEntries(PLAYER_IDS.map(id=>{
     const player={...a[id],x:mix(a[id].x,b[id].x,weight),y:mix(a[id].y,b[id].y,weight),floor:mix(a[id].floor,b[id].floor,weight),lean:mix(a[id].lean,b[id].lean,weight)};
+    // Four distinct return paths let teammates and opponents pass without
+    // pushing their bodies through one another during a restart or court change.
+    const corridor={ 'red-1':308,'red-2':218,'blue-1':278,'blue-2':248 }[id];
+    const floor=mix(player.floor,corridor,windowWeight(progress,0,.06,.94,1));
+    player.y+=floor-player.floor;player.floor=floor;
+    player.scale=1-(FLOOR-player.floor)*.002;
     player.arms=blendPose(a[id].arms,b[id].arms,weight);
     player.legs={front:pair(a[id].legs.front,b[id].legs.front,weight),back:pair(a[id].legs.back,b[id].legs.back,weight)};
     const distance=b[id].x-a[id].x;
@@ -274,9 +291,9 @@ function interpolatePlayers(a,b,weight,progress,duration) {
     const travelled=Math.abs(player.x-a[id].x);
     player.motion={travelled,direction:distance>=0?1:-1,amount};
     player.airborne=0;player.kickWeight=0;
-    const wave=Math.sin(travelled/48*Math.PI*2);
+    const wave=Math.sin(travelled/(48*player.scale)*Math.PI*2);
     player.arms=blendPose(player.arms,{front:[-10-wave*28,-46-wave*28],back:[-10+wave*28,-46+wave*28]},amount*.9);
-    player.y+=amount*(6.5+1.5*Math.cos(travelled/48*Math.PI*4));
+    player.y+=player.scale*amount*(6.5+1.5*Math.cos(travelled/(48*player.scale)*Math.PI*4));
     return [id,player];
   }));
 }
@@ -313,7 +330,11 @@ export function sportsStateAt(seconds) {
   for(const player of Object.values(players)) {
     player.facing=ball[0]>=player.x?1:-1;
     poseLegs(player);
-    player.headAngle=clamp(Math.atan2(ball[1]-(player.y-110),Math.abs(ball[0]-player.x))*180/Math.PI-player.lean,-55,55);
+    const lean=player.lean*Math.PI/180;
+    const headX=player.x+player.scale*player.facing*69*Math.sin(lean);
+    const headY=player.y-player.scale*(41+69*Math.cos(lean));
+    player.headAngle=clamp(Math.atan2(ball[1]-headY,Math.abs(ball[0]-headX))*180/Math.PI-player.lean,-55,55);
+    player.layer=player.floor<233?0:player.floor<263?1:player.floor<293?2:3;
   }
   return {...match,possession,players,scenes,ball:{x:ball[0],y:ball[1],rotation:match.time*180},actionTime:q};
 }

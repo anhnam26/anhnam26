@@ -78,6 +78,30 @@ test('football and basketball include close challenges and an actual steal follo
   }
 });
 
+test('a thief runs past the attacker and the attacker later beats the defender', () => {
+  for(const matchIndex of [0,1]) for(const round of MATCHES[matchIndex].rounds) {
+    const start=matchIndex*60+round.scoreAt-8.8,attack=round.possession;
+    const defence=attack==='red'?'blue':'red',sign=attack==='red'?1:-1;
+    const relative=q=>{
+      const players=sportsStateAt(start+q).players;
+      return sign*(players[`${attack}-1`].x-players[`${defence}-1`].x);
+    };
+    assert.ok(relative(1.6)<0,'Defender starts in front');
+    assert.ok(relative(matchIndex===0?2.05:2.1)>0,'Thief must run past the opponent');
+    assert.ok(relative(7)>25,'Attacker must get past the defender before shooting');
+  }
+});
+
+test('player paths never collide in the court plane, including restarts and transitions', () => {
+  for(let time=0;time<180;time+=.01) {
+    const players=Object.values(sportsStateAt(time).players);
+    for(let i=0;i<players.length;i++) for(let j=i+1;j<players.length;j++) {
+      const a=players[i],b=players[j];
+      assert.ok(Math.hypot(a.x-b.x,a.floor-b.floor)>=30,`${a.id} runs into ${b.id} at ${time.toFixed(2)}`);
+    }
+  }
+});
+
 test('every volleyball serve is hit from behind the end line, with both feet outside the court', () => {
   for (let round=0;round<5;round++) {
     const event=contactEvents(2,round).find(event=>event.action==='serve');
@@ -94,7 +118,7 @@ test('football tackles, recoveries and shots put the shoe against the ball', () 
     const start=round.scoreAt-8.8,defence=round.possession==='red'?'blue':'red';
     for(const [q,id] of [[1.35,`${defence}-1`],[2.4,`${round.possession}-1`],[3.85,`${round.possession}-2`],[7.2,`${round.possession}-1`]]) {
       const state=sportsStateAt(start+q),player=state.players[id],foot=worldFoot(player);
-      const toe=[foot[0]+player.facing*10,foot[1]];
+      const toe=[foot[0]+player.scale*player.facing*10,foot[1]];
       assert.ok(distance(toe,[state.ball.x,state.ball.y])<15,`${id} misses football at ${start+q}`);
       close(worldFoot(player,'back')[1],player.floor);
     }
