@@ -1,8 +1,9 @@
 import { sportsStateAt, PLAYER_IDS, SPORTS_DURATION, BALL_SPIN_SPEED, actionTimeAt, contactEvents } from './sports-timeline.mjs';
 import { playerBones } from './sports-rig.mjs';
-import { MATCHES, TEAMS } from './sports-matches.mjs';
+import { MATCHES, TEAMS, CELEBRATION_DURATION } from './sports-matches.mjs';
 import { courtTracks } from './sports-paths.mjs';
 import { drawAthlete, drawStadium, drawCourts, drawBall, drawRoster } from './sports-art.mjs';
+import { celebrationAt, drawCelebration } from './sports-celebration.mjs';
 export { sportsStateAt, SPORTS_DURATION };
 
 const n = value => Number(value.toFixed(3));
@@ -21,6 +22,22 @@ function valuesAt(state) {
   add('intro-label','opacity',[state.phase==='intro'?windowIntro(state.matchTime,state.introDuration):0]);
   add('start-label','opacity',[state.phase==='intro'&&state.matchTime>=whistle?Math.min(1,(state.matchTime-whistle)*4,(state.introDuration-state.matchTime)*4):0]);
   add('point-label','opacity',[state.phase==='restart'?Math.max(0,1-(state.matchTime-state.round.scoreAt)/1.4):0]);
+  const celebration=celebrationAt(state);
+  add('celebration-opacity','opacity',[celebration.opacity]);
+  add('celebration-color','color',[TEAMS[state.winner??'blue'].color],true);
+  celebration.fireworks.forEach((firework,i)=>{
+    add(`firework-${i}-rocket-position`,'translate',firework.rocket);
+    add(`firework-${i}-rocket-opacity`,'opacity',[firework.rocketOpacity]);
+    add(`firework-${i}-burst-opacity`,'opacity',[firework.burstOpacity]);
+    add(`firework-${i}-burst-scale`,'size',[firework.scale]);
+    add(`firework-${i}-burst-rotation`,'rotate',[firework.rotation]);
+  });
+  celebration.confetti.forEach((confetti,i)=>{
+    add(`confetti-${i}-position`,'translate',confetti.position);
+    add(`confetti-${i}-opacity`,'opacity',[confetti.opacity]);
+    add(`confetti-${i}-rotation`,'rotate',[confetti.rotation]);
+    add(`confetti-${i}-scale`,'size',[confetti.scale]);
+  });
   for (const sport of ['football','basketball','volleyball']) {
     add(`${sport}-scene`,'opacity',[state.scenes[sport]]);
     add(`${sport}-skin`,'opacity',[state.scenes[sport]]);
@@ -88,6 +105,12 @@ function animationCSS() {
       addReturn(round.scoreAt,round.returnPlan);
     }
     addReturn(match.transitionStart,match.transitionPlan);
+    for(let t=0;t<=CELEBRATION_DURATION;t+=1/24)times.add(offset+match.winAt+t);
+    times.add(offset+match.winAt+CELEBRATION_DURATION);
+    for(let i=0;i<6;i++){
+      const start=.1+Math.floor(i/2)*.9+(i%2)*.18;
+      for(const event of [start,start+.55,start+1.9])times.add(offset+match.winAt+event);
+    }
     for (const round of match.rounds) {
       for (const time of [round.start,round.scoreAt]) times.add(offset+time);
       times.add(actionTimeAt(index,round.index,0));
@@ -139,8 +162,8 @@ function animationCSS() {
     let samples=frames.map(frame=>({time:frame.time,values:frame.values[name].values}));
     if (discrete) samples=samples.filter((sample,index,array)=>index===0 || index===array.length-1 || sample.values[0]!==array[index-1].values[0]);
     else samples=simplify(samples,kind);
-    const property=kind==='opacity'?'opacity':'transform';
-    const rules=samples.map(sample=>`${Number((sample.time/SPORTS_DURATION*100).toFixed(7))}%{${property}:${kind==='opacity'?n(sample.values[0]):transform(kind,sample.values)}}`).join('');
+    const property=kind==='opacity'?'opacity':kind==='color'?'color':'transform';
+    const rules=samples.map(sample=>`${Number((sample.time/SPORTS_DURATION*100).toFixed(7))}%{${property}:${kind==='opacity'?n(sample.values[0]):kind==='color'?sample.values[0]:transform(kind,sample.values)}}`).join('');
     return `.sports-${name}{animation:sports-${name} ${SPORTS_DURATION}s ${discrete?'steps(1,end)':'linear'} infinite}@keyframes sports-${name}{${rules}}`;
   }).join('\n');
   return cachedCSS;
@@ -205,6 +228,7 @@ export function renderSportsAnimation() {
         <g transform="translate(380 194)"><path class="sports-animated sports-match-progress" d="M0 0H424" stroke="#80efc5" stroke-width="4" style="transform:scaleX(0)"/></g>
       </g>
       ${drawRoster()}
+      ${drawCelebration()}
     </g>
   </svg>`;
 }

@@ -39,7 +39,10 @@ in place while the playing surface and equipment transform.
 Each match opens with an entrance and readiness sequence. Points arrive at the
 end of their actual plays. The scoreboard displays the final score and FULL
 TIME winner as soon as a team reaches three. A 5.5-second celebration precedes
-the court transition. Every scoring play, including a basket, adds one point.
+the court transition, with six fireworks and confetti fired from both corners.
+The fireworks and cannons use the winning team's color. Effects appear only
+after the final point and finish before the players change courts; reduced
+motion hides them. Every scoring play, including a basket, adds one point.
 
 | Sport | Point winners, in order | Final score (red : blue) | Next possession |
 | --- | --- | --- | --- |
@@ -81,7 +84,7 @@ images or font dependencies. Motion is sampled at 12 Hz, together with exact
 path waypoints, return phases, contact, scoring,
 facing and depth changes. Redundant samples are discarded within 0.4 logical
 pixels for position and 1.2 degrees for joints; browser interpolation fills the
-gaps. The longer normal-paced asset is about 4.5 MB per theme. Tests enforce a
+gaps. The longer normal-paced asset is about 4.6 MB per theme. Tests enforce a
 5 MB size ceiling for this expanded loop. The generated CSS is cached within the render process so
 both themes use the identical choreography.
 
@@ -165,6 +168,7 @@ from the latest `main` branch. Disable the workflow in Actions to stop refreshes
 - `.github/workflows/update-activity.yml`: hourly refresh and bot publication.
 - `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
 - `scripts/sports-paths.mjs`: court paths, normal-paced play clocks and returns.
+- `scripts/sports-celebration.mjs`: winner-only fireworks and confetti.
 - `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
 - `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.
 - `scripts/sports-art.mjs`: hand-authored pixel athletes, stadium, courts and ball.

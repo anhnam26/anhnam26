@@ -7,6 +7,7 @@ import { playerBones, worldHand, worldFoot, ARM_LENGTHS, LEG_LENGTHS } from './s
 import { MATCHES } from './sports-matches.mjs';
 
 import { RUN_SPEED } from './sports-paths.mjs';
+import { celebrationAt } from './sports-celebration.mjs';
 
 const close=(a,b,tolerance=.001)=>assert.ok(Math.abs(a-b)<tolerance,`${a} != ${b}`);
 const distance=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
@@ -62,6 +63,25 @@ test('the third basketball play starts blue and contains the decisive red steal'
   assert.equal(sportsStateAt(MATCHES[1].startAt+MATCHES[1].rounds[2].start).possession,'blue');
   assert.equal(sportsStateAt(steal.time+.05).possession,'red');
   assert.deepEqual(sportsStateAt(MATCHES[1].startAt+MATCHES[1].rounds[2].scoreAt).score,{red:2,blue:1});
+});
+
+test('fireworks and confetti start only after the winning point and clear before court changes', () => {
+  for(const match of MATCHES) {
+    for(const time of [0,match.introDuration,...match.rounds.slice(0,-1).map(round=>round.scoreAt)]) {
+      const effects=celebrationAt(sportsStateAt(match.startAt+time));
+      assert.equal(effects.opacity,0);
+      assert.ok(effects.fireworks.every(effect=>effect.burstOpacity===0&&effect.rocketOpacity===0));
+      assert.ok(effects.confetti.every(effect=>effect.opacity===0));
+    }
+    const celebration=sportsStateAt(match.startAt+match.winAt+1);
+    assert.equal(celebration.winner,match.winner);
+    const effects=celebrationAt(celebration);
+    assert.ok(effects.opacity>.99);
+    assert.ok(effects.fireworks.some(effect=>effect.burstOpacity>.1));
+    assert.ok(effects.confetti.some(effect=>effect.opacity>.5));
+    assert.ok(effects.confetti.some(effect=>effect.position[1]<580));
+    assert.equal(celebrationAt(sportsStateAt(match.startAt+match.transitionStart)).opacity,0);
+  }
 });
 
 test('one ball stays visible and continuous over rallies, resets and court changes', () => {
