@@ -3,18 +3,20 @@ export const FLOOR = 308;
 export const ARM_LENGTHS = [24, 23];
 export const LEG_LENGTHS = [21, 22];
 export const POSES = Object.freeze({
-  idle: { front: [-8, -6], back: [8, 12] },
-  carry: { front: [-20, -135], back: [-34, -124] },
-  dribble: { front: [-25, -82], back: [12, 35] },
-  guard: { front: [-140, -105], back: [-112, -94] },
-  shoot: { front: [-166, -153], back: [-152, -168] },
-  set: { front: [-155, -169], back: [-166, -147] },
-  bump: { front: [-58, -58], back: [-58, -58] },
+  idle: { front: [-8, -25], back: [8, -12] },
+  carry: { front: [-22, -122], back: [-35, -122] },
+  dribble: { front: [-25, -78], back: [10, -30] },
+  guard: { front: [-148, -165], back: [-134, -160] },
+  reach: { front: [-68, -86], back: [16, -32] },
+  shield: { front: [-28, -106], back: [-65, -90] },
+  shoot: { front: [-130, -178], back: [-120, -173] },
+  set: { front: [-142, -172], back: [-138, -172] },
+  bump: { front: [-70, -75], back: [-68, -75] },
   cock: { front: [-150, -230], back: [-64, -120] },
-  strike: { front: [-135, -125], back: [-45, -72] },
-  follow: { front: [-52, -22], back: [-12, -35] },
+  strike: { front: [-148, -162], back: [-45, -72] },
+  follow: { front: [-48, -76], back: [-12, -35] },
   save: { front: [-50, -70], back: [-55, -72] },
-  celebrate: { front: [-166, -154], back: [-170, -162] },
+  celebrate: { front: [-152, -163], back: [-158, -170] },
 });
 
 export const clamp = (n, min = 0, max = 1) => Math.max(min, Math.min(max, n));
@@ -71,8 +73,9 @@ export function handPoint(pose, hand='front') {
 }
 
 export function makePlayer(id, team, x, y=FLOOR) {
-  return { id,team,x,y,lean:0,arms:blendPose(POSES.idle,POSES.idle,0),
-    legs:{front:[-8,7],back:[10,-7]},facing:team==='red'?1:-1,headAngle:0,action:'idle' };
+  return { id,team,x,y,floor:y,lean:0,arms:blendPose(POSES.idle,POSES.idle,0),
+    legs:{front:legAngles([5,-41],[9,0]),back:legAngles([-5,-41],[-9,0])},
+    facing:team==='red'?1:-1,headAngle:0,action:'idle' };
 }
 
 export function playerBones(player) {
@@ -87,6 +90,12 @@ export function playerBones(player) {
 export function worldHand(player, hand='front') {
   const local=handPoint(player.arms,hand);
   const radians=player.lean*Math.PI/180;
-  return [player.x+player.facing*(local[0]*Math.cos(radians)-local[1]*Math.sin(radians)),
-    player.y+local[0]*Math.sin(radians)+local[1]*Math.cos(radians)];
+  const vertical=local[1]+41;
+  return [player.x+player.facing*(local[0]*Math.cos(radians)-vertical*Math.sin(radians)),
+    player.y-41+local[0]*Math.sin(radians)+vertical*Math.cos(radians)];
+}
+
+export function worldFoot(player, leg='front') {
+  const local=playerBones(player)[`leg-${leg}`].end;
+  return [player.x+player.facing*local[0],player.y+local[1]];
 }

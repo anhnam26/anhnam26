@@ -28,7 +28,9 @@ address synchronized when changing contact details.
 The README displays the activity panel after current work and before the small
 repository section. A separate arena below the calendar loops through three
 60-second matches: football, basketball and volleyball. Each team has two
-players; red stays on the left and blue on the right. A central scoreboard
+players; red's home end is on the left and blue's on the right. Football and
+basketball players cross midfield to attack and contest possession. Volleyball
+players stay on their own half. A central scoreboard
 shows the current sport and score. Every scoring play counts as one point,
 including basketball, and the first team to three wins.
 
@@ -47,14 +49,32 @@ seconds 59–60. The same four players and one continuous ball stay on screen,
 including the return from volleyball to football. No random events change the
 three-minute sequence.
 
+Football rallies include an approaching defender, a tackle and temporary
+possession change, a recovery, a deflected pass, a supporting runner and a shot
+under pressure. Basketball has a drive, a steal and recovery, a give-and-go,
+a step-back and a jump shot against two defenders. The possession label follows
+these live steals as well as the restarts after scoring. These events are part
+of the same repeatable script and do not change the fixed scores above.
+
+Volleyball servers hold their position in the marked service zone until after
+contact. Both shoes remain outside the end line (`x=162` or `x=1022`). After the
+serve, the player runs into the court for the next dig or attack.
+
 The SVG contains generated CSS animations and local vector artwork, without
 runtime scripts or external assets. Authored shoulder and elbow angles keep
 limbs attached, with fixed bone lengths and bounded elbow bends. Forearms and
 shins are nested inside their parent joints so CSS interpolation cannot detach
-elbows or knees. Players face the ball, with hand contact timed to dribbles,
+elbows or knees. Both knees use the same forward-facing anatomical branch.
+A foot stays planted during the stance portion of each stride while the other
+swings clear of the floor. Running arms counterbalance the legs, the dribbling
+arm pumps with the ball, and jumps include crouching, flight and landing.
+Torso lean pivots at the hips while the legs remain attached to the pelvis.
+Players run back into position between points. Players face the ball, with
+hand contact timed to dribbles,
 shots, digs, sets and spikes. Turns occur when the ball crosses a player's
 position rather than waiting for the next regular animation sample.
-CSS keyframes sample the timeline at 8 Hz, plus exact action and scoring times,
+CSS keyframes sample normal play at 16 Hz and faster returns at 48 Hz (96 Hz
+during court transitions), plus exact action and scoring times,
 then discard redundant samples within position and angle tolerances. Browser
 interpolation keeps playback smooth. Reduced motion shows the opening
 football scene as a still image. Sports scores belong to the illustration and
