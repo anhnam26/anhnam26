@@ -60,10 +60,10 @@ beat, not necessarily a single uninterrupted camera shot.
 | --- | --- |
 | 0.000-4.267 | Cool industrial street. Rear low-angle view of the jacketed animal with red arrows above it; alternate frontal/operator views and an interaction prompt. |
 | 4.267-8.800 | Warm crate-lined yard. Skull operator moves with a long green rifle; wide stance and a seated/crouched pose. |
-| 8.800-12.367 | Gold skull-mask close-ups and weapon/eye detail. Warm highlights, dark equipment, rapid changes of framing. |
-| 12.367-14.067 | Blue-lit desk/gaming insert with a live-action human composited in front of a monitor. |
-| 14.067-16.700 | Close-up of a dark interface with a white person icon, zero count and dashed plus box. |
-| 16.700-21.867 | Blue room, seated bald character using a phone; phone/chat close-up and blurred foreground transition. |
+| 8.800-10.467 | Gold skull-mask close-ups and weapon/eye detail. Warm highlights, dark equipment, rapid changes of framing. |
+| 10.467-12.367 | Blue-lit desk/gaming insert with a live-action human composited in front of a monitor. |
+| 12.367-16.700 | Dark interface with a white person icon, zero count and dashed plus box, continuously revealing the seated phone user around 15 seconds. |
+| 16.700-21.867 | Phone/chat close-up, followed by blurred blue-room character and foreground transitions. |
 | 21.867-23.200 | Inventory/loadout insert with a pistol, ammunition values and equipment UI. |
 | 23.200-25.867 | Sunny dusty street, rear following view of the small jacketed animal. Buildings and palms frame the route. |
 | 25.867-30.233 | Live-action dialogue/comedy insert near a workstation, followed by the return to the outdoor group. |
