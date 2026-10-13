@@ -58,13 +58,14 @@ function goal(side) {
   const net='M142 192L94 209L54 308H142Z';
   const mesh=Array.from({length:9},(_,i)=>`M${54+i*11} 190V310`).join('')
     +Array.from({length:11},(_,i)=>`M52 ${198+i*11}H144`).join('');
-  return `<g data-equipment="football-goal" data-view="side" stroke-linejoin="round">
+  const centerOffset=(124+340)/2-(192+308)/2;
+  return `<g data-equipment="football-goal" data-view="side" transform="translate(0 ${centerOffset})" stroke-linejoin="round">
     <defs><clipPath id="sports-goal-net-${side}"><path d="${net}"/></clipPath></defs>
     <ellipse cx="100" cy="312" rx="49" ry="5" fill="#234f3d" opacity=".18"/>
     <path d="${net}" fill="#d8f9ee" fill-opacity=".18"/>
     <path d="${mesh}" clip-path="url(#sports-goal-net-${side})" fill="none" stroke="#eafff6" stroke-width="1.4" opacity=".8"/>
     <path d="M142 192L94 209L54 308H142" fill="none" stroke="#b2d1c9" stroke-width="3"/>
-    <path d="M142 308V192" fill="none" stroke="${ink}" stroke-width="9"/>
+    <path data-goal-mouth="true" d="M142 308V192" fill="none" stroke="${ink}" stroke-width="9"/>
     <path d="M142 308V192" fill="none" stroke="#fffdf3" stroke-width="6"/>
     <path d="M140 304V195" fill="none" stroke="#ffffff" stroke-width="1.5"/>
     <circle cx="142" cy="192" r="4" fill="#fffdf3" stroke="${ink}" stroke-width="1.5"/>
