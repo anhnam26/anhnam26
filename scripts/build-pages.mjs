@@ -9,6 +9,8 @@ await mkdir(destination,{recursive:true});
 // The generated folder ignores itself; the owner's existing .gitignore is untouched.
 await writeFile(resolve(destination,'.gitignore'),'*\n');
 for(const file of ['index.html','src','public'])await cp(resolve(root,file),resolve(destination,file),{recursive:true});
+await mkdir(resolve(destination,'assets'),{recursive:true});
+await cp(resolve(root,'assets/sports-preview.gif'),resolve(destination,'assets/sports-preview.gif'));
 const html=await readFile(resolve(destination,'index.html'),'utf8');
 if(!html.includes('src/main.js'))throw new Error('Missing application entry point');
 await writeFile(resolve(destination,'.nojekyll'),'');

@@ -76,5 +76,10 @@
       404
     ],
     "purpose": "Static identity texture on an articulated 3D head"
+  },
+  {
+    "file": "public/k1-poster.png",
+    "source": "Code-rendered browser recreation, first GIF frame",
+    "purpose": "Loading and reduced-motion fallback"
   }
 ]

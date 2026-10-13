@@ -37,11 +37,19 @@ Based in **Ho Chi Minh City, Vietnam**. Studying Information Technology at **HCM
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg">
     <source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg">
-    <img src="assets/activity-dark.svg" alt="My GitHub activity: yearly contributions, public repositories and stars. Pixel Sports Club: four distinct red and blue players in a faster, seamless four-minute football, basketball and volleyball loop. Each sport lasts 80 seconds, including the first-to-three match, fireworks, confetti and court transition. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. The ball glows and morphs as the courts transform. Click to see current GitHub activity." width="100%">
+    <img src="assets/activity-dark.svg" alt="My GitHub activity: yearly contributions, public repositories and stars. Click to see current GitHub activity." width="100%">
   </picture>
 </a>
 
 <sub>[See current activity ↗](https://github.com/anhnam26?tab=overview)</sub>
+
+## K1 Cinematic
+
+<a href="https://anhnam26.github.io/anhnam26/">
+  <img src="assets/sports-preview.gif" alt="Animated preview of my code-rendered K1 cinematic: animal operators, a gold skull mask, industrial scenes and a seamless loop. Click to open the complete 4 minute 4.6 second animation." width="100%">
+</a>
+
+<sub>Selected scenes from the code recreation. [Watch the complete 4:04.6 animation ↗](https://anhnam26.github.io/anhnam26/)</sub>
 
 ## Selected repositories
 

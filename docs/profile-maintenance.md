@@ -25,77 +25,38 @@ address synchronized when changing contact details.
 
 ## Refresh the activity snapshot
 
-The README displays the activity panel after current work and before the small
-repository section. A separate 16:9 arena below the calendar runs Pixel Sports
-Club: football, basketball and volleyball, in a seamless four-minute loop.
-Each sport lasts exactly 80 seconds, including entrance, five scoring plays,
-restarts, the winner's celebration and the transition to the next court.
-Football starts at 0 seconds, basketball at 80 and volleyball at 160.
-Four hand-authored pixel cartoon athletes keep their identities across sports:
-Red 07 has spiky dark hair, Red 11 has curls and a yellow headband, Blue 04 has
-an orange ponytail, and Blue 09 has cropped hair and a mint headband. Exactly
-two players per team are visible on the court. The bright arcade stadium stays
-in place while the playing surface and equipment transform.
+The README displays a compact activity panel after the AI focus list. It contains
+only the yearly contribution calendar, public repository count and owned non-fork
+repository stars. Both themes are 1280 x 414 SVGs, about 46 KB each. The saved
+snapshot remains in `assets/activity.json`. No cinematic or animated CSS belongs
+inside this panel, and activity updates do not regenerate the GIF.
 
-Each match opens with an entrance and readiness sequence. Points arrive at the
-end of their actual plays. The scoreboard displays the final score and FULL
-TIME winner as soon as a team reaches three. A 5.5-second celebration precedes
-the court transition, with six fireworks and confetti fired from both corners.
-The fireworks and cannons use the winning team's color. Effects appear only
-after the final point and finish before the players change courts; reduced
-motion hides them. Every scoring play, including a basket, adds one point.
+## Standalone K1 cinematic
 
-| Sport | Point winners, in order | Final score (red : blue) | Next possession |
-| --- | --- | --- | --- |
-| Football | Red, blue, red, blue, blue | 2 : 3 | Conceding team |
-| Basketball | Blue, red, red, blue, red | 3 : 2 | Conceding team |
-| Volleyball | Red, blue, red, blue, blue | 2 : 3 | Point winner serves |
+A separate clickable GIF immediately below GitHub Activity links to the complete
+browser recreation at `https://anhnam26.github.io/anhnam26/`. The supplied K1 video
+was confirmed by the owner: it is a 3D animal/operator cinematic, not the earlier
+football/basketball/volleyball animation. The full app lasts 244.6 seconds and
+renders procedural 3D scenes, articulated characters and reference UI in a
+responsive 16:9 canvas. It plays automatically and blends back to the first scene.
 
-Football starts with red possession, basketball with blue possession, and
-volleyball with a red serve. After each of the first four points, the players
-return to position at the same increased pace. Blue steals from red before the final
-football goal. Red steals from blue during the third basketball play. These
-turnovers reconcile the fixed scoring order with the normal restart rules.
-The final attack uses the same pace as the opening play. No random events change
-the script. A shared monotone baseline clock smooths movement around direction
-changes. Each sport applies one uniform time scale to entrances, plays, restarts
-and court transitions, fitting them into 74.5 seconds while preserving a
-5.5-second celebration. Football and basketball run about twice as fast as the
-previous animation; volleyball runs about 1.3 times as fast. Contact times,
-limb movement and scoring follow the same scaled clock. Return trips change
-court depth, cross in separate lanes, then settle into formation. The final
-attack uses the opening attack's speed factor, with no deadline catch-up.
+`assets/sports-preview.gif` is a 25.5-second excerpt at 12 fps, 480 x 270 pixels,
+with 306 frames and infinite looping. It is approximately 4.05 MB. The file name
+follows the supplied prompt; the visible content is K1. Excerpt intervals, size
+and decoded duration are recorded in `assets/sports-preview.json`. This preview
+omits scenes; the complete app retains the full reference duration. The image is
+captured from the code render, rather than transcoded from the original movie.
 
-Football shows contested dribbling, a tackle, recovery, a give-and-go and a shot
-past a saving defender. Basketball includes dribbling, a steal, passing and a
-contested jump shot. Volleyball includes a serve, receive, set, spike, low dig
-attempts and a jumping block. Winning spikes land inside the opponent's court.
-The server stays behind the end line until after contact; both shoes remain
-outside x=162 or x=1022. Players keep looking at the
-ball and run past each other on separate paths, with at least 30 logical pixels
-of clearance between their court positions. Supporting players use a back lane.
-Four depth bands choose the paint order, with one visible drawing per athlete.
-The small portraits in the footer are the roster, rather than extra court players.
+`VIDEO_ANALYSIS.md` documents the entire source. `docs/k1-animation.md` covers the
+app and exporter. `docs/k1-comparison.md` records visual differences and measured
+verification. The procedural characters, environments and camera framing differ
+from the source; do not describe this as a pixel-perfect reproduction. The
+source's black interval is filled with a visible combat continuation, and the
+ending is blended into the opening for the infinite loop. Source-derived face
+textures have explicit provenance in `src/assets/provenance.json`.
 
-The same ball remains visible throughout. During each transition it lifts into
-the air, spins, gains a halo and blends its surface into the next sport's ball.
-The green football pitch, orange basketball court and sandy volleyball court
-crossfade continuously. The ending returns to the next entrance state, including
-the volleyball-to-football seam.
-
-The SVG uses local artwork and generated CSS, with no runtime script, remote
-images or font dependencies. Motion is sampled at 12 Hz, together with exact
-path waypoints, return phases, contact, scoring,
-facing and depth changes. Redundant samples are discarded within 0.4 logical
-pixels for position and 1.2 degrees for joints; browser interpolation fills the
-gaps. Tests enforce a 5 MB size ceiling per theme. The generated CSS is cached within the render process so
-both themes use the identical choreography.
-
-Shoulders, elbows, hips and knees stay connected through nested fixed-length
-bones. Both knees use the same anatomical branch. A support shoe stays planted
-during each running stride; jumps include a crouch and landing. Reduced motion
-shows a static football poster with all four players ready on the field.
-Sports scores belong to the illustration and do not change contribution counts.
+The previous `scripts/sports-*.mjs` renderer is retained as an unused reference.
+Its choreography is not rendered by the activity updater or the K1 application.
 
 ## Automatic activity updates
 
@@ -169,14 +130,12 @@ from the latest `main` branch. Disable the workflow in Actions to stop refreshes
 - `assets/project-*-*.svg`: retained artwork, unused in the current README.
 - `scripts/update-activity.mjs`: activity layout, colors and data collection.
 - `.github/workflows/update-activity.yml`: hourly refresh and bot publication.
-- `scripts/sports-matches.mjs`: immutable scoring, timing and possession rules.
-- `scripts/sports-paths.mjs`: court paths, baseline play clocks and returns.
-- `scripts/sports-celebration.mjs`: winner-only fireworks and confetti.
-- `scripts/sports-rig.mjs`: fixed limb lengths and authored joint poses.
-- `scripts/sports-timeline.mjs`: player actions, ball travel and court transitions.
-- `scripts/sports-art.mjs`: hand-authored pixel athletes, stadium, courts and ball.
-- `scripts/sports-animation.mjs`: scoreboard and generated CSS playback.
-  Refreshing activity preserves the match script and animation.
+- `index.html`, `src/`, `public/`: the independent K1 browser application.
+- `assets/sports-preview.gif`: the standalone README animation.
+- `scripts/export-k1-preview.py`: regenerate the preview from the code-rendered app.
+- `scripts/verify-k1.py`: native browser checks and source comparisons.
+- `scripts/build-pages.mjs`: build the deployable static application.
+- `docs/k1-animation.md`: app, verification, preview and deployment instructions.
 
 Keep the paired light/dark SVGs synchronized. Keep facts and links aligned with
 the public portfolio and repositories; do not turn planned project features into

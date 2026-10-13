@@ -1,0 +1,58 @@
+{
+  "format": "GIF",
+  "width": 480,
+  "height": 270,
+  "fps": 12,
+  "frames": 306,
+  "loop": 0,
+  "decoded_duration_seconds": 25.5,
+  "bytes": 4047991,
+  "full_animation_seconds": 244.6,
+  "source": "Code-rendered browser app, not K1.mp4",
+  "selected_source_intervals": [
+    [
+      0,
+      2.6
+    ],
+    [
+      4.26667,
+      7.26667
+    ],
+    [
+      9.8,
+      10.46667
+    ],
+    [
+      23.2,
+      25.2
+    ],
+    [
+      37.5,
+      39.3667
+    ],
+    [
+      77.2667,
+      80.0333
+    ],
+    [
+      128.4,
+      131.4
+    ],
+    [
+      176.033,
+      179.033
+    ],
+    [
+      196.533,
+      200.267
+    ],
+    [
+      241.767,
+      244.6
+    ]
+  ],
+  "last_frame_source_seconds": 244.599,
+  "palette_colors": 64,
+  "dither": "none",
+  "seam_mae_8bit": 0.6451826131687243
+}
