@@ -3,16 +3,15 @@
 The README uses GitHub-supported Markdown, `<picture>` and repository-local SVGs.
 Dark and light images are selected by GitHub's theme-aware image support. The hero
 uses CSS animation inside its SVG; it becomes static when reduced motion is enabled.
-Focus areas and the small repository section remain plain text for mobile readers.
+Current work and the small repository section remain plain text for mobile readers.
 
 ## Profile content
 
-Lead with the AI Engineer direction: AI agents, RAG, LLM APIs, Local AI, ML/DL
-and production AI. The focus table describes development goals, rather than
-claiming every listed capability has already shipped. The production diagram
-illustrates the engineering workflow being developed. Keep selected repositories
-as a short section at the end, after the introduction, focus and contact content.
-Avoid moving activity counts or large project cards back into the main profile.
+Use English throughout the profile and artwork, with the name `Pham Hoa Anh Nam`
+without diacritics. List current work in AI agents, RAG, LLM APIs, Local AI,
+ML/DL and production AI. Keep the presentation as a list of areas, without a
+workflow or roadmap diagram. Keep selected repositories as a short section at
+the end, after the introduction, current work and activity content.
 
 ## Contact buttons
 
@@ -56,10 +55,9 @@ manual. There are no workflows that automatically commit or push.
 
 ## Edit the design
 
-- `README.md`: AI engineering direction, focus areas, contact links and small
+- `README.md`: current AI work, contact links and small
   repository section.
 - `assets/hero-*.svg`: header artwork and animation.
-- `assets/production-*.svg`: the AI engineering workflow illustration.
 - `assets/badges/*.svg`: contact buttons; destinations live in `README.md`.
 - `assets/project-*-*.svg`: retained artwork, unused in the current README.
 - `scripts/update-activity.mjs`: activity layout, colors and data collection.
