@@ -1,10 +1,12 @@
 // One immutable, repeatable script. Every scoring play is worth one point.
 export const MATCH_DURATION = 60;
 export const SPORTS_DURATION = MATCH_DURATION * 3;
-export const POINT_TIMES = Object.freeze([10, 21, 32, 43, 58]);
+export const INTRO_DURATION = 8;
+export const TRANSITION_START = 58;
+export const POINT_TIMES = Object.freeze([18, 28, 38, 48, 56]);
 export const TEAMS = Object.freeze({
-  red: Object.freeze({ side: 'left', color: '#e85b62', name: 'RED' }),
-  blue: Object.freeze({ side: 'right', color: '#559ded', name: 'BLUE' }),
+  red: Object.freeze({ side: 'left', color: '#ff4b60', name: 'RED' }),
+  blue: Object.freeze({ side: 'right', color: '#3189ff', name: 'BLUE' }),
 });
 
 const opponent = (team) => team === 'red' ? 'blue' : 'red';
@@ -12,7 +14,7 @@ const opponent = (team) => team === 'red' ? 'blue' : 'red';
 function makeMatch(sport, initialPossession, scorers) {
   const rounds = scorers.map((scorer, index) => Object.freeze({
     index,
-    start: index === 0 ? 0 : POINT_TIMES[index - 1] + 2,
+    start: index === 0 ? INTRO_DURATION : POINT_TIMES[index - 1] + 2,
     scoreAt: POINT_TIMES[index],
     scorer,
     possession: index === 0 ? initialPossession
@@ -22,9 +24,9 @@ function makeMatch(sport, initialPossession, scorers) {
 }
 
 export const MATCHES = Object.freeze([
-  makeMatch('football', 'red', ['red', 'blue', 'red', 'blue', 'red']),
-  makeMatch('basketball', 'blue', ['blue', 'red', 'blue', 'red', 'blue']),
-  makeMatch('volleyball', 'red', ['red', 'blue', 'blue', 'red', 'red']),
+  makeMatch('football', 'red', ['red', 'blue', 'red', 'blue', 'blue']),
+  makeMatch('basketball', 'blue', ['blue', 'red', 'red', 'blue', 'red']),
+  makeMatch('volleyball', 'red', ['red', 'blue', 'red', 'blue', 'blue']),
 ]);
 
 export function matchStateAt(seconds) {
@@ -39,15 +41,15 @@ export function matchStateAt(seconds) {
     index === 4 || matchTime < match.rounds[index + 1].start
   ));
   const winner = score.red === 3 ? 'red' : score.blue === 3 ? 'blue' : null;
-  const phase = winner ? matchTime >= 59 ? 'transition' : 'victory'
-    : matchTime >= round.scoreAt ? 'restart' : 'play';
+  const phase = winner ? matchTime >= TRANSITION_START ? 'transition' : 'victory'
+    : matchTime < INTRO_DURATION ? 'intro' : matchTime >= round.scoreAt ? 'restart' : 'play';
   const nextPossession = winner ? null : matchTime >= round.scoreAt
     ? match.sport === 'volleyball' ? round.scorer : opponent(round.scorer)
     : round.possession;
   return {
     time, matchIndex, sport: match.sport, matchTime, score, winner, phase,
     possession: nextPossession, round,
-    roundTime: Math.min(matchTime - round.start, round.scoreAt - round.start),
+    roundTime: Math.max(0, Math.min(matchTime - round.start, round.scoreAt - round.start)),
     roundDuration: round.scoreAt - round.start,
     nextSport: MATCHES[(matchIndex + 1) % MATCHES.length].sport,
   };
