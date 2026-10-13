@@ -26,17 +26,24 @@ address synchronized when changing contact details.
 ## Refresh the activity snapshot
 
 The README displays the activity panel after current work and before the small
-repository section. Its football rolls in a separate strip below the calendar,
-so the animation does not cover contribution cells or imply extra contributions.
-The ball's horizontal movement and rotation reverse together at each end. CSS
-inside the SVG drives the animation; no scripts or external assets are needed.
-When reduced motion is enabled, the ball stays visible and stationary.
+repository section. A separate arena below the calendar plays a fixed 24-second
+story: football passes and a goal, a defended basketball jump shot and basket,
+then a volleyball set and spike. The same two characters stay on screen. One
+continuous ball changes its surface as the courts crossfade, including the
+return from volleyball to football. No random events change the sequence.
+
+The SVG contains generated CSS animations and local vector artwork, without
+runtime scripts or external assets. Inverse kinematics keeps limbs attached as
+the players kick, guard, shoot, set and spike. Reduced motion shows the opening
+football scene as a still image. Sports scores belong to the illustration and
+do not change contribution counts.
 
 Run with the existing Node.js installation (Node 22 or newer):
 
 ```powershell
 node scripts/update-activity.mjs
 node --test scripts/update-activity.test.mjs
+node --test scripts/sports-animation.test.mjs
 ```
 
 No package installation, Python environment, token or third-party statistics
@@ -64,12 +71,13 @@ manual. There are no workflows that automatically commit or push.
 - `README.md`: current AI work, contact links and small
   repository section.
 - `assets/hero-*.svg`: header artwork and animation.
-- `assets/activity-*.svg`: the GitHub calendar and rolling football, generated
+- `assets/activity-*.svg`: the GitHub calendar and sports animation, generated
   by the activity updater.
 - `assets/badges/*.svg`: contact buttons; destinations live in `README.md`.
 - `assets/project-*-*.svg`: retained artwork, unused in the current README.
-- `scripts/update-activity.mjs`: activity layout, ball animation, colors and
-  data collection. Refreshing the snapshot preserves the animation.
+- `scripts/update-activity.mjs`: activity layout, colors and data collection.
+- `scripts/sports-animation.mjs`: the fixed sports timeline, articulated players,
+  ball skins, court artwork and generated CSS. Refreshing activity preserves it.
 
 Keep the paired light/dark SVGs synchronized. Keep facts and links aligned with
 the public portfolio and repositories; do not turn planned project features into
