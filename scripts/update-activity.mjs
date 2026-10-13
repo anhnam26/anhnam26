@@ -88,10 +88,20 @@ export function renderActivity(snapshot, theme) {
   }).format(new Date(snapshot.fetchedAt));
   const format = (value) => new Intl.NumberFormat('en-US').format(value);
   const title = `GitHub activity — ${format(calendar.total)} contributions shown in the last year`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="408" viewBox="0 0 1280 408" role="img" aria-labelledby="title desc">
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="488" viewBox="0 0 1280 488" role="img" aria-labelledby="title desc">
   <title id="title">${escapeXml(title)}</title>
-  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7).</desc>
-  <rect x=".5" y=".5" width="1279" height="407" rx="16" fill="${p.bg}" stroke="${p.line}"/>
+  <desc id="desc">Snapshot for ${USERNAME}. ${snapshot.repositories} public repositories, ${snapshot.stars} stars on owned non-fork repositories. Calendar ${calendar.days[0].date} to ${calendar.days.at(-1).date}. Updated ${escapeXml(updated)} (UTC+7). A decorative football rolls below the calendar without changing the data.</desc>
+  <defs>
+    <clipPath id="ball-clip"><circle r="22"/></clipPath>
+    <style>
+      .ball-travel{animation:roll-across 12s linear infinite alternate}
+      .ball-spin{animation:roll-spin 12s linear infinite alternate;transform-origin:0px 0px}
+      @keyframes roll-across{from{transform:translateX(0px)}to{transform:translateX(1024px)}}
+      @keyframes roll-spin{from{transform:rotate(0deg)}to{transform:rotate(2667deg)}}
+      @media(prefers-reduced-motion:reduce){.ball-travel,.ball-spin{animation:none}}
+    </style>
+  </defs>
+  <rect x=".5" y=".5" width="1279" height="487" rx="16" fill="${p.bg}" stroke="${p.line}"/>
   <g font-family="Consolas,'Courier New',monospace" fill="${p.accent}" font-size="14" letter-spacing="2">
     <text x="48" y="40">BUILD LOG / GITHUB ACTIVITY</text>
     <text x="1232" y="40" text-anchor="end" fill="${p.muted}" letter-spacing="0">@${USERNAME}</text>
@@ -108,17 +118,32 @@ export function renderActivity(snapshot, theme) {
       <text x="916" y="150">Stars · owned non-fork repos</text>
     </g>
   </g>
-  <path d="M460 80V150M868 80V150M48 174H1232M48 363H1232" stroke="${p.line}"/>
+  <path d="M460 80V150M868 80V150M48 174H1232M48 363H1232M48 447H1232" stroke="${p.line}"/>
   <g font-family="Consolas,monospace" fill="${p.muted}" font-size="12">
     ${months.join('\n    ')}
     <text x="72" y="254">Mon</text><text x="72" y="294">Wed</text><text x="72" y="334">Fri</text>
   </g>
   ${squares.join('\n  ')}
-  <text x="48" y="391" font-family="Consolas,monospace" font-size="12" fill="${p.muted}">SNAPSHOT / ${escapeXml(updated.toUpperCase())} / UTC+7</text>
+  <path d="M124 436H1196" stroke="${p.line}" stroke-width="2" stroke-linecap="round"/>
+  <g transform="translate(144 414)">
+    <g class="ball-travel">
+      <g class="ball-spin">
+        <title>Rolling football</title>
+        <circle r="22" fill="#f1f6f2"/>
+        <g clip-path="url(#ball-clip)" fill="#243d33" stroke="#243d33" stroke-linejoin="round">
+          <path d="M0-9L9-3L6 7H-6L-9-3Z"/>
+          <path d="M-22-6L-15-8L-14 0L-21 6ZM22-6L15-8L14 0L21 6ZM-13 18L-9 12L-2 17L-4 22ZM13 18L9 12L2 17L4 22ZM-4-22L-3-15L4-14L10-20Z"/>
+          <path d="M0-9L-3-17M9-3L18-6M6 7L10 15M-6 7L-10 15M-9-3L-18-6" fill="none" stroke-width="1.2"/>
+        </g>
+        <circle r="22" fill="none" stroke="${p.accent}" stroke-width="1.5"/>
+      </g>
+    </g>
+  </g>
+  <text x="48" y="471" font-family="Consolas,monospace" font-size="12" fill="${p.muted}">SNAPSHOT / ${escapeXml(updated.toUpperCase())} / UTC+7</text>
   <g font-family="Consolas,monospace" font-size="12" fill="${p.muted}">
-    <text x="1020" y="391">Less</text>
-    ${p.levels.map((color, i) => `<rect x="1060" y="380" width="12" height="12" rx="2" fill="${color}" transform="translate(${i * 19} 0)"/>`).join('')}
-    <text x="1166" y="391">More</text>
+    <text x="1020" y="471">Less</text>
+    ${p.levels.map((color, i) => `<rect x="1060" y="460" width="12" height="12" rx="2" fill="${color}" transform="translate(${i * 19} 0)"/>`).join('')}
+    <text x="1166" y="471">More</text>
   </g>
 </svg>
 `;

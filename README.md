@@ -31,6 +31,18 @@ Based in **Ho Chi Minh City, Vietnam**. Studying Information Technology at **HCM
 
 **My foundations:** `Python` `PyTorch` `SQL / SQLite` `Node.js` `TypeScript`
 
+## GitHub Activity
+
+<a href="https://github.com/anhnam26?tab=overview">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg">
+    <img src="assets/activity-dark.svg" alt="My GitHub activity: yearly contributions, public repositories and stars, with a rolling football below the calendar. The snapshot date is shown in the image. Click to see current activity." width="100%">
+  </picture>
+</a>
+
+<sub>A dated snapshot. [See current activity ↗](https://github.com/anhnam26?tab=overview)</sub>
+
 ## Selected repositories
 
 - **[NLPNew](https://github.com/anhnam26/NLPNew)** — Vietnamese History MiniGPT + RAG: a custom PyTorch Transformer with hybrid retrieval.

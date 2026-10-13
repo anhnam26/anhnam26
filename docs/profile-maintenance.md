@@ -24,8 +24,12 @@ address synchronized when changing contact details.
 
 ## Refresh the activity snapshot
 
-The activity assets are retained for optional use; the current README emphasizes
-AI engineering focus and does not display the statistics panel.
+The README displays the activity panel after current work and before the small
+repository section. Its football rolls in a separate strip below the calendar,
+so the animation does not cover contribution cells or imply extra contributions.
+The ball's horizontal movement and rotation reverse together at each end. CSS
+inside the SVG drives the animation; no scripts or external assets are needed.
+When reduced motion is enabled, the ball stays visible and stationary.
 
 Run with the existing Node.js installation (Node 22 or newer):
 
@@ -58,9 +62,12 @@ manual. There are no workflows that automatically commit or push.
 - `README.md`: current AI work, contact links and small
   repository section.
 - `assets/hero-*.svg`: header artwork and animation.
+- `assets/activity-*.svg`: the GitHub calendar and rolling football, generated
+  by the activity updater.
 - `assets/badges/*.svg`: contact buttons; destinations live in `README.md`.
 - `assets/project-*-*.svg`: retained artwork, unused in the current README.
-- `scripts/update-activity.mjs`: activity layout, colors and data collection.
+- `scripts/update-activity.mjs`: activity layout, ball animation, colors and
+  data collection. Refreshing the snapshot preserves the animation.
 
 Keep the paired light/dark SVGs synchronized. Keep facts and links aligned with
 the public portfolio and repositories; do not turn planned project features into
