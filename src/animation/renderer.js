@@ -110,6 +110,7 @@ export async function makeRenderer(canvas,overlay) {
       gpu:debug?gl.getParameter(debug.UNMASKED_RENDERER_WEBGL):'WebGL2',
       geometries:gpu.info.memory.geometries,textures:gpu.info.memory.textures,
       visibleActors:Object.values(actors).filter(a=>a.group.visible).map(a=>a.id),
+      poses:Object.values(actors).filter(a=>a.group.visible).map(a=>({id:a.id,position:a.group.position.toArray()})),
       joints:Object.values(actors).filter(a=>a.group.visible).flatMap(a=>a.arms.map(l=>{
         scene.updateMatrixWorld(true);const shoulder=l.upper.getWorldPosition(new T.Vector3());
         const elbow=l.lower.getWorldPosition(new T.Vector3());

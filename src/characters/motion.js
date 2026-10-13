@@ -52,7 +52,7 @@ export function poseActor(actor,state,slot) {
   }
   if(action==='sit') {root.position.y=-.56;legs.forEach(l=>{l.upper.rotation.x=-1.22;l.lower.rotation.x=1.5;});}
   if(action==='stretch')group.scale.y=1+1.6*Math.sin(progress*Math.PI)**2;
-  if(action==='leap'||action==='float') {
+  if(action==='float'||action==='leap'&&slot===0) {
     const arc=action==='float'?.7+Math.sin(local*.9+slot)*.3:Math.sin(progress*Math.PI);
     group.position.y=arc*(action==='float'?2.9:1.8);
     group.position.x+=(progress-.5)*(action==='float'?2:3);
@@ -61,6 +61,7 @@ export function poseActor(actor,state,slot) {
     legs.forEach((l,i)=>{l.upper.rotation.x=i?-.8:.65;l.lower.rotation.x=.85;});
     arms.forEach(a=>reach(a,[a.side*.65,1.48,.39]));
   }
+  if(action==='leap'&&slot>0)arms.forEach(a=>reach(a,[a.side*.36,1.55,.43]));
   if(duel) {
     const wave=Math.sin(local*2.6),side=slot===0?-1:1;
     group.position.set(side*.91,0,0);group.rotation.y=-side*Math.PI/2;
