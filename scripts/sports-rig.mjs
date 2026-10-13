@@ -41,6 +41,31 @@ export function boneChain(origin, angles, lengths) {
   };
 }
 
+// A single anatomical knee branch: the knee points forward and the shin folds
+// back for BOTH legs. Mirroring the athlete mirrors the whole joint chain.
+export function legAngles(hip, foot) {
+  const [thigh,shin]=LEG_LENGTHS;
+  const dx=foot[0]-hip[0],dy=foot[1]-hip[1];
+  const reach=clamp(Math.hypot(dx,dy),12,thigh+shin-.001);
+  const aim=Math.atan2(-dx,dy);
+  const hipOffset=Math.acos(clamp((thigh*thigh+reach*reach-shin*shin)/(2*thigh*reach),-1,1));
+  const bend=Math.acos(clamp((reach*reach-thigh*thigh-shin*shin)/(2*thigh*shin),-1,1));
+  const upper=(aim-hipOffset)*180/Math.PI;
+  return [upper,upper+bend*180/Math.PI];
+}
+
+// The stance phase offsets body travel exactly, so its shoe stays in place.
+// The other foot lifts, swings forward, then lands for the next stride.
+export function strideFeet(x, travelled, direction, floor=FLOOR) {
+  const stride=48,stance=.6;
+  return Object.fromEntries(['front','back'].map((leg,index)=>{
+    const phase=((travelled/stride+index*.5)%1+1)%1;
+    const swing=clamp((phase-stance)/(1-stance));
+    const offset=phase<stance?12-stride*phase:mix(12-stride*stance,12,smooth(swing));
+    return [leg,{x:x+direction*offset,y:floor-18*Math.sin(Math.PI*swing),planted:phase<stance}];
+  }));
+}
+
 export function handPoint(pose, hand='front') {
   return boneChain(hand==='front'?[4,-84]:[-2,-85],pose[hand],ARM_LENGTHS).end;
 }
