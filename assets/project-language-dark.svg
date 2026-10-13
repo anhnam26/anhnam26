@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="248" viewBox="0 0 440 248" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Vietnamese History — MiniGPT + RAG</title>
+  <desc id="desc">Project 01. A custom Transformer with hybrid retrieval and answers with sources.</desc>
+  <rect x=".5" y=".5" width="439" height="247" rx="12" fill="#101b1d" stroke="#2c3e40"/>
+  <g font-family="Consolas,'Courier New',monospace" font-size="12" letter-spacing="1.5" fill="#9ee6c1">
+    <text x="24" y="32">01 / LANGUAGE INTELLIGENCE</text><text x="398" y="32" font-size="22">↗</text>
+  </g>
+  <g stroke="#3f6057"><path d="M34 62V102M68 62V102M102 62V102M34 82H102L144 62H210L254 82H314L356 62H406"/><path d="M102 82L144 102H210L254 82M314 82L356 102H406"/></g>
+  <g fill="#9ee6c1"><rect x="30" y="68" width="8" height="28" rx="2"/><rect x="64" y="74" width="8" height="16" rx="2"/><rect x="98" y="68" width="8" height="28" rx="2"/><circle cx="144" cy="62" r="4"/><circle cx="144" cy="102" r="4"/><circle cx="210" cy="62" r="4"/><circle cx="210" cy="102" r="4"/></g>
+  <rect x="254" y="62" width="60" height="40" rx="5" stroke="#9ee6c1"/>
+  <text x="284" y="87" text-anchor="middle" font-family="Consolas,monospace" font-size="13" fill="#9ee6c1">GPT</text>
+  <path d="M356 62H406M356 82H394M356 102H400" stroke="#efb18a" stroke-width="3" stroke-linecap="round"/>
+  <g font-family="'Segoe UI',Arial,sans-serif">
+    <text x="24" y="147" fill="#f1f6f2" font-size="27" font-weight="650" letter-spacing="-.6">Vietnamese History</text>
+    <text x="24" y="177" fill="#9ee6c1" font-size="24" font-weight="600">MiniGPT + RAG</text>
+    <text x="24" y="206" fill="#afc1c0" font-size="14">Custom model. Hybrid retrieval. Cited answers.</text>
+  </g>
+  <text x="24" y="231" font-family="Consolas,monospace" font-size="11" letter-spacing="1" fill="#afc1c0">PYTORCH / TRANSFORMER / SQLITE</text>
+</svg>

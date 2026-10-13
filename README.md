@@ -1,23 +1,77 @@
-# Hi, I'm Phạm Hòa Anh Nam 👋
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.svg">
+  <source media="(prefers-color-scheme: light)" srcset="assets/hero-light.svg">
+  <img alt="Phạm Hòa Anh Nam — AI Engineer. From language models to useful products. Based in Ho Chi Minh City, Vietnam." src="assets/hero-dark.svg" width="100%">
+</picture>
 
-Welcome to my GitHub profile!
+<p align="center">
+  <a href="https://anhnam26.vercel.app/"><b>Explore my portfolio ↗</b></a>
+  &nbsp; · &nbsp;
+  <a href="#selected-work">Selected work</a>
+  &nbsp; · &nbsp;
+  <a href="mailto:anhnamnknt@gmail.com">Say hello</a>
+  &nbsp; · &nbsp;
+  <a href="https://www.facebook.com/anhnamneverdie">Facebook</a>
+</p>
 
-I'm **Phạm Hòa Anh Nam**, also known as **[@anhnam26](https://github.com/anhnam26)** on GitHub. This is where I share my projects, document my learning journey, and showcase the things I build.
+# Hi, I'm Nam.
 
-## About Me
+**AI Engineer · Ho Chi Minh City, Vietnam**
 
-- 🌱 Always learning and exploring new ideas.
-- 💻 Passionate about turning ideas into real-world products.
-- 🤝 Open to connecting, exchanging knowledge, and collaborating on exciting projects.
+I build language models, retrieval systems and applications that put AI to work. My projects span Vietnamese history Q&A, on-device computer vision and interactive web experiences.
 
-## Projects
+I'm studying Information Technology at **HCMC University of Technology and Engineering** and working on internal AI assistants at **CyberAnt Service**. Right now, I'm exploring **AI agents, LLM applications and practical automation**.
 
-I'll be adding some of my featured projects here soon.
+*Xin chào! Mình là Phạm Hòa Anh Nam — thích tìm hiểu cách mọi thứ hoạt động và biến ý tưởng thành sản phẩm chạy được.*
 
-## Connect with Me
+## Selected work
 
-- Facebook: [anhnamneverdie](https://www.facebook.com/anhnamneverdie)
+<p>
+  <a href="https://github.com/anhnam26/NLPNew">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/project-language-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="assets/project-language-light.svg">
+      <img src="assets/project-language-dark.svg" alt="01 — Vietnamese History MiniGPT + RAG. A custom Transformer, hybrid retrieval and answers with sources. Open the NLPNew repository." width="400">
+    </picture>
+  </a>
+  <a href="https://github.com/anhnam26/ADC_Hackathon2026_PU-WIN">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="assets/project-dayzero-dark.svg">
+      <source media="(prefers-color-scheme: light)" srcset="assets/project-dayzero-light.svg">
+      <img src="assets/project-dayzero-dark.svg" alt="02 — Day Zero. A 3D workplace simulator with wheelchair navigation and collision history. Open the hackathon repository." width="400">
+    </picture>
+  </a>
+</p>
+
+### [Vietnamese History MiniGPT + RAG](https://github.com/anhnam26/NLPNew)
+
+A custom GPT-style Transformer in PyTorch, paired with SQLite/FTS5 and dense retrieval. Includes training workflows, retrieval evaluation, source reporting and tests.
+
+`Python` `PyTorch` `Transformer` `RAG` `SQLite`
+
+### [Day Zero — Workplace Simulator](https://github.com/anhnam26/ADC_Hackathon2026_PU-WIN)
+
+A 3D office experience built around wheelchair navigation, object interactions and collision history for managers to review. Developed for ADC Hackathon 2026.
+
+`TypeScript` `React` `Three.js` `React Three Fiber`
+
+**Also on my workbench:** [Android development](https://github.com/anhnam26/FonosShoppee) · [Web applications](https://github.com/anhnam26/FinalWeb2025) · [All repositories ↗](https://github.com/anhnam26?tab=repositories)
+
+## My toolkit
+
+| Area | What I work with |
+| :--- | :--- |
+| **Language & AI** | Python · PyTorch · GPT-style Transformers · RAG · LLM APIs · Gradio |
+| **Web & 3D** | TypeScript · JavaScript · React · Three.js · Node.js · Express |
+| **Data & retrieval** | SQLite · FTS5 · Dense embeddings · Hybrid search · PostgreSQL |
+| **Vision & mobile** | Java · Android · MediaPipe · Firebase |
+
+## Let's build something useful.
+
+I'm happy to exchange ideas about **RAG, AI agents, language models and computer vision**, or collaborate on a project with a practical problem to solve.
+
+**[Portfolio ↗](https://anhnam26.vercel.app/)** · **[Email me ↗](mailto:anhnamnknt@gmail.com)** · **[Facebook ↗](https://www.facebook.com/anhnamneverdie)**
 
 ---
 
-Thanks for stopping by! ✨
+<p align="center"><sub>Built with curiosity. Shared in the open.</sub></p>

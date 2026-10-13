@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="248" viewBox="0 0 440 248" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">Day Zero — Workplace Simulator</title>
+  <desc id="desc">Project 02. An interactive 3D office with wheelchair navigation and collision history.</desc>
+  <rect x=".5" y=".5" width="439" height="247" rx="12" fill="#101b1d" stroke="#2c3e40"/>
+  <g font-family="Consolas,'Courier New',monospace" font-size="12" letter-spacing="1.5" fill="#efb18a">
+    <text x="24" y="32">02 / INTERACTIVE EXPERIENCES</text><text x="398" y="32" font-size="22">↗</text>
+  </g>
+  <g stroke="#3f6057" stroke-linejoin="round">
+    <path d="M26 92L90 62L154 92L90 122Z M90 62V44L154 74V92 M90 44L26 74V92"/>
+    <path d="M192 92L256 62L320 92L256 122Z M192 92V64L256 34L320 64V92 M256 62V34"/>
+    <path d="M358 98L394 80L420 93L384 111Z M358 98V70L394 52L420 65V93 M394 52V80"/>
+  </g>
+  <path d="M90 92L132 113L180 90L225 111L268 90L326 117L385 88" stroke="#efb18a" stroke-width="2" stroke-dasharray="5 5"/>
+  <circle cx="90" cy="92" r="5" fill="#9ee6c1"/><circle cx="385" cy="88" r="5" fill="#efb18a"/>
+  <g font-family="'Segoe UI',Arial,sans-serif">
+    <text x="24" y="147" fill="#f1f6f2" font-size="27" font-weight="650" letter-spacing="-.6">Day Zero</text>
+    <text x="24" y="177" fill="#efb18a" font-size="24" font-weight="600">Workplace Simulator</text>
+    <text x="24" y="206" fill="#afc1c0" font-size="14">Explore an office through a different lens.</text>
+  </g>
+  <text x="24" y="231" font-family="Consolas,monospace" font-size="11" letter-spacing="1" fill="#afc1c0">TYPESCRIPT / REACT / THREE.JS</text>
+</svg>
