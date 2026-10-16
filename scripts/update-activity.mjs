@@ -137,6 +137,7 @@ async function request(url, json, { fetchImpl, token }) {
       ...(api && token ? { Authorization: `Bearer ${token}` } : {}),
     },
     signal: AbortSignal.timeout(20_000),
+    cache: 'no-store',
   });
   if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status} for ${url}`);
   return json ? response.json() : response.text();
@@ -153,16 +154,14 @@ async function fetchRepositories(options) {
   }
 }
 
-export async function updateActivity({
-  assets = ASSETS, fetchImpl = fetch, token = process.env.GITHUB_TOKEN, now = () => new Date(),
-  readme = assets === ASSETS ? new URL('../README.md', import.meta.url) : undefined,
+export async function fetchActivitySnapshot({
+  fetchImpl = fetch, token, now = () => new Date(),
 } = {}) {
   const options = { fetchImpl, token };
   const [html, repositories] = await Promise.all([
     request(`https://github.com/users/${USERNAME}/contributions`, false, options), fetchRepositories(options),
   ]);
-  // Finish fetching, validating and rendering before touching existing assets.
-  const snapshot = {
+  return {
     username: USERNAME,
     fetchedAt: now().toISOString(),
     sources: {
@@ -172,6 +171,14 @@ export async function updateActivity({
     ...summarizeRepositories(repositories),
     calendar: parseContributionCalendar(html),
   };
+}
+
+export async function updateActivity({
+  assets = ASSETS, fetchImpl = fetch, token = process.env.GITHUB_TOKEN, now = () => new Date(),
+  readme = assets === ASSETS ? new URL('../README.md', import.meta.url) : undefined,
+} = {}) {
+  // The image service and snapshot workflow validate the same live sources.
+  const snapshot = await fetchActivitySnapshot({ fetchImpl, token, now });
   let previous;
   try {
     previous = JSON.parse(await readFile(new URL('activity.json', assets), 'utf8'));

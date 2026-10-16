@@ -1,0 +1,8 @@
+.git
+.github
+.vercel
+.env*
+K1.mp4
+assets
+docs
+scripts/*.test.mjs
