@@ -1,5 +1,10 @@
 # Activity images fetched on profile load
 
+The production service is
+[`anhnam26-live-activity.vercel.app`](https://anhnam26-live-activity.vercel.app/api/activity?theme=dark).
+`README.md` uses this endpoint for both themes. Publish the local README commit
+to activate it on the GitHub profile.
+
 The live service uses the same design, contribution parser and sports animation
 as the saved activity images. `GET /api/activity?theme=dark` and
 `GET /api/activity?theme=light` fetch GitHub on every request and return SVG.
@@ -77,17 +82,17 @@ in the Vercel project's server environment. The token is sent only to
 `api.github.com`; the public calendar request remains anonymous. Do not copy
 Git credentials to the deployment or put tokens in image URLs, assets or Git.
 
-Deploying the service and switching README image URLs are separate steps.
-The current README continues to use its working saved images until the public
-endpoint has passed checks; creating these source files alone does not activate
-live profile updates.
+The project is `anh-nam/anhnam26-live-activity`, separate from the existing
+portfolio project. Once the local directory is linked, deploy source changes
+with `vercel deploy --prod`. GitHub pushes and Vercel deployments are separate;
+this project is not connected to automatic Git deployments.
 
 ## Switch the profile after deployment
 
 Use the public production origin of the new image project:
 
 ```powershell
-npm run activity:connect -- https://your-activity-project.vercel.app
+npm run activity:connect -- https://anhnam26-live-activity.vercel.app
 ```
 
 This command verifies a fresh snapshot, both SVG themes, the service identity
@@ -112,12 +117,26 @@ have been switched back if rolling back. A hosting connection and a deployed
 public endpoint are required; do not replace the working image URLs with a
 guessed project hostname.
 
-## Verification performed before deployment
+## Verification
 
 The local HTTP service fetched GitHub's actual public count successfully.
 Separately, a private browser fixture changed its simulated upstream from
 1,196 to 1,197. Chrome loaded the same image URL again on a normal page reload
 and displayed the new number, with no cache-clearing or URL changes. Both
-themes loaded with the existing sports animation. That verifies local service
-behaviour; public hosting and GitHub's image proxy still require deployment
-and the checks above.
+themes loaded with the existing sports animation.
+
+On 17 October 2026, production deployment
+`dpl_DsYi2KoHr5SW2eHMvLJ54q2QyWLh` returned HTTP 200 anonymously for JSON and
+both SVG themes. The live total was 1,196, matching GitHub's public calendar.
+Each SVG was 3,665,566 bytes, below Vercel's 4.5 MB response limit.
+
+GitHub's Markdown renderer generated Camo URLs for the proposed README. Two
+requests to each image returned HTTP 200, `X-Cache: MISS`, `Age: 0`, and the
+service's `no-cache, no-store` header. All four displayed 1,196 and retained
+the sports animation. Chrome then loaded those public Camo images in dark,
+light and 390-pixel mobile views. A normal reload requested the same URL again
+and received another uncached HTTP 200. This verifies the public image path
+without publishing the README or fabricating a real contribution change.
+
+All 45 automated tests passed. Browser fixtures and screenshots are kept
+outside the repository; no credentials or test-only endpoints are deployed.

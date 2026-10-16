@@ -35,9 +35,9 @@ Based in **Ho Chi Minh City, Vietnam**. Studying Information Technology at **HCM
 
 <a href="https://github.com/anhnam26?tab=overview">
   <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="assets/activity-dark.svg?v=47bf9c9832f56135">
-    <source media="(prefers-color-scheme: light)" srcset="assets/activity-light.svg?v=47bf9c9832f56135">
-    <img src="assets/activity-dark.svg?v=47bf9c9832f56135" alt="My GitHub activity: yearly contributions, public repositories and stars. Pixel Sports Club: four distinct red and blue players in a faster, seamless four-minute football, basketball and volleyball loop. Each sport lasts 80 seconds, including the first-to-three match, fireworks, confetti and court transition. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. The ball glows and morphs as the courts transform. Click to see current GitHub activity." width="100%">
+    <source media="(prefers-color-scheme: dark)" srcset="https://anhnam26-live-activity.vercel.app/api/activity?theme=dark">
+    <source media="(prefers-color-scheme: light)" srcset="https://anhnam26-live-activity.vercel.app/api/activity?theme=light">
+    <img src="https://anhnam26-live-activity.vercel.app/api/activity?theme=dark" alt="My GitHub activity: yearly contributions, public repositories and stars. Pixel Sports Club: four distinct red and blue players in a faster, seamless four-minute football, basketball and volleyball loop. Each sport lasts 80 seconds, including the first-to-three match, fireworks, confetti and court transition. Blue wins football 3-2, red wins basketball 3-2, blue wins volleyball 3-2. The ball glows and morphs as the courts transform. Click to see current GitHub activity." width="100%">
   </picture>
 </a>
 

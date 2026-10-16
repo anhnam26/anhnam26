@@ -126,11 +126,12 @@ Operations mode. Keep the creator credit linked to `neongi_yt` on TikTok.
 
 ## Automatic activity updates
 
-An on-demand image service is available in `api/activity.mjs` for fresh data
+The on-demand image service in `api/activity.mjs` provides fresh data
 when someone opens or reloads the profile. It is independent of the schedule
 below. Deployment, cache controls and the verified README activation command
-are documented in [live-activity.md](live-activity.md). Until a public service
-has been deployed and connected, the README continues using saved images.
+are documented in [live-activity.md](live-activity.md). The README points to
+`https://anhnam26-live-activity.vercel.app`; publish its local commit to activate
+this on GitHub. The saved SVG files remain available as fallbacks.
 
 The workflow in `.github/workflows/update-activity.yml` checks activity every
 five minutes, at minutes 2, 7, 12, ..., 57 (UTC). It also starts on every push
