@@ -6,6 +6,7 @@
   "engines": { "node": "24.x" },
   "scripts": {
     "test": "node --test scripts/*.test.mjs",
-    "dev": "node scripts/serve-activity.mjs"
+    "dev": "node scripts/serve-activity.mjs",
+    "activity:connect": "node scripts/connect-activity.mjs"
   }
 }

@@ -81,3 +81,43 @@ Deploying the service and switching README image URLs are separate steps.
 The current README continues to use its working saved images until the public
 endpoint has passed checks; creating these source files alone does not activate
 live profile updates.
+
+## Switch the profile after deployment
+
+Use the public production origin of the new image project:
+
+```powershell
+npm run activity:connect -- https://your-activity-project.vercel.app
+```
+
+This command verifies a fresh snapshot, both SVG themes, the service identity
+and `no-cache`/`no-store` headers before changing anything. It refuses cached,
+stale, login-protected or failed endpoints. It changes only the three activity
+image URLs in `README.md`; sports, Delta Force, creator credit and all other
+profile content remain in place. Running it again is safe.
+
+Review and commit the resulting README change locally. Publish it yourself
+with `git push origin main` when ready. The scheduled updater can continue
+maintaining saved fallback images; it leaves live endpoint URLs unchanged.
+
+After publishing, inspect the rendered GitHub profile's image URL. Request the
+`camo.githubusercontent.com` URL twice and confirm it revalidates with the live
+service rather than serving a long-lived cached response. Compare its visible
+number with a direct fresh service request and GitHub's current calendar.
+Vercel consumes its own CDN-control headers, so they may not be visible on the
+public response; `Cache-Control` and the service identity should still be there.
+
+Keep the service code and verified endpoint active until the README image URLs
+have been switched back if rolling back. A hosting connection and a deployed
+public endpoint are required; do not replace the working image URLs with a
+guessed project hostname.
+
+## Verification performed before deployment
+
+The local HTTP service fetched GitHub's actual public count successfully.
+Separately, a private browser fixture changed its simulated upstream from
+1,196 to 1,197. Chrome loaded the same image URL again on a normal page reload
+and displayed the new number, with no cache-clearing or URL changes. Both
+themes loaded with the existing sports animation. That verifies local service
+behaviour; public hosting and GitHub's image proxy still require deployment
+and the checks above.
