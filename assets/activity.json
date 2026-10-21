@@ -1,14 +1,14 @@
 {
   "username": "anhnam26",
-  "fetchedAt": "2026-10-20T13:02:12.312Z",
+  "fetchedAt": "2026-10-21T00:06:54.404Z",
   "sources": {
     "calendar": "https://github.com/users/anhnam26/contributions",
     "repositories": "https://api.github.com/users/anhnam26/repos?type=owner&per_page=100"
   },
-  "repositories": 7,
+  "repositories": 8,
   "stars": 9,
   "calendar": {
-    "total": 1666,
+    "total": 1673,
     "days": [
       {
         "date": "2025-10-19",
@@ -1842,8 +1842,13 @@
       },
       {
         "date": "2026-10-20",
-        "count": 84,
+        "count": 86,
         "level": 3
+      },
+      {
+        "date": "2026-10-21",
+        "count": 5,
+        "level": 1
       }
     ]
   }
