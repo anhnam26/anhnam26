@@ -66,7 +66,7 @@ export function summarizeRepositories(repositories) {
   };
 }
 
-export function renderActivity(snapshot, theme, {sportsMarkup} = {}) {
+export function renderActivity(snapshot, theme, {sportsMarkup,stale=false} = {}) {
   const p = theme === 'dark'
     ? { bg: '#101b1d', line: '#2c3e40', text: '#f1f6f2', muted: '#afc1c0', accent: '#9ee6c1', levels: ['#1d2d2a', '#2d5846', '#428464', '#6cb68d', '#9ee6c1'] }
     : { bg: '#f5f7f2', line: '#d0d9cf', text: '#172f29', muted: '#4f645b', accent: '#236b51', levels: ['#e0e8de', '#c0dbbf', '#89b88d', '#4b9265', '#236b51'] };
@@ -97,6 +97,7 @@ export function renderActivity(snapshot, theme, {sportsMarkup} = {}) {
   <rect x=".5" y=".5" width="1279" height="1099" rx="16" fill="${p.bg}" stroke="${p.line}"/>
   <g font-family="Consolas,'Courier New',monospace" fill="${p.accent}" font-size="14" letter-spacing="2">
     <text x="48" y="40">BUILD LOG / GITHUB ACTIVITY</text>
+    ${stale?`<text x="640" y="40" text-anchor="middle" font-size="12" letter-spacing="0" fill="${p.muted}">Saved data · ${escapeXml(new Date(snapshot.fetchedAt).toISOString().replace('T',' ').slice(0,16))} UTC</text>`:''}
     <text x="1232" y="40" text-anchor="end" fill="${p.muted}" letter-spacing="0">@${USERNAME}</text>
   </g>
   <g font-family="'Segoe UI',Arial,sans-serif">
@@ -127,7 +128,7 @@ export function renderActivity(snapshot, theme, {sportsMarkup} = {}) {
 `;
 }
 
-async function request(url, json, { fetchImpl, token }) {
+async function request(url, json, { fetchImpl, token, signal }) {
   const api = new URL(url).origin === 'https://api.github.com';
   const response = await fetchImpl(url, {
     headers: {
@@ -136,7 +137,7 @@ async function request(url, json, { fetchImpl, token }) {
       ...(json ? { Accept: 'application/vnd.github+json' } : {}),
       ...(api && token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    signal: AbortSignal.timeout(20_000),
+    signal: signal?AbortSignal.any([signal,AbortSignal.timeout(20_000)]):AbortSignal.timeout(20_000),
     cache: 'no-store',
   });
   if (!response.ok) throw new Error(`GitHub returned HTTP ${response.status} for ${url}`);
@@ -155,9 +156,9 @@ async function fetchRepositories(options) {
 }
 
 export async function fetchActivitySnapshot({
-  fetchImpl = fetch, token, now = () => new Date(),
+  fetchImpl = fetch, token, now = () => new Date(), signal,
 } = {}) {
-  const options = { fetchImpl, token };
+  const options = { fetchImpl, token, signal };
   const [html, repositories] = await Promise.all([
     request(`https://github.com/users/${USERNAME}/contributions`, false, options), fetchRepositories(options),
   ]);

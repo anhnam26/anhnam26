@@ -130,8 +130,9 @@ The on-demand image service in `api/activity.mjs` provides fresh data
 when someone opens or reloads the profile. It is independent of the schedule
 below. Deployment, cache controls and the verified README activation command
 are documented in [live-activity.md](live-activity.md). The README points to
-`https://anhnam26-live-activity.vercel.app`; publish its local commit to activate
-this on GitHub. The saved SVG files remain available as fallbacks.
+`https://anhnam26-live-activity.vercel.app`. The function serves a clearly marked
+saved snapshot during GitHub outages, while every normal reload still fetches
+fresh data. The saved SVG files also remain available for manual rollback.
 
 The workflow in `.github/workflows/update-activity.yml` checks activity every
 five minutes, at minutes 2, 7, 12, ..., 57 (UTC). It also starts on every push

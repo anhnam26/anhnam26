@@ -3,6 +3,6 @@
   "framework": null,
   "installCommand": "",
   "functions": {
-    "api/activity.mjs": { "maxDuration": 30, "includeFiles": ".generated/**" }
+    "api/activity.mjs": { "maxDuration": 30, "includeFiles": [".generated/**", "assets/activity.json"] }
   }
 }

@@ -2,8 +2,7 @@
 
 The production service is
 [`anhnam26-live-activity.vercel.app`](https://anhnam26-live-activity.vercel.app/api/activity?theme=dark).
-`README.md` uses this endpoint for both themes. Publish the local README commit
-to activate it on the GitHub profile.
+`README.md` uses this endpoint for both themes.
 
 The live service uses the same design, contribution parser and sports animation
 as the saved activity images. `GET /api/activity?theme=dark` and
@@ -14,12 +13,23 @@ upstream URL. GET and HEAD are supported.
 
 The service sends `Cache-Control: no-cache, no-store, max-age=0, must-revalidate`,
 plus `CDN-Cache-Control: no-store` and `Vercel-CDN-Cache-Control: no-store`.
-It does not issue ETags, return 304 responses, read `assets/activity.json`, or
-reuse contribution counts between requests. The immutable sports scene is
+It does not issue ETags or return 304 responses. Each request first tries fresh
+GitHub data, with a shared three-second deadline for calendar and repository
+requests. Contribution counts are never cached on successful refreshes.
+The immutable sports scene is
 compiled by `npm run build` into `.generated/sports.svg` and bundled with the
 function. Requests read that scene instead of computing thousands of animation
-keyframes on a cold start. Failed upstream requests return 503 rather than an
-old count.
+keyframes on a cold start.
+
+If a live refresh fails or times out, SVG responses reuse the last successful
+snapshot. A cold instance tries the latest public `assets/activity.json` on
+`main` with a one-second deadline, then the validated snapshot bundled with the
+function. The image remains HTTP 200 with `X-Activity-Stale: true` and a visible
+`Saved data` timestamp. It retains `no-store` so the next visit retries live
+data immediately. Validated fallback numbers are never presented as live or
+replaced by zero. JSON health checks remain HTTP 503 during upstream failures,
+and invalid fallback data is rejected. The original removed snapshot/date row
+does not appear during normal live operation.
 
 ## What this improves
 
@@ -74,8 +84,11 @@ node scripts/serve-activity.mjs --port 5176
 
 Use a separate project for this repository's image API; do not overwrite the
 existing portfolio project. `vercel.json` selects the Node function and a
-30-second request limit. `.vercelignore` excludes local environment files,
+30-second function limit. `.vercelignore` excludes local environment files,
 the source video, generated images and maintenance documents from uploads.
+It includes only `assets/activity.json` from the assets directory as an outage
+fallback. The build creates `.generated/sports.svg`; both files are explicitly
+included in the function bundle.
 
 A public deployment must allow anonymous requests so GitHub's image proxy can
 load it. Preview deployments protected by Vercel authentication cannot be used
@@ -154,5 +167,7 @@ Origin requests and available Vercel request logs returned 200, so those records
 do not identify the precise response that GitHub rejected. The cold renderer
 took 2,646 ms locally versus 4 ms warm. Moving the immutable sports scene into
 the build reduced a cold image handler with captured upstream data to 41 ms.
-The SVG animation and contribution-fetch behaviour remain unchanged. All 46
-tests passed after this change.
+The SVG animation and normal live contribution-fetch behaviour remain unchanged.
+Regression tests also cover outages, cold-instance fallbacks, token isolation,
+invalid fallback rejection, upstream aborts and immediate recovery of fresh
+counts. The JSON health endpoint remains strict during outages.

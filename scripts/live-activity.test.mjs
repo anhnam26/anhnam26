@@ -85,6 +85,77 @@ test('an upstream failure returns an uncached error instead of an old or invente
   assert.match(response.headers.get('Cache-Control'),/no-store/);
 });
 
+test('a transient GitHub failure keeps the profile image visible and the next reload recovers live data',async()=>{
+  const upstream=source(),handler=createActivityHandler({fetchImpl:upstream.fetchImpl});
+  const url='https://profile.example/api/activity?theme=dark';
+  assert.equal((await handler(new Request(url))).status,200);
+  upstream.failed=true;
+  const fallback=await handler(new Request(url));
+  assert.equal(fallback.status,200,'A GitHub outage must not turn the profile image into a broken link');
+  assert.match(fallback.headers.get('Content-Type'),/image\/svg\+xml/);
+  assert.equal(fallback.headers.get('X-Activity-Stale'),'true');
+  const saved=await fallback.text();
+  assert.match(saved,/>1,196<\/text>/);
+  assert.match(saved,/Saved data/,'Visitors must know that this is the last successful snapshot');
+  upstream.failed=false;upstream.total=1197;
+  const recovered=await handler(new Request(url));
+  assert.equal(recovered.headers.get('X-Activity-Stale'),'false');
+  const fresh=await recovered.text();
+  assert.match(fresh,/>1,197<\/text>/);
+  assert.ok(!fresh.includes('Saved data'),'Normal reloads must immediately use live data again');
+});
+
+test('a cold instance can serve a validated published snapshot when GitHub is unavailable',async()=>{
+  const upstream=source();
+  const snapshot=await (await createActivityHandler({fetchImpl:upstream.fetchImpl})(new Request('https://profile.example/api/activity?format=json'))).json();
+  const calls=[];
+  const fetchImpl=async(url,options)=>{
+    calls.push({url,options});
+    return url.startsWith('https://raw.githubusercontent.com/')?Response.json(snapshot):new Response('Rate limited',{status:403});
+  };
+  const handler=createActivityHandler({fetchImpl,token:'test-only-token'});
+  const response=await handler(new Request('https://profile.example/api/activity?theme=light'));
+  assert.equal(response.status,200,'The first visit must still receive an image during an outage');
+  assert.equal(response.headers.get('X-Activity-Stale'),'true');
+  const svg=await response.text();
+  assert.match(svg,/>1,196<\/text>/);
+  assert.match(svg,/Saved data/);
+  assert.match(svg,/id="sports-arena"/);
+  assert.equal(calls.find(c=>c.url.startsWith('https://raw.githubusercontent.com/')).options.headers.Authorization,undefined,'Public snapshots never receive the API token');
+});
+
+test('invalid saved data cannot turn a failed refresh into an invented contribution count',async()=>{
+  const upstream=source();
+  const snapshot=await (await createActivityHandler({fetchImpl:upstream.fetchImpl})(new Request('https://profile.example/api/activity?format=json'))).json();
+  upstream.failed=true;
+  for(const patch of [
+    {username:'someone-else'}, {fetchedAt:'invalid'},
+    {calendar:{...snapshot.calendar,total:1197}},
+    {calendar:{...snapshot.calendar,days:snapshot.calendar.days.slice(1)}},
+  ]) {
+    const handler=createActivityHandler({fetchImpl:upstream.fetchImpl,loadFallback:async()=>({...snapshot,...patch})});
+    const response=await handler(new Request('https://profile.example/api/activity?theme=dark'));
+    assert.equal(response.status,503,'Invalid data must fail instead of being presented as a real snapshot');
+  }
+});
+
+test('slow upstream requests are aborted before the proxy deadline so a saved image can load',async()=>{
+  const upstream=source();
+  const snapshot=await (await createActivityHandler({fetchImpl:upstream.fetchImpl})(new Request('https://profile.example/api/activity?format=json'))).json();
+  let aborted=0;
+  const slow=async(url,{signal})=>new Promise((resolve,reject)=>{
+    const timer=setTimeout(()=>reject(new Error('Upstream stalled')),1000);
+    signal.addEventListener('abort',()=>{aborted++;clearTimeout(timer);reject(signal.reason);},{once:true});
+  });
+  const handler=createActivityHandler({fetchImpl:slow,timeoutMs:30,loadFallback:async()=>snapshot});
+  const start=performance.now();
+  const response=await handler(new Request('https://profile.example/api/activity?theme=dark'));
+  assert.ok(performance.now()-start<500,'Do not make the image proxy wait for a stalled GitHub request');
+  assert.equal(response.status,200);
+  assert.equal(response.headers.get('X-Activity-Stale'),'true');
+  assert.equal(aborted,2,'Cancel both calendar and repository fetches when their shared deadline expires');
+});
+
 test('invalid themes, query parameters and methods do not call GitHub', async()=>{
   const upstream=source(),handler=createActivityHandler({fetchImpl:upstream.fetchImpl});
   for(const query of ['theme=unknown','username=someone-else','format=xml','theme=dark&theme=light']) {

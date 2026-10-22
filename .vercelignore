@@ -3,7 +3,8 @@
 .vercel
 .env*
 K1.mp4
-assets
+assets/*
+!assets/activity.json
 docs
 scripts/*.test.mjs
 .generated
