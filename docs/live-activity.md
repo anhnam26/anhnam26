@@ -171,3 +171,18 @@ The SVG animation and normal live contribution-fetch behaviour remain unchanged.
 Regression tests also cover outages, cold-instance fallbacks, token isolation,
 invalid fallback rejection, upstream aborts and immediate recovery of fresh
 counts. The JSON health endpoint remains strict during outages.
+
+Production repair deployment `dpl_7wdVNhKDbHMvsXjYq3mKyJr4DRpe` passed the
+first real profile load after deployment, then six consecutive normal reloads
+through GitHub Camo (three per theme), plus a 390-pixel mobile load. Every image
+decoded at its expected 1280×1100 size; Camo returned HTTP 200 and retained
+`no-cache, no-store`. Direct JSON and both SVG themes returned the current
+1,762 contributions with `X-Activity-Stale: false`. All 50 tests passed,
+including controlled upstream failures and timeouts; those simulated failures
+were not presented as observed GitHub incidents. The existing README image
+URLs are unchanged, so the deployed repair applies without a GitHub push.
+
+The Vercel build also emits a minimal `.generated/public/404.html` because an
+API-only project still requires a non-empty static output directory. The
+function's `includeFiles` is a single brace-glob string covering the sports
+template and bundled JSON snapshot.
