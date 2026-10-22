@@ -66,7 +66,7 @@ export function summarizeRepositories(repositories) {
   };
 }
 
-export function renderActivity(snapshot, theme) {
+export function renderActivity(snapshot, theme, {sportsMarkup} = {}) {
   const p = theme === 'dark'
     ? { bg: '#101b1d', line: '#2c3e40', text: '#f1f6f2', muted: '#afc1c0', accent: '#9ee6c1', levels: ['#1d2d2a', '#2d5846', '#428464', '#6cb68d', '#9ee6c1'] }
     : { bg: '#f5f7f2', line: '#d0d9cf', text: '#172f29', muted: '#4f645b', accent: '#236b51', levels: ['#e0e8de', '#c0dbbf', '#89b88d', '#4b9265', '#236b51'] };
@@ -122,7 +122,7 @@ export function renderActivity(snapshot, theme) {
     ${p.levels.map((color, i) => `<rect x="1060" y="378" width="12" height="12" rx="2" fill="${color}" transform="translate(${i * 19} 0)"/>`).join('')}
     <text x="1166" y="389">More</text>
   </g>
-  ${renderSportsAnimation(p)}
+  ${sportsMarkup ?? renderSportsAnimation(p)}
 </svg>
 `;
 }

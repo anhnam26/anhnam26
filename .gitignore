@@ -2,3 +2,4 @@ K1.mp4
 
 .vercel
 .env*
+.generated/

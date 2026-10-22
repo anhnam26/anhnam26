@@ -6,3 +6,4 @@ K1.mp4
 assets
 docs
 scripts/*.test.mjs
+.generated

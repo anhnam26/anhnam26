@@ -2,8 +2,7 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "installCommand": "",
-  "buildCommand": "",
   "functions": {
-    "api/activity.mjs": { "maxDuration": 30 }
+    "api/activity.mjs": { "maxDuration": 30, "includeFiles": ".generated/**" }
   }
 }

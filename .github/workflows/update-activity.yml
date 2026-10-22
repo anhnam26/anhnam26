@@ -44,6 +44,7 @@ jobs:
 
       - name: Check syntax and run tests
         run: |
+          npm run build
           for script in scripts/*.mjs; do
             node --check "$script"
           done

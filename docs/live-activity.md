@@ -15,8 +15,11 @@ upstream URL. GET and HEAD are supported.
 The service sends `Cache-Control: no-cache, no-store, max-age=0, must-revalidate`,
 plus `CDN-Cache-Control: no-store` and `Vercel-CDN-Cache-Control: no-store`.
 It does not issue ETags, return 304 responses, read `assets/activity.json`, or
-reuse contribution counts between requests. Only the immutable sports animation
-CSS is memoized. Failed upstream requests return 503 rather than an old count.
+reuse contribution counts between requests. The immutable sports scene is
+compiled by `npm run build` into `.generated/sports.svg` and bundled with the
+function. Requests read that scene instead of computing thousands of animation
+keyframes on a cold start. Failed upstream requests return 503 rather than an
+old count.
 
 ## What this improves
 
@@ -52,6 +55,8 @@ before treating the profile integration as verified.
 ## Local verification
 
 Use Node.js 24; the service has no npm dependencies.
+`npm test` and `npm run dev` automatically build the sports scene first.
+If invoking `node --test` directly, run `npm run build` beforehand.
 
 ```powershell
 npm test
@@ -140,3 +145,14 @@ without publishing the README or fabricating a real contribution change.
 
 All 45 automated tests passed. Browser fixtures and screenshots are kept
 outside the repository; no credentials or test-only endpoints are deployed.
+
+### Cold-start repair, 22 October 2026
+
+The real GitHub profile initially reproduced a broken image (`naturalWidth=0`,
+`net::ERR_BLOCKED_BY_ORB`); later reloads worked after the function was warm.
+Origin requests and available Vercel request logs returned 200, so those records
+do not identify the precise response that GitHub rejected. The cold renderer
+took 2,646 ms locally versus 4 ms warm. Moving the immutable sports scene into
+the build reduced a cold image handler with captured upstream data to 41 ms.
+The SVG animation and contribution-fetch behaviour remain unchanged. All 46
+tests passed after this change.

@@ -1,6 +1,18 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import { createActivityHandler } from '../api/activity.mjs';
+import { renderActivity } from './update-activity.mjs';
+
+test('the live renderer uses a prebuilt sports scene without regenerating its keyframes',async()=>{
+  const upstream=source();
+  const response=await createActivityHandler({fetchImpl:upstream.fetchImpl})(new Request('https://profile.example/api/activity?format=json'));
+  const snapshot=await response.json();
+  const sportsMarkup='<svg id="sports-arena" data-build="precomputed"><g/></svg>';
+  const image=renderActivity(snapshot,'dark',{sportsMarkup});
+  assert.ok(image.includes(sportsMarkup),'Serve the scene prepared during the build');
+  assert.ok(!image.includes('@keyframes'),'The supplied scene must not invoke runtime animation generation');
+  assert.match(image,/>1,196<\/text>/,'Activity numbers remain dynamic');
+});
 
 function calendarHtml(total) {
   const cells=Array.from({length:365},(_,i)=>{

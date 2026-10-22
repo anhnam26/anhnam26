@@ -1,4 +1,8 @@
 import { fetchActivitySnapshot, renderActivity } from '../scripts/update-activity.mjs';
+import { readFile } from 'node:fs/promises';
+
+let sportsTemplate;
+const loadSportsTemplate=()=>sportsTemplate??=readFile(new URL('../.generated/sports.svg',import.meta.url),'utf8');
 
 const HEADERS = Object.freeze({
   'Cache-Control': 'no-cache, no-store, max-age=0, must-revalidate',
@@ -31,7 +35,9 @@ export function createActivityHandler({fetchImpl=fetch,token,now=()=>new Date()}
       // the renderer; contribution counts and calendar data are never cached.
       const snapshot=await fetchActivitySnapshot({fetchImpl,token,now});
       const json=params.get('format')==='json';
-      const body=json?JSON.stringify(snapshot):renderActivity(snapshot,params.get('theme')??'dark');
+      const body=json?JSON.stringify(snapshot):renderActivity(snapshot,params.get('theme')??'dark',{
+        sportsMarkup:await loadSportsTemplate(),
+      });
       return new Response(request.method==='HEAD'?null:body,{headers:{
         ...HEADERS,
         'Content-Type':json?'application/json; charset=utf-8':'image/svg+xml; charset=utf-8',
